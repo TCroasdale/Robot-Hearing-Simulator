@@ -1,5 +1,6 @@
 # Robot-Hearing-Simulator
 
+
 # Dependancies
 - PySoundFile
 - Joblib
@@ -10,7 +11,7 @@
 
 #### To Run Simulation
 - Run `python robothearingsim.py `
-###### Program Arguemnts
+###### Program Arguments
 * -i Input File _The file which will be used, default `test_data/data.wav`_
 * -o Output File _The zip file which will be generated, filled with the simulations, default `test_data/data_gen.zip`_
 * -g _The number of simulations to run, integer, default `10`_

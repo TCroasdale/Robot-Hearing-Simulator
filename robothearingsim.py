@@ -23,12 +23,8 @@ def arg_to_bool(arg):
 # example conf = (data, room_dim, rt60, 16000)
 def run_sim(mic_pos, src_pos, i, conf):
     if show_output:
-        print("--Generation {0}".format(i))
-        print( "----Microphone Position:    {0}".format(mic_pos))
-        print( "----    Source Position:    {0}".format(src_pos))
-        print( "----               rt60:    {0}".format(conf[2]))
-        print( "----    Room Dimensions:    {0}".format(conf[1]))
-        print( "----        Sample Rate:    {0}".format(conf[3]))
+        print("--Generation {0}\n----Microphone Position:\t{1}\n----\tSource Position:\t{2}\n----\t\t   rt60:\t{3}\n----\tRoom Dimensions:\t{4}\n----\t   Sample Rate:\t\t{5}\n".format(i, mic_pos, src_pos, conf[2], conf[1], conf[3]))
+
 
     mic_positions = [mic_pos]
     rir = roomsimove_single.do_everything(conf[1], mic_positions, src_pos, conf[2])
@@ -61,7 +57,7 @@ if __name__ == '__main__': #Main Entry point
     room_dim = [float(args.rx), float(args.ry), float(args.rz)] # in meters
     sampling_rate = 16000
 
-    #Generating a list of random mic and source positions
+    # Generating a list of random mic and source positions
     number_generations = int(args.g)
     all_mic_pos = np.asarray([np.random.uniform(0.1, room_dim[0]-0.1, size=number_generations),
                 np.random.uniform(0.1, room_dim[1]-0.1, size=number_generations),
@@ -82,7 +78,7 @@ if __name__ == '__main__': #Main Entry point
     Parallel(n_jobs=int(args.t))(delayed(run_sim)(all_mic_pos[:, i], all_source_pos[:, i], i, config) for i in range(number_generations))
         
 
-    #Zip up new files, and delete old ones.
+    # Zip up new files, and delete old ones.
     zip_name = args.o
     directory_name = 'temp_data'
     print("Zipping output to: {0}".format(zip_name)) if show_output else 0
