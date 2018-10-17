@@ -28,9 +28,9 @@ rir = sim_rir.create_rir(source_pos)
 
 ## ipdb.set_trace()
 
-[data, fs] = sf.read('data.wav',always_2d=True) #Read data fs=samplerate
+[data, fs] = sf.read('data.wav',always_2d=True)   #Read data fs=samplerate
 data =  data[:,0] 
-data_rev_ch1 = olafilt.olafilt(rir[:,0], data)  #Simulate channel 1
-data_rev_ch2 = olafilt.olafilt(rir[:,1], data)  #Simulate channel 2
+data_rev_ch1 = olafilt.olafilt(rir[:,0], data)    #Simulate channel 1
+data_rev_ch2 = olafilt.olafilt(rir[:,1], data)    #Simulate channel 2
 data_rev = np.array([data_rev_ch1, data_rev_ch2]) #put the data together
-sf.write('data_rev.wav', data_rev.T, fs)         #Write it to a file
+sf.write('data_rev.wav', data_rev.T, fs)          #Write it to a file

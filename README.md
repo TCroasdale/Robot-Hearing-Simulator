@@ -4,6 +4,7 @@
 # Dependancies
 - PySoundFile
 - Joblib
+- Room Impulse Response Generator, https://github.com/sunits/rir_simulator_python
 
 # How to use
 #### To Install Dependancies

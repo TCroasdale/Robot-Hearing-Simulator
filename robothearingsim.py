@@ -1,3 +1,12 @@
+#######################################
+# Author: Thomas Croasdale
+#
+# This file is responsible for taking 
+# an audio file and generating a 
+# number of simulations based on what
+# a robot would hear. 
+# 
+#######################################
 import argparse
 import soundfile as sf
 from rir_simulator import roomsimove_single
@@ -7,6 +16,7 @@ import shutil as zipper
 import os
 from joblib import Parallel, delayed
 import time
+
 
 #Converts a string to a true/false boolean, used to process bool arguments
 def arg_to_bool(arg):
@@ -28,8 +38,8 @@ def run_sim(mic_pos, src_pos, i, conf):
 
     mic_positions = [mic_pos]
     rir = roomsimove_single.do_everything(conf[1], mic_positions, src_pos, conf[2])
-    data_rev = olafilt.olafilt(rir[:,0], conf[0])  #Simulate room
-    sf.write('temp_data/data_gen_{0}.wav'.format(i), data_rev.T, conf[3]) #Write new file
+    data_rev = olafilt.olafilt(rir[:,0], conf[0])  #Simulate room, THis line should be repeated for the second channel
+    sf.write('temp_data/data_gen_{0}.wav'.format(i), data_rev.T, conf[3]) #Write new file into a folder calle temp_data
 
 # Simulates one mic in a 5x5x5 room with both the source and mix positions randomised
 # Generates 30 utterances
@@ -77,7 +87,6 @@ if __name__ == '__main__': #Main Entry point
     config = (data, room_dim, rt60, fs)
     Parallel(n_jobs=int(args.t))(delayed(run_sim)(all_mic_pos[:, i], all_source_pos[:, i], i, config) for i in range(number_generations))
         
-
     # Zip up new files, and delete old ones.
     zip_name = args.o
     directory_name = 'temp_data'
