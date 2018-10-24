@@ -93,10 +93,11 @@ class Robot(object):
         Representing a robot.
     '''
 
-    def __init__(self, pos, rot, robo_mics, robo_motors):
+    def __init__(self, pos, rot, robo_mics, robo_motors, skin_width):
         self.transform = Transform(pos, rot, None)
         self.microphones = robo_mics
         self.motors = robo_motors
+        self.skin_with = skin_width
         #Set the world position of the microphones and motors
         for mic in robo_mics: self.attach_transform(mic.transform) 
         for mot in robo_motors: self.attach_transform(mot.transform) 

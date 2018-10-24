@@ -44,7 +44,7 @@ def run_sim(mic_pos, src_pos, i, conf):
 # Simulates one mic in a 5x5x5 room with both the source and mix positions randomised
 # Generates 30 utterances
 if __name__ == '__main__': #Main Entry point
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser() # Parsing program arguments
     parser.add_argument('-i', help='The input utterance', default='test_data/data.wav')
     parser.add_argument('-o', help='The output files', default='test_data/data.zip')
     parser.add_argument('-g', help='Number of Generations', default='10')
@@ -67,11 +67,18 @@ if __name__ == '__main__': #Main Entry point
     room_dim = [float(args.rx), float(args.ry), float(args.rz)] # in meters
     sampling_rate = 16000
 
+    mic1 = RobotMicrophone([0.25, 0.25, 0.5], [0.0, 0.0, 45.0], None, 0)
+    mic2 = RobotMicrophone([-0.25, 0.25, 0.5], [0.0, 0.0, -45.0],  None, 1)
+    mot1 = RobotMotor([0.3, 0, 0], None, 0)
+    mot2 = RobotMotor([0.3, 0, 0], None, 1)
+
+    MIRo = Robot([0, 0, 0], [30.0, 0.0, 90.0], [mic1, mic2], [mot1, mot2], 0.5)
+
     # Generating a list of random mic and source positions
     number_generations = int(args.g)
-    all_mic_pos = np.asarray([np.random.uniform(0.1, room_dim[0]-0.1, size=number_generations),
-                np.random.uniform(0.1, room_dim[1]-0.1, size=number_generations),
-                np.random.uniform(0.1, room_dim[2]-0.1, size=number_generations)])
+    all_robot_pos = np.asarray([np.random.uniform(MIRo.skin_width, room_dim[0]-MIRo.skin_width, size=number_generations),
+                np.random.uniform(MIRo.skin_width, room_dim[1]-MIRo.skin_width, size=number_generations),
+                np.random.uniform(MIRo.skin_width, room_dim[2]-MIRo.skin_width, size=number_generations)])
     
     all_source_pos = np.asarray([np.random.uniform(0.1, room_dim[0]-0.1, size=number_generations),
                 np.random.uniform(0.1, room_dim[1]-0.1, size=number_generations),
