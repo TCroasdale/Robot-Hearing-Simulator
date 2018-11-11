@@ -1,0 +1,49 @@
+{
+    "Robot_config":{
+        "pos": {"x": 5.0, "y": 5.0, "z": 5.0}, //-1 for autos
+        "rot": {"x": 5.0, "y": 5.0, "z": 5.0}, //-1 for autos
+        "microphones": [{
+            "local_pos": {"x": 5.0, "y": 5.0, "z": 5.0},
+            "local_rot": {"x": 5.0, "y": 5.0, "z": 5.0},
+            "mic_style": {"path": "path/to/micresponse", "uid": 123},
+            "id": -1 //-1 for auto
+        }],
+        "motors": [{
+            "local_pos": {"x": 5.0, "y": 5.0, "z": 5.0},
+            "sound": {"path": "path/to/utterance", "uid": 123},
+            "id": -1 //-1 for auto
+        }],
+        "skin_width": 0.25 //-1 for auto calulation
+    },
+    "Simulation_config":{
+        "room_dimensions": {"x": 5.0, "y": 5.0, "z": 5.0},
+        "robot_config": {"path": "path/to/robotsetup"},
+        "rt60": 300,
+        "sample_Rate": 16000,
+        "source_config":{
+            "input_utterance": {"path": "path/to/utterance", "uid": 123},
+            "background_noise": {"path": "background/noise/path", "uid": 123},
+            "simulation_setups": [{
+                "style": "box",
+                "dimensions": {"x": 4.0, "y": 4.0, "z": 4.0},
+                "orientation": {"x": 2.5, "y": 2.5, "z": 2.5},
+                "origin": {"x": 2.5, "y": 2.5, "z": 2.5},
+                "divisions": {"x": 4, "y": 4, "z": 4}
+            }, {
+                "style": "pyramid",
+                "origin": {"x": 2.5, "y": 2.5, "z": 2.5},
+                "orientation": {"x": 2.5, "y": 2.5, "z": 2.5},
+                "length": 5,
+                "angle_from_normal": 30,
+                "Layers": 3, //vertical divisions
+                "divisions": 5 //number of horizontal points at base, 5x5 = 25 so 25 points on base
+            }, {
+                "style": "sphere",
+                "origin": {"x": 2.5, "y": 2.5, "z": 2.5},
+                "radius": 3.0,
+                "vertical_segments": 8,
+                "horizontal_segments": 4 
+            }]
+        }
+    }
+}

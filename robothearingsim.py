@@ -36,8 +36,6 @@ def arg_to_bool(arg):
 def run_sim(robot_pos, src_pos, i, conf):
     if show_output:
         print("--Generation {0}\n----\t Robot Position:\t{1}\n----\tSource Position:\t{2}\n----\t\t   rt60:\t{3}\n----\tRoom Dimensions:\t{4}\n----\t    Sample Rate:\t{5}\n".format(i, robot_pos, src_pos, conf[2], conf[1], conf[3]))
-
-
     # Simple Methods
     # conf[4].transform.set_world_pos(robot_pos)
     # mic_positions = [x.transform.get_world_pos() for x in conf[4].microphones]
@@ -65,7 +63,7 @@ def run_sim(robot_pos, src_pos, i, conf):
     data_rev = np.array([data_rev_ch1, data_rev_ch2]) #put the data together
     sf.write('temp_data/data_gen_{0}.wav'.format(i), data_rev.T, sample_rate) #Write new file into a folder called temp_data
 
-# Simulates one mic in a 5x5x5 room with both the source and mix positions randomised
+# Simulates one mic in a 5x5x5 room with both the source and mic positions randomised
 # Generates 30 utterances
 if __name__ == '__main__': #Main Entry point
     parser = argparse.ArgumentParser() # Parsing program arguments
