@@ -1,10 +1,10 @@
 #######################################
 # Author: Thomas Croasdale
 #
-# This file is responsible for 
+# This file is responsible for
 # representing a robot's microphones
 # and motors
-# 
+#
 #######################################
 
 from rir_simulator import roomsimove_single
@@ -28,33 +28,40 @@ class Transform(object):
 
     def rotate(self, q):
         self.orientation[0] + q[0]
-        if self.orientation[0] > 360: self.orientation[0] = 0 
-        if self.orientation[0] < 0: self.orientation[0] = 360 
+        if self.orientation[0] > 360: self.orientation[0] = 0
+        if self.orientation[0] < 0: self.orientation[0] = 360
 
         self.orientation[1] + q[1]
-        if self.orientation[1] > 360: self.orientation[1] = 0 
-        if self.orientation[1] < 0: self.orientation[1] = 360 
+        if self.orientation[1] > 360: self.orientation[1] = 0
+        if self.orientation[1] < 0: self.orientation[1] = 360
 
         self.orientation[2] + q[2]
-        if self.orientation[2] > 360: self.orientation[2] = 0 
-        if self.orientation[2] < 0: self.orientation[2] = 360 
+        if self.orientation[2] > 360: self.orientation[2] = 0
+        if self.orientation[2] < 0: self.orientation[2] = 360
+
+    def set_world_pos(self, vec):
+        if self.parent == None: # Only the root transform can move
+            self.x_pos = vec[0]
+            self.y_pos = vec[1]
+            self.z_pos = vec[2]
+
 
     def get_world_pos(self):
         if self.parent == None:
             return [self.x_pos, self.y_pos, self.z_pos]
         else:
-            return [self.parent.get_world_pos()[0] + self.x_pos, 
-                    self.parent.get_world_pos()[1] + self.y_pos, 
+            return [self.parent.get_world_pos()[0] + self.x_pos,
+                    self.parent.get_world_pos()[1] + self.y_pos,
                     self.parent.get_world_pos()[2] + self.z_pos]
-    
+
     def get_world_rot(self):
         if self.parent == None:
             return self.orientation
         else:
-            return [self.parent.get_world_rot()[0] + self.orientation[0], 
-                    self.parent.get_world_rot()[1] + self.orientation[1], 
+            return [self.parent.get_world_rot()[0] + self.orientation[0],
+                    self.parent.get_world_rot()[1] + self.orientation[1],
                     self.parent.get_world_rot()[2] + self.orientation[2]]
-    
+
     def __str__(self):
         info = "pos: {0}, orientation: {1}, parent: \n\t\t{2}".format(self.get_world_pos(), self.get_world_rot(), self.parent)
         return info
@@ -88,19 +95,21 @@ class RobotMicrophone(object):
         return info
 
 
+
 class Robot(object):
     '''
         Representing a robot.
     '''
 
-    def __init__(self, pos, rot, robo_mics, robo_motors, skin_width):
+    def __init__(self, pos, rot, robo_mics, robo_motors, skin_width=0.1):
         self.transform = Transform(pos, rot, None)
         self.microphones = robo_mics
         self.motors = robo_motors
-        self.skin_with = skin_width
+        self.skin_width = skin_width
+
         #Set the world position of the microphones and motors
-        for mic in robo_mics: self.attach_transform(mic.transform) 
-        for mot in robo_motors: self.attach_transform(mot.transform) 
+        for mic in robo_mics: self.attach_transform(mic.transform)
+        for mot in robo_motors: self.attach_transform(mot.transform)
 
     def attach_transform(self, transform):
         transform.parent = self.transform
@@ -124,4 +133,4 @@ if __name__ == '__main__': #Main Entry point
     print("===== Mics =====")
     for mic in MIRo.microphones: print(mic)
     print("===== Motors =====")
-    for mot in MIRo.motors: print(mot) 
+    for mot in MIRo.motors: print(mot)

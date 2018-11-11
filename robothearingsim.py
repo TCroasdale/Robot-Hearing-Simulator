@@ -1,16 +1,17 @@
 #######################################
 # Author: Thomas Croasdale
 #
-# This file is responsible for taking 
-# an audio file and generating a 
+# This file is responsible for taking
+# an audio file and generating a
 # number of simulations based on what
-# a robot would hear. 
-# 
+# a robot would hear.
+#
 #######################################
 import argparse
 import soundfile as sf
 from rir_simulator import roomsimove_single
 from rir_simulator import olafilt
+import robotconfig as roboconf
 import numpy as np
 import shutil as zipper
 import os
@@ -22,7 +23,7 @@ import time
 def arg_to_bool(arg):
     if arg.lower() in ('yes', 'true', 't', 'y'):
         return True
-    else: 
+    else:
         return False
 
 # Runs one simulation
@@ -30,16 +31,41 @@ def arg_to_bool(arg):
 # conf[1] is the room dimensions
 # conf[2] is the rt60 value
 # conf[3] is the sample rate
+# conf[4] is the robot object
 # example conf = (data, room_dim, rt60, 16000)
-def run_sim(mic_pos, src_pos, i, conf):
+def run_sim(robot_pos, src_pos, i, conf):
     if show_output:
-        print("--Generation {0}\n----Microphone Position:\t{1}\n----\tSource Position:\t{2}\n----\t\t   rt60:\t{3}\n----\tRoom Dimensions:\t{4}\n----\t   Sample Rate:\t\t{5}\n".format(i, mic_pos, src_pos, conf[2], conf[1], conf[3]))
+        print("--Generation {0}\n----\t Robot Position:\t{1}\n----\tSource Position:\t{2}\n----\t\t   rt60:\t{3}\n----\tRoom Dimensions:\t{4}\n----\t    Sample Rate:\t{5}\n".format(i, robot_pos, src_pos, conf[2], conf[1], conf[3]))
 
 
-    mic_positions = [mic_pos]
-    rir = roomsimove_single.do_everything(conf[1], mic_positions, src_pos, conf[2])
-    data_rev = olafilt.olafilt(rir[:,0], conf[0])  #Simulate room, THis line should be repeated for the second channel
-    sf.write('temp_data/data_gen_{0}.wav'.format(i), data_rev.T, conf[3]) #Write new file into a folder calle temp_data
+    conf[4].transform.set_world_pos(robot_pos)
+    mic_positions = [x.transform.get_world_pos() for x in conf[4].microphones]
+
+    # Simple Methods
+    # rir = roomsimove_single.do_everything(conf[1], mic_positions, src_pos, conf[2])
+
+    # Advanced Method
+    room_dim = conf[1]
+    rt60 = conf[2]
+    sample_rate = conf[3]
+
+    absorption = roomsimove_single.rt60_to_absorption(conf[1], rt60)
+    room = roomsimove_single.Room(room_dim, abs_coeff=absorption)
+
+    mics = [roomsimove_single.Microphone(mic.transform.get_world_pos(), mic.id,  \
+            orientation=mic.transform.get_world_rot(), direction='omnidirectional') for mic in conf[4].microphones]
+    # mic1 = roomsimove_single.Microphone(mic_positions[0], 1,  \
+    #         orientation=[0.0, 0.0, 0.0], direction='omnidirectional')
+    # mic2 = roomsimove_single.Microphone(mic_positions[1], 2,  \
+    #         orientation=[0.0, 0.0, 0.0], direction='omnidirectional')
+    # mics = [mic1, mic2]
+    sim_rir = roomsimove_single.RoomSim(sample_rate, room, mics, RT60=rt60)
+    rir = sim_rir.create_rir(src_pos)
+
+    data = conf[0][:,0]
+    data_rev = olafilt.olafilt(rir[:,0], data)  #Simulate room, This line should be repeated for the second channel
+    data_rev = olafilt.olafilt(rir[:,1], data)
+    sf.write('temp_data/data_gen_{0}.wav'.format(i), data_rev.T, conf[3]) #Write new file into a folder called temp_data
 
 # Simulates one mic in a 5x5x5 room with both the source and mix positions randomised
 # Generates 30 utterances
@@ -58,42 +84,42 @@ if __name__ == '__main__': #Main Entry point
 
     show_output = arg_to_bool(args.DEBUG)
     timed = arg_to_bool(args.TIMED)
-    
-    start_time = time.time() 
+
+    start_time = time.time()
     if timed:
         print("Starting Timer") if show_output else 0
-    
+
     rt60 = 0.4 # in seconds
     room_dim = [float(args.rx), float(args.ry), float(args.rz)] # in meters
     sampling_rate = 16000
 
-    mic1 = RobotMicrophone([0.25, 0.25, 0.5], [0.0, 0.0, 45.0], None, 0)
-    mic2 = RobotMicrophone([-0.25, 0.25, 0.5], [0.0, 0.0, -45.0],  None, 1)
-    mot1 = RobotMotor([0.3, 0, 0], None, 0)
-    mot2 = RobotMotor([0.3, 0, 0], None, 1)
+    mic1 = roboconf.RobotMicrophone([0.25, 0.25, 0.5], [0.0, 0.0, 45.0], None, 0)
+    mic2 = roboconf.RobotMicrophone([-0.25, 0.25, 0.5], [0.0, 0.0, -45.0],  None, 1)
+    mot1 = roboconf.RobotMotor([0.3, 0, 0], None, 0)
+    mot2 = roboconf.RobotMotor([0.3, 0, 0], None, 1)
 
-    MIRo = Robot([0, 0, 0], [30.0, 0.0, 90.0], [mic1, mic2], [mot1, mot2], 0.5)
+    MIRo = roboconf.Robot([0, 0, 0], [30.0, 0.0, 90.0], [mic1, mic2], [mot1, mot2], 0.5)
 
     # Generating a list of random mic and source positions
     number_generations = int(args.g)
     all_robot_pos = np.asarray([np.random.uniform(MIRo.skin_width, room_dim[0]-MIRo.skin_width, size=number_generations),
                 np.random.uniform(MIRo.skin_width, room_dim[1]-MIRo.skin_width, size=number_generations),
                 np.random.uniform(MIRo.skin_width, room_dim[2]-MIRo.skin_width, size=number_generations)])
-    
+
     all_source_pos = np.asarray([np.random.uniform(0.1, room_dim[0]-0.1, size=number_generations),
                 np.random.uniform(0.1, room_dim[1]-0.1, size=number_generations),
                 np.random.uniform(0.1, room_dim[2]-0.1, size=number_generations)])
 
     # Reading the data from the source file
     [data, fs] = sf.read(args.i, always_2d=True)
-    data =  data[:,0] 
+    data =  data[:,0]
 
     print("Starting work") if show_output else 0
-    
+
     ## Multithreaded
-    config = (data, room_dim, rt60, fs)
-    Parallel(n_jobs=int(args.t))(delayed(run_sim)(all_mic_pos[:, i], all_source_pos[:, i], i, config) for i in range(number_generations))
-        
+    config = (data, room_dim, rt60, fs, MIRo)
+    Parallel(n_jobs=int(args.t))(delayed(run_sim)(all_robot_pos[:, i], all_source_pos[:, i], i, config) for i in range(number_generations))
+
     # Zip up new files, and delete old ones.
     zip_name = args.o
     directory_name = 'temp_data'
