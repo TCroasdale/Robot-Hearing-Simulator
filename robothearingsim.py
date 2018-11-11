@@ -38,10 +38,9 @@ def run_sim(robot_pos, src_pos, i, conf):
         print("--Generation {0}\n----\t Robot Position:\t{1}\n----\tSource Position:\t{2}\n----\t\t   rt60:\t{3}\n----\tRoom Dimensions:\t{4}\n----\t    Sample Rate:\t{5}\n".format(i, robot_pos, src_pos, conf[2], conf[1], conf[3]))
 
 
-    conf[4].transform.set_world_pos(robot_pos)
-    mic_positions = [x.transform.get_world_pos() for x in conf[4].microphones]
-
     # Simple Methods
+    # conf[4].transform.set_world_pos(robot_pos)
+    # mic_positions = [x.transform.get_world_pos() for x in conf[4].microphones]
     # rir = roomsimove_single.do_everything(conf[1], mic_positions, src_pos, conf[2])
 
     # Advanced Method
@@ -52,20 +51,19 @@ def run_sim(robot_pos, src_pos, i, conf):
     absorption = roomsimove_single.rt60_to_absorption(conf[1], rt60)
     room = roomsimove_single.Room(room_dim, abs_coeff=absorption)
 
+    # Using list comprehension to create a list of all mics
     mics = [roomsimove_single.Microphone(mic.transform.get_world_pos(), mic.id,  \
-            orientation=mic.transform.get_world_rot(), direction='omnidirectional') for mic in conf[4].microphones]
-    # mic1 = roomsimove_single.Microphone(mic_positions[0], 1,  \
-    #         orientation=[0.0, 0.0, 0.0], direction='omnidirectional')
-    # mic2 = roomsimove_single.Microphone(mic_positions[1], 2,  \
-    #         orientation=[0.0, 0.0, 0.0], direction='omnidirectional')
-    # mics = [mic1, mic2]
+            orientation=mic.transform.get_world_rot(), direction=mic.style) \
+            for mic in conf[4].microphones]
+    
     sim_rir = roomsimove_single.RoomSim(sample_rate, room, mics, RT60=rt60)
     rir = sim_rir.create_rir(src_pos)
 
-    data = conf[0][:,0]
-    data_rev = olafilt.olafilt(rir[:,0], data)  #Simulate room, This line should be repeated for the second channel
-    data_rev = olafilt.olafilt(rir[:,1], data)
-    sf.write('temp_data/data_gen_{0}.wav'.format(i), data_rev.T, conf[3]) #Write new file into a folder called temp_data
+    data = conf[0]
+    data_rev_ch1 = olafilt.olafilt(rir[:,0], data)    #Simulate channel 1
+    data_rev_ch2 = olafilt.olafilt(rir[:,1], data)    #Simulate channel 2
+    data_rev = np.array([data_rev_ch1, data_rev_ch2]) #put the data together
+    sf.write('temp_data/data_gen_{0}.wav'.format(i), data_rev.T, sample_rate) #Write new file into a folder called temp_data
 
 # Simulates one mic in a 5x5x5 room with both the source and mix positions randomised
 # Generates 30 utterances
@@ -93,8 +91,8 @@ if __name__ == '__main__': #Main Entry point
     room_dim = [float(args.rx), float(args.ry), float(args.rz)] # in meters
     sampling_rate = 16000
 
-    mic1 = roboconf.RobotMicrophone([0.25, 0.25, 0.5], [0.0, 0.0, 45.0], None, 0)
-    mic2 = roboconf.RobotMicrophone([-0.25, 0.25, 0.5], [0.0, 0.0, -45.0],  None, 1)
+    mic1 = roboconf.RobotMicrophone([0.25, 0.25, 0.5], [0.0, 0.0, 45.0], 'cardioid', 0)
+    mic2 = roboconf.RobotMicrophone([-0.25, 0.25, 0.5], [0.0, 0.0, -45.0],  'cardioid', 1)
     mot1 = roboconf.RobotMotor([0.3, 0, 0], None, 0)
     mot2 = roboconf.RobotMotor([0.3, 0, 0], None, 1)
 

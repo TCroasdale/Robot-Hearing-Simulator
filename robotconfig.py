@@ -85,9 +85,9 @@ class RobotMicrophone(object):
         Representing a microphone within a robot.
     '''
 
-    def __init__(self, localpos, localrot, rir_mic, id):
+    def __init__(self, localpos, localrot, mic_style, id):
         self.id = id
-        self.rir_mic = rir_mic
+        self.style = mic_style
         self.transform = Transform(localpos, localrot, None)
 
     def __str__(self):
