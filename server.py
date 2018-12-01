@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from flask import Flask, redirect, url_for, request, render_template
 app = Flask(__name__)
 
@@ -17,6 +18,20 @@ def signup():
 def simulator():
     if request.method == 'GET':
         return render_template('simulator', user=None)
+=======
+from flask import Flask, render_template
+import os
+
+template_dir = os.path.abspath('web/templates')
+app = Flask(__name__, template_folder=template_dir)
+
+
+
+
+@app.route("/")
+def hello():
+    return render_template('index.html', title='Home')
+>>>>>>> 8823835cb831f9906937cd8eb2be2f54e2e93257
 
 if __name__ == "__main__":
     app.run()
