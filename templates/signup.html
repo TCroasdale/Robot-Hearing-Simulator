@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+{% block title %}Index{% endblock %}
+{% block head %}
+{% endblock %}
+{% block content %}
+    <h1>Sign up</h1>
+    <form action='/signup' method="post">
+        <p>
+            <label for="email">Your E-Mail</label>
+            <input name="email" type="email">
+        </p>
+        <p>
+            <label for="password">Your Password</label>
+            <input name="password" type="password">
+        </p>
+    </form>
+{% endblock %}

@@ -1,0 +1,41 @@
+CREATE DATABASE rhs-db;
+
+CREATE TABLE users {
+  id INT NOT NULL AUTO_INCREMENT,
+  email VARCHAR(255) NOT NULL,
+  passHash VARCHAR(255) NOT NULL,
+  passSalt VARCHAR(255) NOT NULL,
+  accessLevel INT NOT NULL DEFAULT '0',
+  PRIMARY KEY(id)
+};
+
+CREATE TABLE simulations {
+  id INT NOT NULL AUTO_INCREMENT,
+  pathToConfig VARCHAR(255) NOT NULL,
+  dateCreated DATETIME,
+  state VARCHAR(16) DEFAULT 'Scheduled',
+  seed INT NOT NULL,
+  userID INT NOT NULL,
+  visibility INT NOT NULL DEFAULT '0',
+  PRIMARY KEY(id),
+  FOREIGN KEY (userID) REFERENCES users(id)
+};
+
+CREATE TABLE robots{
+  id INT NOT NULL AUTO_INCREMENT,
+  name VARCHAR(32) NOT NULL,
+  pathToConfig varchar(255) NOT NULL,
+  visibility INT NOT NULL DEFAULT '0',
+  userID INT NOT NULL,
+  PRIMARY KEY(id),
+  FOREIGN KEY(userID) REFERENCES users(id)
+};
+
+CREATE TABLE sounds{
+  id INT NOT NULL AUTO_INCREMENT,
+  pathToFile varchar(255) NOT NULL,
+  visibility INT NOT NULL DEFAULT '0',
+  userID INT NOT NULL,
+  PRIMARY KEY(id),
+  FOREIGN KEY(userID) REFERENCES users(id)
+};

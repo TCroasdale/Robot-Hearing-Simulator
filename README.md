@@ -11,8 +11,14 @@
 #### To Install Dependancies
 - Run `pip install -r requirements.txt`
 
-#### To Run Simulation
+
+#### To Run Webserver
+- Run `python server.py`
+
+
+#### To Run Simulation Engine
 - Run `python robothearingsim.py `
+
 ###### Program Arguments
 * -i Input File _The file which will be used, default `test_data/data.wav`_
 * -o Output File _The zip file which will be generated, filled with the simulations, default `test_data/data_gen.zip`_
