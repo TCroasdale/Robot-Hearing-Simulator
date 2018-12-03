@@ -1,6 +1,10 @@
-<<<<<<< HEAD
-from flask import Flask, redirect, url_for, request, render_template
+from flask import Flask, redirect, url_for, request, render_template, jsonify, send_file
+import json
+import os
+from robothearingsim import RobotHearingSim as sim
+from utilities import Utilities as util
 app = Flask(__name__)
+
 
 @app.route("/")
 def index():
@@ -17,21 +21,35 @@ def signup():
 @app.route('/simulator', methods=['POST', 'GET'])
 def simulator():
     if request.method == 'GET':
-        return render_template('simulator', user=None)
-=======
-from flask import Flask, render_template
-import os
+        return render_template('simulator.html', user=None)
+    else:
+        return render_template('simulator.html', user=None)
 
-template_dir = os.path.abspath('web/templates')
-app = Flask(__name__, template_folder=template_dir)
+@app.route('/simulator/run_simulation', methods=['POST'])
+def run_simulation():
+    strdict = json.loads(request.form['config'])
+    config = util.objectifyJson(strdict)
+    downloadPath = sim.run_from_json_config(config)
+
+    return jsonify({"success": "true", "file": downloadPath})
 
 
+@app.route('/upload_config', methods=['POST'])
+def review_config():
+    if 'file' in request.files:
+        file = request.files['file']
+        myfile = file.read()
+        ret = {"success": "true", "config": json.loads(myfile)}
 
+        # Needs to check validity of uploaded file too.
 
-@app.route("/")
-def hello():
-    return render_template('index.html', title='Home')
->>>>>>> 8823835cb831f9906937cd8eb2be2f54e2e93257
+        return jsonify(ret)
+    else:
+        return "{\"success\": \"false\"}"
 
+@app.route("/dl/<path>")
+def DownloadLogFile (path = None):
+    filename = os.path.join(app.root_path, 'static' ,'dl', path)
+    return send_file(filename, as_attachment=True)
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)

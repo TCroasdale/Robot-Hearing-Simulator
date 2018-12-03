@@ -10,13 +10,13 @@ ROOMSIMOVE_SINGLE Compute shoebox room filters for a single source
 Roomsimove, http://homepages.loria.fr/evincent/software/Roomsimove.zip
 # This code is distributed under the terms of the GNU Public License version 3
 # (http://www.gnu.org/licenses/gpl.txt)
-# 
+#
 # If you find it useful, please cite the following reference:
 ###########################################################################
-One  difference between the matlab version and this code is that 
+One  difference between the matlab version and this code is that
 RT60 value is assumed to be same for all frequencies.
 
-Tested for sampling rate of 16000 Hz. 
+Tested for sampling rate of 16000 Hz.
 
 Usage:
 =========
@@ -110,7 +110,7 @@ def get_rt60(F_abs, room_size, A):
 def rt60_to_absorption(room_obj_dim, rt60):
     '''
     Norris-Eyring formula %%
-     Converts a given reverberation time into a single absorption coefficient for all surfaces 
+     Converts a given reverberation time into a single absorption coefficient for all surfaces
     '''
     room_vol = np.prod(room_obj_dim)
     area_xz=room_obj_dim[0] * room_obj_dim[2]
@@ -126,7 +126,7 @@ class Microphone(object):
     '''
     def __init__(self, pos, id_val,  \
             orientation=[0.0, 0.0, 0.0], direction='omnidirectional'):
-        self.x_pos = pos[0] 
+        self.x_pos = pos[0]
         self.y_pos = pos[1]
         self.z_pos = pos[2]
         self.pos = pos

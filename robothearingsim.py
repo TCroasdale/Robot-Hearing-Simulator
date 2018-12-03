@@ -7,6 +7,7 @@
 # a robot would hear.
 #
 #######################################
+
 import argparse
 import soundfile as sf
 from rir_simulator import roomsimove_single
@@ -18,52 +19,122 @@ import os
 from joblib import Parallel, delayed
 import time
 
+class RobotHearingSim:
+    #Converts a string to a true/false boolean, used to process bool arguments
+    def arg_to_bool(arg):
+        if arg.lower() in ('yes', 'true', 't', 'y'):
+            return True
+        else:
+            return False
 
-#Converts a string to a true/false boolean, used to process bool arguments
-def arg_to_bool(arg):
-    if arg.lower() in ('yes', 'true', 't', 'y'):
-        return True
-    else:
-        return False
-
-# Runs one simulation
-# conf[0] is the sound data
-# conf[1] is the room dimensions
-# conf[2] is the rt60 value
-# conf[3] is the sample rate
-# conf[4] is the robot object
-# example conf = (data, room_dim, rt60, 16000)
-def run_sim(robot_pos, src_pos, i, conf):
-    if show_output:
+    # Runs one simulation
+    # conf[0] is the sound data
+    # conf[1] is the room dimensions
+    # conf[2] is the rt60 value
+    # conf[3] is the sample rate
+    # conf[4] is the robot object
+    # example conf = (data, room_dim, rt60, 16000)
+    def run_sim(robot_pos, src_pos, i, conf):
         print("--Generation {0}\n----\t Robot Position:\t{1}\n----\tSource Position:\t{2}\n----\t\t   rt60:\t{3}\n----\tRoom Dimensions:\t{4}\n----\t    Sample Rate:\t{5}\n".format(i, robot_pos, src_pos, conf[2], conf[1], conf[3]))
-    # Simple Methods
-    # conf[4].transform.set_world_pos(robot_pos)
-    # mic_positions = [x.transform.get_world_pos() for x in conf[4].microphones]
-    # rir = roomsimove_single.do_everything(conf[1], mic_positions, src_pos, conf[2])
+        # Advanced Method
+        room_dim = conf[1]
+        rt60 = conf[2]
+        sample_rate = conf[3]
 
-    # Advanced Method
-    room_dim = conf[1]
-    rt60 = conf[2]
-    sample_rate = conf[3]
+        absorption = roomsimove_single.rt60_to_absorption(conf[1], rt60)
+        room = roomsimove_single.Room(room_dim, abs_coeff=absorption)
 
-    absorption = roomsimove_single.rt60_to_absorption(conf[1], rt60)
-    room = roomsimove_single.Room(room_dim, abs_coeff=absorption)
+        # Using list comprehension to create a list of all mics
+        mics = [roomsimove_single.Microphone(mic.transform.get_world_pos(), mic.id,  \
+                orientation=mic.transform.get_world_rot(), direction=mic.style) \
+                for mic in conf[4].microphones]
 
-    # Using list comprehension to create a list of all mics
-    mics = [roomsimove_single.Microphone(mic.transform.get_world_pos(), mic.id,  \
-            orientation=mic.transform.get_world_rot(), direction=mic.style) \
-            for mic in conf[4].microphones]
-    
-    sim_rir = roomsimove_single.RoomSim(sample_rate, room, mics, RT60=rt60)
-    rir = sim_rir.create_rir(src_pos)
+        sim_rir = roomsimove_single.RoomSim(sample_rate, room, mics, RT60=rt60)
+        rir = sim_rir.create_rir(src_pos)
 
-    data = conf[0]
-    data_rev_ch1 = olafilt.olafilt(rir[:,0], data)    #Simulate channel 1
-    data_rev_ch2 = olafilt.olafilt(rir[:,1], data)    #Simulate channel 2
-    data_rev = np.array([data_rev_ch1, data_rev_ch2]) #put the data together
-    sf.write('temp_data/data_gen_{0}.wav'.format(i), data_rev.T, sample_rate) #Write new file into a folder called temp_data
+        data = conf[0]
+        data_rev_ch1 = olafilt.olafilt(rir[:,0], data)    #Simulate channel 1
+        # data_rev_ch2 = olafilt.olafilt(rir[:,1], data)    #Simulate channel 2
+        data_rev = np.array([data_rev_ch1])#, data_rev_ch2]) #put the data together
+        sf.write('temp_data/data_gen_{0}.wav'.format(i), data_rev.T, sample_rate) #Write new file into a folder called temp_data
 
-# Simulates one mic in a 5x5x5 room with both the source and mic positions randomised
+
+    def run_from_json_config(config):
+        simConfig = config['simulation_config']
+        roboConfig = config['robot_config']
+        rt60 = simConfig['rt60']
+        sampling_rate = int(simConfig['sample_rate'])
+        room_dim = [simConfig['room_dimensions']['x'], simConfig['room_dimensions']['y'], simConfig['room_dimensions']['z']]
+
+        mics = []
+        for mic in roboConfig['microphones']:
+            pos = [mic['local_pos']['x'], mic['local_pos']['y'], mic['local_pos']['z']]
+            rot = [mic['local_rot']['x'], mic['local_rot']['y'], mic['local_rot']['z']]
+            microphone = roboconf.RobotMicrophone(pos, rot, 'cardioid', mic['id'])
+            mics.append(microphone)
+
+        # Do motors
+        motors = []
+
+        robopos = [simConfig['robot_pos']['x'], simConfig['robot_pos']['y'], simConfig['robot_pos']['z']]
+        roborot = [simConfig['robot_rot']['x'], simConfig['robot_rot']['y'], simConfig['robot_rot']['z']]
+        robot = roboconf.Robot(robopos, roborot, mics, motors, roboConfig['skin_width'])
+
+        source_positions = []
+        for source_setup in simConfig['source_config']['simulation_setups']:
+            if source_setup['style'] == "box":
+                posArray = RobotHearingSim.parse_box_source_setup(source_setup)
+                source_positions += (posArray)
+            # Calculate other source setups
+
+        # Reading the data from the source file
+        [data, fs] = sf.read('test_data/data.wav', always_2d=True)
+        data =  data[:,0]
+
+        ## Multithreaded
+        config = (data, room_dim, rt60, fs, robot)
+        all_robot_pos = [robopos] * len(source_positions)
+        Parallel(n_jobs=int(4))(delayed(RobotHearingSim.run_sim)(all_robot_pos[i], source_positions[i], i, config) for i in range(len(source_positions)))
+
+        # Zip up new files, and delete old ones.
+        zip_name = 'static/dl/data'
+        directory_name = 'temp_data'
+        zipper.make_archive(zip_name, 'zip', directory_name)
+        for i in range(len(source_positions)):
+            os.remove('temp_data/data_gen_{0}.wav'.format(i))
+        return "data.zip"
+
+
+
+
+    def parse_box_source_setup(setup):
+        allPositions = []
+        dim = [setup['dimensions']['x'], setup['dimensions']['y'], setup['dimensions']['z']]
+        midpoint = [setup['origin']['x'] + (dim[0]/2),
+                    setup['origin']['y'] + (dim[1]/2),
+                    setup['origin']['z'] + (dim[2]/2)]
+
+        # These for loops can be combined
+        xes = [midpoint[0] + i * ((dim[0]/2)-dim[0]) for i in range(int(setup['divisions']['x']))]
+        yes = [midpoint[1] + i * ((dim[1]/2)-dim[1]) for i in range(int(setup['divisions']['y']))]
+        zes = [midpoint[2] + i * ((dim[2]/2)-dim[2]) for i in range(int(setup['divisions']['z']))]
+
+        for x in xes:
+            for y in yes:
+                for z in zes:
+                    allPositions.append([x, y, z])
+
+        return allPositions
+
+
+    def parse_sphere_source_setup(setup):
+        return
+    def parse_cone_source_setup(setup):
+        return
+
+
+
+# Simulates one mic in a 5x5x5 room wit h both the source and mic positions randomised
 # Generates 30 utterances
 if __name__ == '__main__': #Main Entry point
     parser = argparse.ArgumentParser() # Parsing program arguments
@@ -78,8 +149,8 @@ if __name__ == '__main__': #Main Entry point
     parser.add_argument('-TIMED', help='Time the generation', default='FALSE')
     args = parser.parse_args()
 
-    show_output = arg_to_bool(args.DEBUG)
-    timed = arg_to_bool(args.TIMED)
+    show_output = RobotHearingSim.arg_to_bool(args.DEBUG)
+    timed = RobotHearingSim.arg_to_bool(args.TIMED)
 
     start_time = time.time()
     if timed:
@@ -114,7 +185,7 @@ if __name__ == '__main__': #Main Entry point
 
     ## Multithreaded
     config = (data, room_dim, rt60, fs, MIRo)
-    Parallel(n_jobs=int(args.t))(delayed(run_sim)(all_robot_pos[:, i], all_source_pos[:, i], i, config) for i in range(number_generations))
+    Parallel(n_jobs=int(args.t))(delayed(RobotHearingSim.run_sim)(all_robot_pos[:, i], all_source_pos[:, i], i, config) for i in range(number_generations))
 
     # Zip up new files, and delete old ones.
     zip_name = args.o
