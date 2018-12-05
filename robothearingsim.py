@@ -53,9 +53,12 @@ class RobotHearingSim:
         rir = sim_rir.create_rir(src_pos)
 
         data = conf[0]
-        data_rev_ch1 = olafilt.olafilt(rir[:,0], data)    #Simulate channel 1
-        # data_rev_ch2 = olafilt.olafilt(rir[:,1], data)    #Simulate channel 2
-        data_rev = np.array([data_rev_ch1])#, data_rev_ch2]) #put the data together
+        data_rev = []
+        for i in range(0, len(mics)): # Simulate a channel for each micophone in the scene
+            print(i)
+            data_simmed = olafilt.olafilt(rir[:,i], data)
+            data_rev += [data_simmed]
+        data_rev = np.array(data_rev) #put the data together
         sf.write('temp_data/data_gen_{0}.wav'.format(i), data_rev.T, sample_rate) #Write new file into a folder called temp_data
 
 

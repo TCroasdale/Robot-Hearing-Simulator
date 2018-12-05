@@ -1,124 +1,141 @@
 {
- "robot_config": {
-  "microphones": [
-   {
-    "id": "-1",
-    "local_pos": {
-     "x": "0.5",
-     "y": "0.5",
-     "z": "0.5"
+    "robot_config": {
+     "microphones": [
+      {
+       "id": "-1",
+       "local_pos": {
+        "x": "0.5",
+        "y": "0.5",
+        "z": "0.5"
+       },
+       "local_rot": {
+        "x": "5.0",
+        "y": "5.0",
+        "z": "5.0"
+       },
+       "mic_style": {
+        "path": "path/to/micresponse",
+        "uid": "123"
+       }
+      },
+      {
+       "id": "-1",
+       "local_pos": {
+        "x": "-0.5",
+        "y": "0.5",
+        "z": "0.5"
+       },
+       "local_rot": {
+        "x": "5.0",
+        "y": "5.0",
+        "z": "5.0"
+       },
+       "mic_style": {
+        "path": "path/to/micresponse",
+        "uid": "123"
+       }
+      }
+     ],
+     "motors": [
+      {
+       "id": "-1",
+       "local_pos": {
+        "x": "5.0",
+        "y": "5.0",
+        "z": "5.0"
+       },
+       "sound": {
+        "path": "path/to/utterance",
+        "uid": "123"
+       }
+      }
+     ],
+     "skin_width": "0.25"
     },
-    "local_rot": {
-     "x": "5.0",
-     "y": "5.0",
-     "z": "5.0"
-    },
-    "mic_style": {
-     "path": "path/to/micresponse",
-     "uid": "123"
+    "simulation_config": {
+     "robot_config": {
+      "path": "path/to/robotsetup",
+      "uid": "123"
+     },
+     "robot_pos": {
+      "x": "2.5",
+      "y": "2.5",
+      "z": "2.5"
+     },
+     "robot_rot": {
+      "x": "5.0",
+      "y": "5.0",
+      "z": "5.0"
+     },
+     "room_dimensions": {
+      "x": "5.0",
+      "y": "5.0",
+      "z": "5.0"
+     },
+     "rt60": "0.4",
+     "sample_rate": "16000",
+     "source_config": {
+      "background_noise": {
+       "path": "background/noise/path",
+       "uid": "123"
+      },
+      "input_utterance": {
+       "path": "path/to/utterance",
+       "uid": "123"
+      },
+      "simulation_setups": [
+       {
+        "dimensions": {
+         "x": "4.0",
+         "y": "4.0",
+         "z": "4.0"
+        },
+        "divisions": {
+         "x": "4",
+         "y": "4",
+         "z": "4"
+        },
+        "orientation": {
+         "x": "2.5",
+         "y": "2.5",
+         "z": "2.5"
+        },
+        "origin": {
+         "x": "2.5",
+         "y": "2.5",
+         "z": "2.5"
+        },
+        "style": "box"
+       },
+       {
+        "Layers": "3",
+        "angle_from_normal": "30",
+        "divisions": "5",
+        "length": "5",
+        "orientation": {
+         "x": "2.5",
+         "y": "2.5",
+         "z": "2.5"
+        },
+        "origin": {
+         "x": "2.5",
+         "y": "2.5",
+         "z": "2.5"
+        },
+        "style": "pyramid"
+       },
+       {
+        "horizontal_segments": "4",
+        "origin": {
+         "x": "2.5",
+         "y": "2.5",
+         "z": "2.5"
+        },
+        "radius": "3.0",
+        "style": "sphere",
+        "vertical_segments": "8"
+       }
+      ]
+     }
     }
    }
-  ],
-  "motors": [
-   {
-    "id": "-1",
-    "local_pos": {
-     "x": "5.0",
-     "y": "5.0",
-     "z": "5.0"
-    },
-    "sound": {
-     "path": "path/to/utterance",
-     "uid": "123"
-    }
-   }
-  ],
-  "skin_width": "0.25"
- },
- "simulation_config": {
-  "robot_config": {
-   "path": "path/to/robotsetup",
-   "uid": "123"
-  },
-  "robot_pos": {
-   "x": "2.5",
-   "y": "2.5",
-   "z": "2.5"
-  },
-  "robot_rot": {
-   "x": "5.0",
-   "y": "5.0",
-   "z": "5.0"
-  },
-  "room_dimensions": {
-   "x": "5.0",
-   "y": "5.0",
-   "z": "5.0"
-  },
-  "rt60": "0.4",
-  "sample_rate": "16000",
-  "source_config": {
-   "background_noise": {
-    "path": "background/noise/path",
-    "uid": "123"
-   },
-   "input_utterance": {
-    "path": "path/to/utterance",
-    "uid": "123"
-   },
-   "simulation_setups": [
-    {
-     "dimensions": {
-      "x": "4.0",
-      "y": "4.0",
-      "z": "4.0"
-     },
-     "divisions": {
-      "x": "4",
-      "y": "4",
-      "z": "4"
-     },
-     "orientation": {
-      "x": "2.5",
-      "y": "2.5",
-      "z": "2.5"
-     },
-     "origin": {
-      "x": "2.5",
-      "y": "2.5",
-      "z": "2.5"
-     },
-     "style": "box"
-    },
-    {
-     "Layers": "3",
-     "angle_from_normal": "30",
-     "divisions": "5",
-     "length": "5",
-     "orientation": {
-      "x": "2.5",
-      "y": "2.5",
-      "z": "2.5"
-     },
-     "origin": {
-      "x": "2.5",
-      "y": "2.5",
-      "z": "2.5"
-     },
-     "style": "pyramid"
-    },
-    {
-     "horizontal_segments": "4",
-     "origin": {
-      "x": "2.5",
-      "y": "2.5",
-      "z": "2.5"
-     },
-     "radius": "3.0",
-     "style": "sphere",
-     "vertical_segments": "8"
-    }
-   ]
-  }
- }
-}

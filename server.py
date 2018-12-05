@@ -1,9 +1,12 @@
 from flask import Flask, redirect, url_for, request, render_template, jsonify, send_file
 import json
 import os
+import sqlite3 as sql# Temporary
+import uuid
 from robothearingsim import RobotHearingSim as sim
 from utilities import Utilities as util
 app = Flask(__name__)
+
 
 
 @app.route("/")
@@ -28,6 +31,19 @@ def simulator():
 @app.route('/simulator/run_simulation', methods=['POST'])
 def run_simulation():
     strdict = json.loads(request.form['config'])
+
+    # Save the JSON config to a file
+    filename = "uploads/simulation_configs/{0}.json".format(uuid.uuid4())
+    with open(filename, 'w') as f:
+        f.write(request.form['config'])
+    with sql.connect("Database/database.db") as con:
+        cur = con.cursor()
+            
+        cur.execute("INSERT INTO simulations (pathToConfig, dateCreated, state, seed, userID, visibility) \
+            VALUES (?,?,?,?,?,?)",(filename,'1-1-2018','scheduled','5', 0, 0))
+        
+        con.commit()
+
     config = util.objectifyJson(strdict)
     downloadPath = sim.run_from_json_config(config)
 
@@ -51,5 +67,6 @@ def review_config():
 def DownloadLogFile (path = None):
     filename = os.path.join(app.root_path, 'static' ,'dl', path)
     return send_file(filename, as_attachment=True)
+
 if __name__ == "__main__":
     app.run(debug=True)
