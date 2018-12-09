@@ -6,8 +6,13 @@ import uuid
 from servertasks import *
 app = Flask(__name__)
 
+UPLOAD_FOLDER = "\\uploads\\sounds"
+ALLOWED_EXTENSIONS = set(['wav'])
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-
+#Returns true if filename has an allowed extension
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route("/")
 def index():
@@ -27,6 +32,33 @@ def simulator():
         return render_template('simulator.html', user=None)
     else:
         return render_template('simulator.html', user=None)
+
+@app.route('/simulator/uploadsounds', methods=['POST'])
+def processSoundUploads():
+    # check if the post request has the file part
+    if 'utterancefile' not in request.files:
+        print("no file in uploads!")
+        return jsonify({'success': 'false'})
+    file = request.files['utterancefile']
+    # if user does not select file, browser also submit a empty part without filename
+    if file.filename == '':
+        print("no file selected in uploads!")
+        return jsonify({'success': 'false'})
+    if file and allowed_file(file.filename):
+        filename = file.filename
+        unique_name = uuid.uuid4()
+        file.save('uploads/sounds/{0}.wav'.format(unique_name))
+
+        utteranceid = 0
+        with sql.connect("Database/database.db") as con:
+            cur = con.cursor()
+                
+            cur.execute("INSERT INTO sounds (name, visibility, userID) VALUES (?,?,?)",('uploads/sounds/{0}'.format(filename), 0, 0))
+            utteranceid = cur.lastrowid
+            con.commit()
+
+        return jsonify({'success': 'true', 'sound_ids': {'utterance_id': utteranceid}})
+    return jsonify({'success': 'false'})
 
 @app.route('/simulator/run_simulation', methods=['POST'])
 def run_simulation():

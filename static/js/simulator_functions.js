@@ -20,11 +20,48 @@ $(document).ready(function() {
     });
   })
 
+  // $('#sound-uploads-form').submit(function(data){
+  //   if(data.success == "true"){
+  //     var config = editor.getValue()
+  //     $.post('/simulator/run_simulation', {config: config}, function(data){
+  //       $('#spinner').hide()
+  //     })
+  //   }else{
+  //     $('#spinner').hide()
+  //   }
+  // })
+
+  $("#sound-uploads-form").submit(function(e) {
+    e.preventDefault();    
+    var formData = new FormData(this);
+
+    $.ajax({
+        url: 'simulator/uploadsounds',
+        type: 'POST',
+        data: formData,
+        success: function (data) {
+          if(data.success == "true"){
+            var config = editor.getValue()
+            jsConfig = JSON.parse(config)
+            console.log(jsConfig)
+            jsConfig.simulation_config.source_config.input_utterance.uid = data.sound_ids.utterance_id
+            $.post('/simulator/run_simulation', {config: config}, function(data){
+              $('#spinner').hide()
+            })
+          }else{
+            $('#spinner').hide()
+          }
+        },
+        cache: false,
+        contentType: false,
+        processData: false
+    });
+});
+
   $('#run_conf').click(function(){
-    var config = editor.getValue()
     $('#spinner').show()
-    $.post('/simulator/run_simulation', {config: config}, function(data){
-      $('#spinner').hide()
-    })
+    $('#sound-uploads-form').submit()
   })
+
+
 })

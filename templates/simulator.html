@@ -22,12 +22,14 @@
           </div>
         </div>
       </div>
-      <div id="utterance_input_controls" class="btn-toolbar" role="toolbar">
-        <div class="btn-group mr-2" role="group">
-          <input type="file" name="utterancefile" class="btn btn-secondary" id="utterancefile" size="1"/>
-          <label for="utterancefile" >Utterance</label>
+      <form id="sound-uploads-form" action="/simulator/uploadsounds" enctype="multipart/form-data" method="POST">
+        <div id="utterance_input_controls" class="btn-toolbar" role="toolbar">
+          <div class="btn-group mr-2" role="group">
+            <input type="file" name="utterancefile" class="btn btn-secondary" id="utterancefile" size="1"/>
+            <label for="utterancefile" >Utterance</label>
+          </div>
         </div>
-      </div>
+      </form>
     </div>
     <div id="spinner" class="loading">Loading&#8230;</div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.2/ace.js" type="text/javascript"></script>
