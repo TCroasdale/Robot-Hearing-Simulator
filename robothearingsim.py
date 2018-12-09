@@ -62,7 +62,7 @@ class RobotHearingSim:
         sf.write('temp_data/data_gen_{0}.wav'.format(i), data_rev.T, sample_rate) #Write new file into a folder called temp_data
 
 
-    def run_from_json_config(config):
+    def run_from_json_config(config, filename):
         simConfig = config['simulation_config']
         roboConfig = config['robot_config']
         rt60 = simConfig['rt60']
@@ -100,12 +100,11 @@ class RobotHearingSim:
         Parallel(n_jobs=int(4))(delayed(RobotHearingSim.run_sim)(all_robot_pos[i], source_positions[i], i, config) for i in range(len(source_positions)))
 
         # Zip up new files, and delete old ones.
-        zip_name = 'static/dl/data'
+        zip_name = 'static/dl/{0}'.format(filename)
         directory_name = 'temp_data'
         zipper.make_archive(zip_name, 'zip', directory_name)
         for i in range(len(source_positions)):
             os.remove('temp_data/data_gen_{0}.wav'.format(i))
-        return "data.zip"
 
 
 

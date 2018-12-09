@@ -25,8 +25,6 @@ $(document).ready(function() {
     $('#spinner').show()
     $.post('/simulator/run_simulation', {config: config}, function(data){
       $('#spinner').hide()
-      if(data.success == 'true')
-        window.location.href = 'dl/' + data.file;
     })
   })
 })

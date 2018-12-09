@@ -3,9 +3,9 @@ import json
 import os
 import sqlite3 as sql# Temporary
 import uuid
-from robothearingsim import RobotHearingSim as sim
-from utilities import Utilities as util
+from servertasks import *
 app = Flask(__name__)
+
 
 
 
@@ -33,7 +33,10 @@ def run_simulation():
     strdict = json.loads(request.form['config'])
 
     # Save the JSON config to a file
-    filename = "uploads/simulation_configs/{0}.json".format(uuid.uuid4())
+    unique_name = uuid.uuid4()
+    filename = "uploads/simulation_configs/{0}.json".format(unique_name)
+    print("putting sim file in: {0}".format(filename))
+    rowid = 0
     with open(filename, 'w') as f:
         f.write(request.form['config'])
     with sql.connect("Database/database.db") as con:
@@ -41,13 +44,12 @@ def run_simulation():
             
         cur.execute("INSERT INTO simulations (pathToConfig, dateCreated, state, seed, userID, visibility) \
             VALUES (?,?,?,?,?,?)",(filename,'1-1-2018','scheduled','5', 0, 0))
-        
+        rowid = cur.lastrowid
         con.commit()
 
-    config = util.objectifyJson(strdict)
-    downloadPath = sim.run_from_json_config(config)
+    runSimulation.delay(strdict, unique_name, rowid)
 
-    return jsonify({"success": "true", "file": downloadPath})
+    return jsonify({"success": "true"})
 
 
 @app.route('/upload_config', methods=['POST'])
@@ -61,12 +63,14 @@ def review_config():
 
         return jsonify(ret)
     else:
-        return "{\"success\": \"false\"}"
+        return jsonify({"success": "false"})
 
 @app.route("/dl/<path>")
-def DownloadLogFile (path = None):
+def downloadLogFile (path = None):
     filename = os.path.join(app.root_path, 'static' ,'dl', path)
     return send_file(filename, as_attachment=True)
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)

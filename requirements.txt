@@ -1,3 +1,4 @@
 pysoundfile
 joblib
 flask
+celery==3.1.24
