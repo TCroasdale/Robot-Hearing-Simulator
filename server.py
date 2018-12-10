@@ -52,13 +52,27 @@ def processSoundUploads():
         utteranceid = 0
         with sql.connect("Database/database.db") as con:
             cur = con.cursor()
-                
-            cur.execute("INSERT INTO sounds (name, visibility, userID) VALUES (?,?,?)",('uploads/sounds/{0}'.format(filename), 0, 0))
+
+            cur.execute("INSERT INTO sounds (name, visibility, userID) VALUES (?,?,?)",('uploads/sounds/{0}.wav'.format(unique_name), 0, 0))
             utteranceid = cur.lastrowid
             con.commit()
 
         return jsonify({'success': 'true', 'sound_ids': {'utterance_id': utteranceid}})
     return jsonify({'success': 'false'})
+
+def fetch_sound_paths(sound_id):
+    if int(sound_id) < 0:
+        return ""
+
+
+    with sql.connect("Database/database.db") as con:
+        cur = con.cursor()
+
+        print(sound_id)
+        cur.execute("SELECT * FROM sounds WHERE id=?", (sound_id,) )
+        rows = cur.fetchall()
+        if len(rows) > 0:
+            return rows[0][1]
 
 @app.route('/simulator/run_simulation', methods=['POST'])
 def run_simulation():
@@ -68,16 +82,23 @@ def run_simulation():
     unique_name = uuid.uuid4()
     filename = "uploads/simulation_configs/{0}.json".format(unique_name)
     print("putting sim file in: {0}".format(filename))
+
+
+    utterancepath = fetch_sound_paths(strdict['simulation_config']['source_config']['input_utterance']['uid'])
+    strdict['simulation_config']['source_config']['input_utterance']['path'] = utterancepath
+
+
     rowid = 0
     with open(filename, 'w') as f:
         f.write(request.form['config'])
     with sql.connect("Database/database.db") as con:
         cur = con.cursor()
-            
+
         cur.execute("INSERT INTO simulations (pathToConfig, dateCreated, state, seed, userID, visibility) \
             VALUES (?,?,?,?,?,?)",(filename,'1-1-2018','scheduled','5', 0, 0))
         rowid = cur.lastrowid
         con.commit()
+
 
     runSimulation.delay(strdict, unique_name, rowid)
 

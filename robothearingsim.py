@@ -16,6 +16,7 @@ import robotconfig as roboconf
 import numpy as np
 import shutil as zipper
 import os
+import uuid
 from joblib import Parallel, delayed
 import time
 
@@ -33,7 +34,8 @@ class RobotHearingSim:
     # conf[2] is the rt60 value
     # conf[3] is the sample rate
     # conf[4] is the robot object
-    # example conf = (data, room_dim, rt60, 16000)
+    # conf[5] is the unique name to use
+    # example conf = (data, room_dim, rt60, 16000, unique_name)
     def run_sim(robot_pos, src_pos, i, conf):
         print("--Generation {0}\n----\t Robot Position:\t{1}\n----\tSource Position:\t{2}\n----\t\t   rt60:\t{3}\n----\tRoom Dimensions:\t{4}\n----\t    Sample Rate:\t{5}\n".format(i, robot_pos, src_pos, conf[2], conf[1], conf[3]))
         # Advanced Method
@@ -55,11 +57,11 @@ class RobotHearingSim:
         data = conf[0]
         data_rev = []
         for i in range(0, len(mics)): # Simulate a channel for each micophone in the scene
-            print(i)
             data_simmed = olafilt.olafilt(rir[:,i], data)
             data_rev += [data_simmed]
+
         data_rev = np.array(data_rev) #put the data together
-        sf.write('temp_data/data_gen_{0}.wav'.format(i), data_rev.T, sample_rate) #Write new file into a folder called temp_data
+        sf.write('temp_data/data_gen_{0}_{1}.flac'.format(conf[5], i), data_rev.T, sample_rate) #Write new file into a folder called temp_data
 
 
     def run_from_json_config(config, filename):
@@ -91,11 +93,13 @@ class RobotHearingSim:
             # Calculate other source setups
 
         # Reading the data from the source file
-        [data, fs] = sf.read('test_data/data.wav', always_2d=True)
+        [data, fs] = sf.read(simConfig['source_config']['input_utterance']['path'], always_2d=True)
         data =  data[:,0]
 
+        unique_num = uuid.uuid4()
+
         ## Multithreaded
-        config = (data, room_dim, rt60, fs, robot)
+        config = (data, room_dim, rt60, fs, robot, unique_num)
         all_robot_pos = [robopos] * len(source_positions)
         Parallel(n_jobs=int(4))(delayed(RobotHearingSim.run_sim)(all_robot_pos[i], source_positions[i], i, config) for i in range(len(source_positions)))
 
@@ -104,7 +108,7 @@ class RobotHearingSim:
         directory_name = 'temp_data'
         zipper.make_archive(zip_name, 'zip', directory_name)
         for i in range(len(source_positions)):
-            os.remove('temp_data/data_gen_{0}.wav'.format(i))
+            os.remove('temp_data/data_gen_{0}_{1}.wav'.format(unique_num, i))
 
 
 

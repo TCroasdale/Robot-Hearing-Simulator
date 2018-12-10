@@ -1,5 +1,6 @@
 $(document).ready(function() {
-  $('#spinner').hide()
+  $('#uploadpopup').modal("hide")
+
   var editor = ace.edit("editor");
   editor.setTheme("ace/theme/monokai");
   editor.session.setMode("ace/mode/javascript");
@@ -20,19 +21,9 @@ $(document).ready(function() {
     });
   })
 
-  // $('#sound-uploads-form').submit(function(data){
-  //   if(data.success == "true"){
-  //     var config = editor.getValue()
-  //     $.post('/simulator/run_simulation', {config: config}, function(data){
-  //       $('#spinner').hide()
-  //     })
-  //   }else{
-  //     $('#spinner').hide()
-  //   }
-  // })
 
   $("#sound-uploads-form").submit(function(e) {
-    e.preventDefault();    
+    e.preventDefault();
     var formData = new FormData(this);
 
     $.ajax({
@@ -43,13 +34,13 @@ $(document).ready(function() {
           if(data.success == "true"){
             var config = editor.getValue()
             jsConfig = JSON.parse(config)
-            console.log(jsConfig)
             jsConfig.simulation_config.source_config.input_utterance.uid = data.sound_ids.utterance_id
-            $.post('/simulator/run_simulation', {config: config}, function(data){
-              $('#spinner').hide()
+
+            $.post('/simulator/run_simulation', {config: JSON.stringify(jsConfig)}, function(data){
+              $('#uploadpopup').modal("hide")
             })
           }else{
-            $('#spinner').hide()
+            $('#uploadpopup').modal("hide")
           }
         },
         cache: false,
@@ -59,7 +50,7 @@ $(document).ready(function() {
 });
 
   $('#run_conf').click(function(){
-    $('#spinner').show()
+    $('#uploadpopup').modal({backdrop: 'static', keyboard: false})
     $('#sound-uploads-form').submit()
   })
 
