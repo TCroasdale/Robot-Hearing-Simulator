@@ -1,0 +1,53 @@
+{
+ "microphones": [
+  {
+   "id": "-1",
+   "local_pos": {
+    "x": "0.5",
+    "y": "0.5",
+    "z": "0.5"
+   },
+   "local_rot": {
+    "x": "5.0",
+    "y": "5.0",
+    "z": "5.0"
+   },
+   "mic_style": {
+    "path": "path/to/micresponse",
+    "uid": "-1"
+   }
+  },
+  {
+   "id": "-1",
+   "local_pos": {
+    "x": "-0.5",
+    "y": "0.5",
+    "z": "0.5"
+   },
+   "local_rot": {
+    "x": "5.0",
+    "y": "5.0",
+    "z": "5.0"
+   },
+   "mic_style": {
+    "path": "path/to/micresponse",
+    "uid": "-1"
+   }
+  }
+ ],
+ "motors": [
+  {
+   "id": "-1",
+   "local_pos": {
+    "x": "5.0",
+    "y": "5.0",
+    "z": "5.0"
+   },
+   "sound": {
+    "path": "path/to/utterance",
+    "uid": "-1"
+   }
+  }
+ ],
+ "skin_width": "0.25"
+}

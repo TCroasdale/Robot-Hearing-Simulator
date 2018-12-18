@@ -4,7 +4,7 @@
 {% endblock %}
 {% block content %}
     <h1>Sign up</h1>
-    <form action='/signup' method="post">
+    <form action='/login' method="post">
         <div class="form-group">
             <label for="email">Your E-Mail</label>
             <input class="form-control" name="email" type="email">
@@ -14,7 +14,7 @@
             <input class="form-control" name="password" type="password">
         </div>
         <div class="form-group">
-          <input type="submit" name="submit" class="form-control btn btn-info" value="Sign Up!"></input>
+          <input type="submit" name="submit" class="form-control btn btn-info" value="Log In!"></input>
         </div>
     </form>
 {% endblock %}

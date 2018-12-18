@@ -21,13 +21,13 @@ $(document).ready(function() {
     });
   })
 
-  var run_sim = function (data) {
+  var save_robot = function (data) {
     if(data.success == "true"){
       var config = editor.getValue()
       jsConfig = JSON.parse(config)
-      jsConfig.simulation_config.source_config.input_utterance.uid = data.sound_ids.utterance_id
+      // jsConfig.simulation_config.source_config.input_utterance.uid = data.sound_ids.utterance_id
 
-      $.post('/simulator/run_simulation', {config: JSON.stringify(jsConfig)}, function(data){
+      $.post('/designer/save', {config: JSON.stringify(jsConfig), robot_name: $('#robot-name').val()}, function(data){
         $('#uploadpopup').modal("hide")
       })
     }else{
@@ -43,14 +43,14 @@ $(document).ready(function() {
         url: 'simulator/uploadsounds',
         type: 'POST',
         data: formData,
-        success: run_sim,
+        success: save_robot,
         cache: false,
         contentType: false,
         processData: false
     });
 });
 
-  $('#run_conf').click(function(){
+  $('#save-robot').click(function(){
     $('#uploadpopup').modal({backdrop: 'static', keyboard: false})
     var i = $('#utterance-select')[0].selectedIndex
     if(i == 0){
@@ -58,7 +58,7 @@ $(document).ready(function() {
     }
     else{
       data = JSON.parse('{"success": "true", "sound_ids": {"utterance_id":' + $('#utterance-select')[0][i].value + '}}')
-      run_sim(data)
+      save_robot(data)
     }
   })
 

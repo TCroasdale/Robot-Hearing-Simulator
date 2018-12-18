@@ -5,18 +5,29 @@ from celery import Celery
 
 celeryApp = Celery('servertasks', broker='pyamqp://guest@localhost//')
 
-@celeryApp.task
-def runSimulation(simconfig, filename, simid):
+def endTask(taskID):
+    celeryApp.control.revoke(taskID, terminate=True)
+
+@celeryApp.task(bind=True)
+def runSimulation(self, simconfig, filename, simid):
     config = util.objectifyJson(simconfig)
     downloadPath = "{0}.zip".format(filename)
     with sql.connect("Database/database.db") as con:
         cur = con.cursor()
-        cur.execute("UPDATE simulations SET state = ? WHERE id = ?" , ("running", simid))
+        cur.execute("UPDATE simulations SET state = ?, taskID = ? WHERE id = ?" , ("running", self.request.id, simid))
         con.commit()
 
-    sim.run_from_json_config(config, filename)
+    # try:
+    dlFile = sim.run_from_json_config(config, filename)
 
     with sql.connect("Database/database.db") as con:
         cur = con.cursor()
         cur.execute("UPDATE simulations SET state = ? WHERE id = ?" , ("finished", simid))
+        con.commit()
+        cur.execute("UPDATE simulations SET pathToZip = ? WHERE id = ?" , (dlFile, simid))
+        con.commit()
+    # except:
+    with sql.connect("Database/database.db") as con:
+        cur = con.cursor()
+        cur.execute("UPDATE simulations SET state = ? WHERE id = ?" , ("errored", simid))
         con.commit()

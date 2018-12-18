@@ -1,57 +1,4 @@
 {
-    "robot_config": {
-     "microphones": [
-      {
-       "id": "-1",
-       "local_pos": {
-        "x": "0.5",
-        "y": "0.5",
-        "z": "0.5"
-       },
-       "local_rot": {
-        "x": "5.0",
-        "y": "5.0",
-        "z": "5.0"
-       },
-       "mic_style": {
-        "path": "path/to/micresponse",
-        "uid": "-1"
-       }
-      },
-      {
-       "id": "-1",
-       "local_pos": {
-        "x": "-0.5",
-        "y": "0.5",
-        "z": "0.5"
-       },
-       "local_rot": {
-        "x": "5.0",
-        "y": "5.0",
-        "z": "5.0"
-       },
-       "mic_style": {
-        "path": "path/to/micresponse",
-        "uid": "-1"
-       }
-      }
-     ],
-     "motors": [
-      {
-       "id": "-1",
-       "local_pos": {
-        "x": "5.0",
-        "y": "5.0",
-        "z": "5.0"
-       },
-       "sound": {
-        "path": "path/to/utterance",
-        "uid": "-1"
-       }
-      }
-     ],
-     "skin_width": "0.25"
-    },
     "simulation_config": {
      "robot_config": {
       "path": "path/to/robotsetup",
@@ -125,15 +72,15 @@
         "style": "pyramid"
        },
        {
-        "horizontal_segments": "4",
+        "rings": "4",
+        "segments": "8",
         "origin": {
          "x": "2.5",
          "y": "2.5",
          "z": "2.5"
         },
         "radius": "3.0",
-        "style": "sphere",
-        "vertical_segments": "8"
+        "style": "sphere"
        }
       ]
      }

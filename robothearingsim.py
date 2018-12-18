@@ -17,8 +17,10 @@ import numpy as np
 import shutil as zipper
 import os
 import uuid
+import math
 from joblib import Parallel, delayed
 import time
+from config import *
 
 class RobotHearingSim:
     #Converts a string to a true/false boolean, used to process bool arguments
@@ -56,12 +58,12 @@ class RobotHearingSim:
 
         data = conf[0]
         data_rev = []
-        for i in range(0, len(mics)): # Simulate a channel for each micophone in the scene
-            data_simmed = olafilt.olafilt(rir[:,i], data)
+        for x in range(0, len(mics)): # Simulate a channel for each micophone in the scene
+            data_simmed = olafilt.olafilt(rir[:,x], data)
             data_rev += [data_simmed]
 
         data_rev = np.array(data_rev) #put the data together
-        sf.write('temp_data/data_gen_{0}_{1}.flac'.format(conf[5], i), data_rev.T, sample_rate) #Write new file into a folder called temp_data
+        sf.write('temp_data/{0}/data_gen_{1}.{2}'.format(conf[5], i, SIM_FILE_EXT), data_rev.T, sample_rate) #Write new file into a folder called temp_data
 
 
     def run_from_json_config(config, filename):
@@ -90,6 +92,9 @@ class RobotHearingSim:
             if source_setup['style'] == "box":
                 posArray = RobotHearingSim.parse_box_source_setup(source_setup)
                 source_positions += (posArray)
+            elif source_setup['style'] == 'sphere':
+                posArray = RobotHearingSim.parse_sphere_source_setup(source_setup)
+                source_positions += (posArray)
             # Calculate other source setups
 
         # Reading the data from the source file
@@ -101,14 +106,17 @@ class RobotHearingSim:
         ## Multithreaded
         config = (data, room_dim, rt60, fs, robot, unique_num)
         all_robot_pos = [robopos] * len(source_positions)
-        Parallel(n_jobs=int(4))(delayed(RobotHearingSim.run_sim)(all_robot_pos[i], source_positions[i], i, config) for i in range(len(source_positions)))
+        os.mkdir('temp_data/{0}'.format(unique_num)) # Create folder for temp data
+        Parallel(n_jobs=int(1))(delayed(RobotHearingSim.run_sim)(all_robot_pos[i], source_positions[i], i, config) for i in range(len(source_positions)))
 
         # Zip up new files, and delete old ones.
         zip_name = 'static/dl/{0}'.format(filename)
-        directory_name = 'temp_data'
+        directory_name = 'temp_data/{0}'.format(unique_num)
         zipper.make_archive(zip_name, 'zip', directory_name)
         for i in range(len(source_positions)):
-            os.remove('temp_data/data_gen_{0}_{1}.wav'.format(unique_num, i))
+            os.remove('temp_data/{0}/data_gen_{1}.{2}'.format(unique_num, i, SIM_FILE_EXT))
+
+        return zip_name + ".zip"
 
 
 
@@ -120,23 +128,50 @@ class RobotHearingSim:
                     setup['origin']['y'] + (dim[1]/2),
                     setup['origin']['z'] + (dim[2]/2)]
 
-        # These for loops can be combined
-        xes = [midpoint[0] + i * ((dim[0]/2)-dim[0]) for i in range(int(setup['divisions']['x']))]
-        yes = [midpoint[1] + i * ((dim[1]/2)-dim[1]) for i in range(int(setup['divisions']['y']))]
-        zes = [midpoint[2] + i * ((dim[2]/2)-dim[2]) for i in range(int(setup['divisions']['z']))]
-
-        for x in xes:
-            for y in yes:
-                for z in zes:
-                    allPositions.append([x, y, z])
-
+        xes = []
+        yes = []
+        zes = []
+        for x in range(int(setup['divisions']['x'])):
+            xes.append(midpoint[0] + x * ((dim[0]/2)-dim[0]))
+            for y in range(int(setup['divisions']['y'])):
+                yes.append(midpoint[1] + y * ((dim[1]/2)-dim[1]))
+                for z in range(int(setup['divisions']['z'])):
+                    zes.append(midpoint[2] + z * ((dim[2]/2)-dim[2]))
+                    allPositions.append([xes[x], yes[y], zes[z]])
         return allPositions
 
 
     def parse_sphere_source_setup(setup):
-        return
+        allPositions = []
+
+        origin = [setup['origin']['x'], setup['origin']['y'], setup['origin']['z']]
+        r = setup['radius']
+
+        #Top and bottom ring
+        top = [origin[0], origin[1]+setup['radius'], origin[2]]
+        bottom = [origin[0], origin[1]-setup['radius'], origin[2]]
+        allPositions.append(top)
+        allPositions.append(bottom)
+
+        for ring in range(int(setup['rings'])-2):
+            # print("ring: {0}".format(ring+1))
+            for seg in range(int(setup['segments'])):
+                # print("seg{0}".format(seg))
+                theta = math.radians((360.0 / setup['segments']) * seg)
+                phi = math.radians((180.0 / setup['rings']) * ring+1)
+                x = r * math.cos(theta) * math.sin(phi)
+                y = r * math.sin(theta) * math.cos(phi)
+                z = r * math.cos(phi)
+
+                allPositions.append([x+origin[0], y+origin[1], z+origin[2]])
+
+        print(allPositions)
+        return allPositions
+
     def parse_cone_source_setup(setup):
-        return
+        allPositions = []
+
+        return allPositions
 
 
 
