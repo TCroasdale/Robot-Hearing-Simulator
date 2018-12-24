@@ -1,3 +1,14 @@
+#######################################
+# Author: Thomas Croasdale
+#
+# This file is responsible for running
+# serving pages to the user and
+# provessing the data they provide,
+# and then sending that to the task
+# server.
+#
+#######################################
+
 from flask import Flask, session, redirect, url_for, request, render_template, jsonify, send_file
 import hashlib
 import json
@@ -91,8 +102,9 @@ def simulator():
     if 'userID' not in session: return redirect('/login?ref=simulator')
 
     sounds = db.get_user_sounds(session['userID'])
+    robots = db.get_user_robots(session['userID'])
 
-    return render_template('simulator.html', user=db.get_user(id=session['userID']), sounds=sounds)
+    return render_template('simulator.html', user=db.get_user(id=session['userID']), sounds=sounds, robots=robots)
 
 @app.route("/removesimulation", methods=['POST'])
 def remove_sim():
@@ -143,19 +155,6 @@ def processSoundUploads():
         return jsonify({'success': 'true', 'sound_ids': {'utterance_id': utt_sound.id}})
     return jsonify({'success': 'false'})
 
-def fetch_sound_paths(sound_id):
-    if int(sound_id) < 0:
-        return ""
-
-    with sql.connect("Database/database.db") as con:
-        cur = con.cursor()
-
-        # print(sound_id)
-        cur.execute("SELECT * FROM sounds WHERE id=?", (sound_id,) )
-        rows = cur.fetchall()
-        if len(rows) > 0:
-            return rows[0][2]
-
 @app.route('/revoke_simulation', methods=['POST'])
 def revoke_simulation():
     if 'userID' not in session: return jsonify({"success": "false"})
@@ -164,9 +163,11 @@ def revoke_simulation():
     sim = db.get_simulation(simid)
     endTask(sim.taskID)
 
-    db.run_query("UPDATE simulations SET state = ? WHERE id = ?" , ("running", simid))
+    db.run_query("UPDATE simulations SET state = ? WHERE id = ?" , ("cancelled", simid))
 
     return jsonify({"success": "true"})
+
+
 
 @app.route('/simulator/run_simulation', methods=['POST'])
 def run_simulation():
@@ -178,18 +179,35 @@ def run_simulation():
     unique_name = uuid.uuid4()
     filename = "uploads/simulation_configs/{0}.json".format(unique_name)
     # print("putting sim file in: {0}".format(filename))
-
-    utterancepath = fetch_sound_paths(strdict['simulation_config']['source_config']['input_utterance']['uid'])
-    strdict['simulation_config']['source_config']['input_utterance']['path'] = utterancepath
-
     with open(filename, 'w') as f:
         f.write(request.form['config'])
+
+
+    # Fix the file paths
+
+    utteranceid = strdict['simulation_config']['source_config']['input_utterance']['uid']
+    print("utterance id: {0}".format(utteranceid))
+    utterance = db.get_one("SELECT * FROM sounds WHERE id=?", [utteranceid], type=Sound)
+    strdict['simulation_config']['source_config']['input_utterance']['path'] = utterance.pathToFile
+
+    robotid = strdict['simulation_config']['robot_config']['uid']
+    robot = db.get_one("SELECT * FROM robots WHERE id =?", [robotid], type=Robot)
+    if robot.userID == session['userID'] or robot.visibility > 0:
+        strdict['simulation_config']['robot_config']['path'] = robot.pathToConfig
+    else:
+        return jsonify({"success": "false", "reason": "bad robot id"})
 
     date = str(dt.now().date())
     sim = Simulation(filename, date, str(uuid.uuid4()), session['userID'])
     sim = db.insert_simulation(sim)
 
-    runSimulation.delay(strdict, unique_name, sim.id)
+
+    robot_conf = open(robot.pathToConfig).read()
+
+    robot_conf_dict = json.loads(robot_conf)
+
+
+    runSimulation.delay(strdict, robot_conf_dict, unique_name, sim.id)
 
     return jsonify({"success": "true"})
 
@@ -206,7 +224,6 @@ def save_robot_config():
 
     robot = Robot(request.form['robot_name'], filename, session['userID'])
     robot = db.insert_robot(robot)
-
 
     return jsonify({"success": "true"})
 

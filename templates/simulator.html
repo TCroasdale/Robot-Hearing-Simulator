@@ -25,14 +25,25 @@
           </div>
         </div>
         <form id="sound-uploads-form" action="/simulator/uploadsounds" enctype="multipart/form-data" method="POST">
-          <div id="utterance_input_controls" class="btn-toolbar" role="toolbar">
+          <div id="utterance-input-controls" class="btn-toolbar" role="toolbar">
             <div class="input-group mr-2" role="group">
-              <input type="file" name="utterancefile" class="btn btn-secondary" id="utterancefile" size="1"/>
               <label for="utterancefile" class="input-group-text">Utterance</label>
+              <input type="file" name="utterancefile" class="btn btn-secondary" id="utterancefile" size="1"/>
               <select id="utterance-select">
                   <option value="-1">Upload other file.</option>
                   {% for sound in sounds: %}
                   <option value="{{sound.id}}">{{ sound.name }}</option>
+                  {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div id="select-input-controls" class="btn-toolbar" role="toolbar">
+            <div class="input-group mr-2" role="group">
+              <label for="robot-select" class="input-group-text">Robot</label>
+              <!-- <input type="file" name="utterancefile" class="btn btn-secondary" id="utterancefile" size="1"/> -->
+              <select id="robot-select">
+                  {% for robot in robots: %}
+                  <option value="{{robot.id}}">{{ robot.name }}</option>
                   {% endfor %}
               </select>
             </div>

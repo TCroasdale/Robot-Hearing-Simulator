@@ -26,6 +26,9 @@ $(document).ready(function() {
       var config = editor.getValue()
       jsConfig = JSON.parse(config)
       jsConfig.simulation_config.source_config.input_utterance.uid = data.sound_ids.utterance_id
+      var i = $('#robot-select')[0].selectedIndex
+      jsConfig.simulation_config.robot_config.uid = $('#robot-select')[0][i].value
+
 
       $.post('/simulator/run_simulation', {config: JSON.stringify(jsConfig)}, function(data){
         $('#uploadpopup').modal("hide")

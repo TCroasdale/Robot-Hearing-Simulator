@@ -9,8 +9,9 @@ def endTask(taskID):
     celeryApp.control.revoke(taskID, terminate=True)
 
 @celeryApp.task(bind=True)
-def runSimulation(self, simconfig, filename, simid):
-    config = util.objectifyJson(simconfig)
+def runSimulation(self, simconfig, roboconfig, filename, simid):
+    sim_config = util.objectifyJson(simconfig)
+    robo_config = util.objectifyJson(roboconfig)
     downloadPath = "{0}.zip".format(filename)
     with sql.connect("Database/database.db") as con:
         cur = con.cursor()
@@ -18,7 +19,7 @@ def runSimulation(self, simconfig, filename, simid):
         con.commit()
 
     # try:
-    dlFile = sim.run_from_json_config(config, filename)
+    dlFile = sim.run_from_json_config(sim_config, robo_config, filename)
 
     with sql.connect("Database/database.db") as con:
         cur = con.cursor()

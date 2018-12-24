@@ -8,8 +8,12 @@ class User:
         self.salt = salt
         self.access_level = access
 
-    def from_DB(tuple):
-        return User(tuple[1], tuple[2], tuple[3], tuple[0], tuple[4])
+    def from_DB(data):
+        if data is None: return None
+        return User(data[1], data[2], data[3], data[0], data[4])
+
+    def from_DB_ls(data_list):
+        return [User.from_DB(d) for d in data_list]
 
 class Sound:
     def __init__(self, name, path, userID, id=0, visibility=0):
@@ -20,7 +24,11 @@ class Sound:
         self.visibility = visibility
 
     def from_DB(data):
+        if data is None: return None
         return Sound(data[1], data[2], data[4], data[0], data[3])
+
+    def from_DB_ls(data_list):
+        return [Sound.from_DB(d) for d in data_list]
 
 class Robot:
     def __init__(self, name, path, userID, id=0, visibility=0):
@@ -31,7 +39,12 @@ class Robot:
         self.visibility = visibility
 
     def from_DB(data):
+        if data is None: return None
         return Robot(data[1], data[2], data[3], data[0], data[4])
+
+    def from_DB_ls(data_list):
+        return [Robot.from_DB(d) for d in data_list]
+
 
 class Simulation:
     def __init__(self, path, date, seed, userID, id=0, state="scheduled", zip="", visibility=0, tID=""):
@@ -46,7 +59,11 @@ class Simulation:
         self.taskID = tID
 
     def from_DB(data):
+        if data is None: return None
         return Simulation(data[1], data[2], data[4], data[6], data[0], data[3], data[5], data[7], data[8])
+
+    def from_DB_ls(data_list):
+        return [Simulation.from_DB(d) for d in data_list]
 
 class DB_Manager:
     def __init__(self, db):
@@ -75,8 +92,7 @@ class DB_Manager:
             cur = con.cursor()
             cur.execute("SELECT * FROM simulations WHERE userID=?", [id])
             allsims = cur.fetchall()
-            for sim in allsims:
-                sims.append(Simulation.from_DB(sim))
+            sims = Simulation.from_DB_ls(allsims)
         return sims
 
     def get_user_robots(self, id):
@@ -85,8 +101,7 @@ class DB_Manager:
             cur = con.cursor()
             cur.execute("SELECT * FROM robots WHERE userID=?", [id])
             allrobots = cur.fetchall()
-            for robot in allrobots:
-                robots.append(Robot.from_DB(robot))
+            robots = Robot.from_DB_ls(allrobots)
         return robots
 
     def get_user_sounds(self, id):
@@ -95,25 +110,41 @@ class DB_Manager:
             cur = con.cursor()
             cur.execute("SELECT * FROM sounds WHERE userID=?", [id])
             allsounds = cur.fetchall()
-            for sound in allsounds:
-                sounds.append(Sound.from_DB(sound))
+            sounds = Sound.from_DB_ls(allsounds)
         return sounds
 
-    # def get_user_robots(self, id):
-    #     sounds = []
-    #     with sql.connect(self.dbLocation) as con:
-    #         cur = con.cursor()
-    #         cur.execute("SELECT * FROM robots WHERE userID=?", [id])
-    #         allsounds = cur.fetchall()
-    #         for sound in allsounds:
-    #             sounds.append(Sound.from_DB(sound))
-    #     return sounds
 
     def run_query(self, q, a):
         with sql.connect("Database/database.db") as con:
             cur = con.cursor()
             cur.execute(q , a)
             con.commit()
+
+    def get_one(self, q, a, type=None):
+        with sql.connect("Database/database.db") as con:
+            cur = con.cursor()
+
+            # print(sound_id)
+            cur.execute(q, a)
+            if type is None:
+                return cur.fetchone()
+            else:
+                return type.from_DB(cur.fetchone())
+
+
+
+    def get_all(self, q, a, type=None):
+        with sql.connect("Database/database.db") as con:
+            cur = con.cursor()
+
+            # print(sound_id)
+            cur.execute(q, a)
+
+            if type is None:
+                return cur.fetchall()
+            else:
+                return type.from_DB(cur.fetchall())
+
 
     def insert_simulation(self, sim):
         with sql.connect("Database/database.db") as con:

@@ -66,9 +66,9 @@ class RobotHearingSim:
         sf.write('temp_data/{0}/data_gen_{1}.{2}'.format(conf[5], i, SIM_FILE_EXT), data_rev.T, sample_rate) #Write new file into a folder called temp_data
 
 
-    def run_from_json_config(config, filename):
-        simConfig = config['simulation_config']
-        roboConfig = config['robot_config']
+    def run_from_json_config(sim_config, robot_config, filename):
+        simConfig = sim_config['simulation_config']
+        roboConfig = robot_config['robot_config']
         rt60 = simConfig['rt60']
         sampling_rate = int(simConfig['sample_rate'])
         room_dim = [simConfig['room_dimensions']['x'], simConfig['room_dimensions']['y'], simConfig['room_dimensions']['z']]
