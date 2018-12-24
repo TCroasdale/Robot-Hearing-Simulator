@@ -124,20 +124,33 @@ class RobotHearingSim:
     def parse_box_source_setup(setup):
         allPositions = []
         dim = [setup['dimensions']['x'], setup['dimensions']['y'], setup['dimensions']['z']]
-        midpoint = [setup['origin']['x'] + (dim[0]/2),
-                    setup['origin']['y'] + (dim[1]/2),
-                    setup['origin']['z'] + (dim[2]/2)]
+        midpoint = [setup['origin']['x'],
+                    setup['origin']['y'],
+                    setup['origin']['z']]
 
-        xes = []
-        yes = []
-        zes = []
-        for x in range(int(setup['divisions']['x'])):
-            xes.append(midpoint[0] + x * ((dim[0]/2)-dim[0]))
-            for y in range(int(setup['divisions']['y'])):
-                yes.append(midpoint[1] + y * ((dim[1]/2)-dim[1]))
-                for z in range(int(setup['divisions']['z'])):
-                    zes.append(midpoint[2] + z * ((dim[2]/2)-dim[2]))
-                    allPositions.append([xes[x], yes[y], zes[z]])
+        #Append the 8 corners
+        allPositions.append([midpoint[0] - (dim[0]/2), midpoint[1] - (dim[1]/2), midpoint[2] - (dim[2]/2)])
+        allPositions.append([midpoint[0] - (dim[0]/2), midpoint[1] - (dim[1]/2), midpoint[2] + (dim[2]/2)])
+        allPositions.append([midpoint[0] + (dim[0]/2), midpoint[1] - (dim[1]/2), midpoint[2] - (dim[2]/2)])
+        allPositions.append([midpoint[0] + (dim[0]/2), midpoint[1] - (dim[1]/2), midpoint[2] + (dim[2]/2)])
+
+        allPositions.append([midpoint[0] - (dim[0]/2), midpoint[1] + (dim[1]/2), midpoint[2] - (dim[2]/2)])
+        allPositions.append([midpoint[0] - (dim[0]/2), midpoint[1] + (dim[1]/2), midpoint[2] + (dim[2]/2)])
+        allPositions.append([midpoint[0] + (dim[0]/2), midpoint[1] + (dim[1]/2), midpoint[2] - (dim[2]/2)])
+        allPositions.append([midpoint[0] + (dim[0]/2), midpoint[1] + (dim[1]/2), midpoint[2] + (dim[2]/2)])
+
+        x_divs = int(setup['divisions']['x'])
+        y_divs = int(setup['divisions']['y'])
+        z_divs = int(setup['divisions']['z'])
+        for x in range(x_divs):
+            x_pos = midpoint[0] + x * ((dim[0]/x_divs)-dim[0])
+            for y in range(y_divs):
+                y_pos = midpoint[1] + y * ((dim[1]/y_divs)-dim[1])
+                for z in range(z_divs):
+                    z_pos = midpoint[2] + z * ((dim[2]/z_divs)-dim[2])
+                    allPositions.append([x_pos, y_pos, z_pos])
+
+        print(allPositions)
         return allPositions
 
 

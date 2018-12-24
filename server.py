@@ -114,7 +114,7 @@ def remove_sim():
         os.remove(sim.pathToConfig)
         os.remove(sim.pathToZip)
     except:
-        print("Cannot delete simulation file, it's not here!")
+        print("Cannot delete simulation files, they're not here!")
 
     db.delete_simulation(request.form['sim_id'])
 
@@ -130,6 +130,19 @@ def remove_sound():
         print("Cannot delete sound file, it's not here!")
 
     db.delete_sound(request.form['sound_id'])
+
+    return jsonify({'success': 'true'})
+
+@app.route("/removerobot", methods=['POST'])
+def remove_robot():
+    if 'userID' not in session: return jsonify({'success': 'false'})
+    robot = db.get_robot(request.form['robot_id'])
+    try:
+        os.remove(robot.pathToConfig)
+    except:
+        print("Cannot delete robot file, it's not here!")
+
+    db.delete_robot(request.form['robot_id'])
 
     return jsonify({'success': 'true'})
 

@@ -182,6 +182,13 @@ class DB_Manager:
             cur.execute("SELECT * FROM sounds WHERE id=?", [id])
             return Sound.from_DB(cur.fetchone())
 
+    def get_robot(self, id):
+        with sql.connect("Database/database.db") as con:
+            cur = con.cursor()
+
+            cur.execute("SELECT * FROM robots WHERE id=?", [id])
+            return Robot.from_DB(cur.fetchone())
+
 
     def delete_simulation(self, id):
         with sql.connect("Database/database.db") as con:
@@ -192,6 +199,11 @@ class DB_Manager:
         with sql.connect("Database/database.db") as con:
             cur = con.cursor()
             cur.execute("DELETE FROM sounds WHERE id=?", [id])
+
+    def delete_robot(self, id):
+        with sql.connect("Database/database.db") as con:
+            cur = con.cursor()
+            cur.execute("DELETE FROM robots WHERE id=?", [id])
 
 
     def insert_user(self, user):

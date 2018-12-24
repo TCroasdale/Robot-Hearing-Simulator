@@ -18,17 +18,17 @@ def runSimulation(self, simconfig, roboconfig, filename, simid):
         cur.execute("UPDATE simulations SET state = ?, taskID = ? WHERE id = ?" , ("running", self.request.id, simid))
         con.commit()
 
-    # try:
-    dlFile = sim.run_from_json_config(sim_config, robo_config, filename)
+    try:
+        dlFile = sim.run_from_json_config(sim_config, robo_config, filename)
 
-    with sql.connect("Database/database.db") as con:
-        cur = con.cursor()
-        cur.execute("UPDATE simulations SET state = ? WHERE id = ?" , ("finished", simid))
-        con.commit()
-        cur.execute("UPDATE simulations SET pathToZip = ? WHERE id = ?" , (dlFile, simid))
-        con.commit()
-    # except:
-    with sql.connect("Database/database.db") as con:
-        cur = con.cursor()
-        cur.execute("UPDATE simulations SET state = ? WHERE id = ?" , ("errored", simid))
-        con.commit()
+        with sql.connect("Database/database.db") as con:
+            cur = con.cursor()
+            cur.execute("UPDATE simulations SET state = ? WHERE id = ?" , ("finished", simid))
+            con.commit()
+            cur.execute("UPDATE simulations SET pathToZip = ? WHERE id = ?" , (dlFile, simid))
+            con.commit()
+    except:
+        with sql.connect("Database/database.db") as con:
+            cur = con.cursor()
+            cur.execute("UPDATE simulations SET state = ? WHERE id = ?" , ("errored", simid))
+            con.commit()

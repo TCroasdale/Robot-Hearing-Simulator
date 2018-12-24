@@ -14,6 +14,14 @@ function deleteSound(id){
   })
 }
 
+function deleteRobot(id){
+  $.post('/removerobot', {robot_id: id}, function(data){
+    if(data.success == "true"){
+      $('#robot_' + id).remove()
+    }
+  })
+}
+
 function endTask(id){
   $.post('/revoke_simulation', {sim_id: id}, function(data){
     if(data.success == "true"){
