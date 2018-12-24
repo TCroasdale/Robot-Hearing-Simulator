@@ -1,7 +1,6 @@
 {
   "simulation_config": {
    "robot_config": {
-    "path": "path/to/robotsetup",
     "uid": "-1"
    },
    "robot_pos": {
@@ -23,11 +22,9 @@
    "sample_rate": "16000",
    "source_config": {
     "background_noise": {
-     "path": "background/noise/path",
      "uid": "-1"
     },
     "input_utterance": {
-     "path": "path/to/utterance",
      "uid": "-1"
     },
     "simulation_setups": [

@@ -168,6 +168,24 @@ def revoke_simulation():
     return jsonify({"success": "true"})
 
 
+def insert_config_paths(dict):
+    # attach the utterance path
+    utteranceid = dict['simulation_config']['source_config']['input_utterance']['uid']
+    utterance = db.get_one("SELECT * FROM sounds WHERE id=?", [utteranceid], type=Sound)
+    if utterance is not None or sound.userID == session['userID'] or sound.visibility > 0:
+        dict['simulation_config']['source_config']['input_utterance']['path'] = utterance.pathToFile
+    else:
+        raise BadSoundIDException
+
+    # Attach the robot config path
+    robotid = dict['simulation_config']['robot_config']['uid']
+    robot = db.get_one("SELECT * FROM robots WHERE id =?", [robotid], type=Robot)
+    if robot is not None or robot.userID == session['userID'] or robot.visibility > 0:
+        dict['simulation_config']['robot_config']['path'] = robot.pathToConfig
+    else:
+        raise BadRobotIDException
+
+    return (dict, robot.pathToConfig)
 
 @app.route('/simulator/run_simulation', methods=['POST'])
 def run_simulation():
@@ -185,16 +203,11 @@ def run_simulation():
 
     # Fix the file paths
 
-    utteranceid = strdict['simulation_config']['source_config']['input_utterance']['uid']
-    print("utterance id: {0}".format(utteranceid))
-    utterance = db.get_one("SELECT * FROM sounds WHERE id=?", [utteranceid], type=Sound)
-    strdict['simulation_config']['source_config']['input_utterance']['path'] = utterance.pathToFile
-
-    robotid = strdict['simulation_config']['robot_config']['uid']
-    robot = db.get_one("SELECT * FROM robots WHERE id =?", [robotid], type=Robot)
-    if robot.userID == session['userID'] or robot.visibility > 0:
-        strdict['simulation_config']['robot_config']['path'] = robot.pathToConfig
-    else:
+    try:
+        (strdict, robotPath) = insert_config_paths(strdict)
+    except BadSoundIDException:
+        return jsonify({"success": "false", "reason": "bad sound id"})
+    except BadRobotIDException:
         return jsonify({"success": "false", "reason": "bad robot id"})
 
     date = str(dt.now().date())
@@ -202,8 +215,7 @@ def run_simulation():
     sim = db.insert_simulation(sim)
 
 
-    robot_conf = open(robot.pathToConfig).read()
-
+    robot_conf = open(robotPath).read()
     robot_conf_dict = json.loads(robot_conf)
 
 
@@ -261,6 +273,11 @@ def serveSound(name = None):
     return send_file("uploads/sounds/{0}".format(name), as_attachment=True)
 
 
+class BadRobotIDException(Exception):
+    pass
+
+class BadSoundIDException(Exception):
+    pass
 
 if __name__ == "__main__":
     db = DB_Manager("Database/database.db")
