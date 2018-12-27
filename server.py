@@ -40,15 +40,21 @@ def signup():
       email = request.form['email']
       if not db.is_email_used(email):
           salt = uuid.uuid4().hex
-          pass_hash = hashlib.sha512(str(request.form['password'] + salt).encode('utf-8')).hexdigest()
-          user = User(email, pass_hash, salt)
-          user = db.insert_user(user)
-          session['userID'] = user.id
-          return redirect('/')
+          if len(request.form['password']) < 8:
+              return render_template('signup.html', message="short-pass")
+
+          if request.form['password'] == request.form['confirm-password']:
+              pass_hash = hashlib.sha512(str(request.form['password'] + salt).encode('utf-8')).hexdigest()
+              user = User(email, pass_hash, salt)
+              user = db.insert_user(user)
+              session['userID'] = user.id
+              return redirect('/')
+          else:
+              return render_template('signup.html', message="no-match-pass")
       else:
-        return render_template('signup.html')
+        return render_template('signup.html', message="used-email")
    else:
-      return render_template('signup.html')
+      return render_template('signup.html', message="")
 
 @app.route('/login', methods = ['POST', 'GET'])
 def login():
@@ -66,18 +72,18 @@ def login():
                 else:
                     return redirect('/')
             else:
-                user = db.get_user(id=session['userID']) if 'userID' in session else None
-                return render_template('login.html')
+                # user = db.get_user(id=session['userID']) if 'userID' in session else None
+                return render_template('login.html', message="wrong-pass")
         else:
-            user = db.get_user(id=session['userID']) if 'userID' in session else None
-            return render_template('login.html', user=user)
+            # user = db.get_user(id=session['userID']) if 'userID' in session else None
+            return render_template('login.html', message="no-match-email")
     else: # GET
         if 'ref' in request.args:
             session['ref_url'] = request.args.get('ref')
 
 
-        user = db.get_user(id=session['userID']) if 'userID' in session else None
-        return render_template('login.html', user=user)
+        # user = db.get_user(id=session['userID']) if 'userID' in session else None
+        return render_template('login.html', message="")
 
 
 @app.route('/logout', methods=['GET'])
@@ -254,7 +260,7 @@ def save_robot_config():
 
 @app.route('/robotdesign', methods=['GET'])
 def robotdesigner():
-    if 'userID' not in session: return redirect('/login?ref=robotdesigner')
+    if 'userID' not in session: return redirect('/login?ref=robotdesign')
 
     sounds = db.get_user_sounds(session['userID'])
 

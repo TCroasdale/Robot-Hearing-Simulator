@@ -75,4 +75,10 @@ $(document).ready(function() {
     }
   })
 
+
+  create_position_input('robo-pos')
+  create_dimension_input('room-dim')
+  create_number_input('rt-60', 'RT 60', 0.4, 0.1)
+  create_number_input('sample-rate', 'Sample Rate', 16000, 100)
+
 })
