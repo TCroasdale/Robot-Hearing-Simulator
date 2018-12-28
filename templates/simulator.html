@@ -8,32 +8,19 @@
 {% block content %}
     <h1>Simulator</h1>
     <div class="row">
-      <div id="3js-container" class="col-md-auto">
+      <div id="3js-container" class="col-md-5">
           <canvas>
           </canvas>
       </div>
-      <div id="interface-container" class="col-md-6">
+      <div id="interface-container" class="col-md-7">
         <ul class="nav nav-tabs">
-          <li class="nav-item active"><a class="nav-link" data-toggle="tab" href="#code">Code Editor</a></li>
-          <li class="nav-item" ><a class="nav-link" data-toggle="tab"  href="#sim-config">Simulation Config</a></li>
-          <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#src-config">Source Config</a></li>
+          <li class="nav-item active" ><a class="nav-link px-1" data-toggle="tab"  href="#sim-config">Simulation Config  <span class="fas fa-wrench"></span></a></li>
+          <li class="nav-item"><a class="nav-link px-1" data-toggle="tab" href="#src-config">Source Config  <span class="fas fa-volume-up"></span></a></li>
+          <li class="nav-item"><a class="nav-link px-1" data-toggle="tab" href="#code">Code Editor <span class="fas fa-code"></span></a></li>
+          <li class="ml-auto nav-item"><a class="btn btn-primary text-white px-1" id="run_conf">Run <span class="fas fa-play"></span></a></li>
         </ul>
         <div class="tab-content">
-          <div class="tab-pane active" id="code">
-            <div id="editor"></div>
-            <div id="upload_controls" class="btn-toolbar justify-content-between" role="toolbar">
-              <div class="btn-group mr-2" role="group">
-                <input type="file" name="fileselect" class="btn btn-secondary" id="fileselect" size="1"/>
-                <button type="submit" id="fileupload" class="btn btn-info">Upload</button>
-              </div>
-              <div class="btn-group mr-2" role="group" id="submit_conf">
-                <div class="input-group-prepend">
-                  <button type="button" class="btn btn-primary" id="run_conf">Run Simulations</button>
-                </div>
-              </div>
-            </div>
-          </div><!-- code tab -->
-          <div class="tab-pane pre-scrollable" id="sim-config">
+          <div class="tab-pane active tall no-hor-scroll" id="sim-config">
             <h2>Simulation Config</h2>
             <hr>
             <p class="text-secondary">Room Dimensions</p>
@@ -45,8 +32,26 @@
             <div class="row" id="rt-60"></div>
             <hr>
             <div class="row" id="sample-rate"></div>
+          </div><!-- sim tab -->
+          <div class="tab-pane" id="src-config">
+            <h2>Source Config</h2>
+            <hr>
+            <div class="row">
+              <button class="btn btn-info col-md-1" id="add-src"><span class="fas fa-plus"></span></button>
             </div>
-          </div><!-- ui tab -->
+            <div class="pre-scrollable tall no-hor-scroll" id="src-setups">
+
+            </div>
+          </div><!-- source tab -->
+          <div class="tab-pane" id="code">
+            <div id="editor"></div>
+            <div id="upload_controls" class="btn-toolbar justify-content-between" role="toolbar">
+              <div class="btn-group" role="group">
+                <input type="file" name="fileselect" class="btn btn-secondary" id="fileselect" size="1"/>
+                <button type="submit" id="fileupload" class="btn btn-info">Upload</button>
+              </div>
+            </div>
+          </div><!-- code tab -->
         </div>
 
         <form id="sound-uploads-form" action="/simulator/uploadsounds" enctype="multipart/form-data" method="POST">

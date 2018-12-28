@@ -75,10 +75,17 @@ $(document).ready(function() {
     }
   })
 
+  //Creating UI 
+
+  i=0
+  $('#add-src').click(function(){
+    create_src_panel($('#src-setups'), 'src-conf', i)
+    i += 1
+  })
+  $('#add-src').click()
 
   create_position_input('robo-pos')
   create_dimension_input('room-dim')
   create_number_input('rt-60', 'RT 60', 0.4, 0.1)
   create_number_input('sample-rate', 'Sample Rate', 16000, 100)
-
 })
