@@ -64,7 +64,7 @@ function create_mic_panel(parent, id, i=-1){
   body.append(control_lbl.format('Rotation', '{0}-rot-{1}'.format(id, i)))
   create_rotation_input('{0}-rot-{1}'.format(id, i), 0, 5)
 
-
+  //MIC STYLE
 }
 
 function create_mot_panel(parent, id, i=-1){
