@@ -173,6 +173,20 @@ function create_position_input(id, def_val=0.0, def_step=0.25){
   parent.append(inp.format(input_class_3, "Z", def_val, def_step, id))
 }
 
+function set_vec3_input(id, obj, type="XYZ"){
+  $('#{0}-{1}'.format(id, type[0])).val(obj['x'])
+  $('#{0}-{1}'.format(id, type[1])).val(obj['y'])
+  $('#{0}-{1}'.format(id, type[2])).val(obj['z'])
+}
+
+function set_number_input(id, val){
+  $('#{0}-val'.format(id)).val(val)
+}
+
+function set_selection_input(id, i, val){
+  $('#{0}-sel-{1}'.format(id, i)).val(val)
+}
+
 //Creates a vector 3 input with labels W, H and D
 function create_dimension_input(id, def_val=0.0, def_step=0.25){
   lbl = '<p class="{0}">{1}</p>'
