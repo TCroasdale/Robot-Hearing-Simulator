@@ -66,7 +66,6 @@ function create_src_panel(parent, id, i=-1){
     toprow.append(del.format("danger", id, i, fasicon.format("minus"), "col-md-1"))
 
     $($('#{0}-del-{1}'.format(id, i))).click(function(){
-      console.log("a")
       remove_element('{0}-{1}'.format(id, i))
     })
   }
@@ -96,7 +95,7 @@ function create_box_controls(parent, id, i){
   create_dimension_input("{0}-box-div-{1}".format(id, i), def_val=2.0, def_step=1.0)
 
   container.append(control.format("Origin", "{0}-box-pos-{1}".format(id, i)))
-  create_dimension_input("{0}-box-pos-{1}".format(id, i), def_val=2.5, def_step=0.25)
+  create_position_input("{0}-box-pos-{1}".format(id, i), def_val=2.5, def_step=0.25)
 
 }
 
@@ -118,7 +117,7 @@ function create_sphere_controls(parent, id, i){
   create_number_input('{0}-sphere-rad-{1}'.format(id, i), "Radius", def_val=8.0, def_step=0.25)
 
   container.append(control_lbl.format("Origin", "{0}-sphere-pos-{1}".format(id, i)))
-  create_dimension_input("{0}-sphere-pos-{1}".format(id, i), def_val=2.5, def_step=0.25)
+  create_position_input("{0}-sphere-pos-{1}".format(id, i), def_val=2.5, def_step=0.25)
 }
 
 function create_pyramid_controls(parent, id, i){
@@ -143,7 +142,7 @@ function create_pyramid_controls(parent, id, i){
   create_number_input('{0}-pyr-ang-{1}'.format(id, i), "Angle", def_val=30, def_step=5)
 
   container.append(control_lbl.format("Origin", "{0}-pyr-pos-{1}".format(id, i)))
-  create_dimension_input("{0}-pyr-pos-{1}".format(id, i), def_val=2.5, def_step=0.25)
+  create_position_input("{0}-pyr-pos-{1}".format(id, i), def_val=2.5, def_step=0.25)
 
 }
 
@@ -204,7 +203,6 @@ function read_vec3_input(id, type="XYZ"){
     input['y'] = $(base_id.format(id, 'Y'))[0].value
     input['z'] = $(base_id.format(id, 'Z'))[0].value
   }else{
-    console.log(base_id.format(id, 'W'))
     input['x'] = $(base_id.format(id, 'W'))[0].value
     input['y'] = $(base_id.format(id, 'H'))[0].value
     input['z'] = $(base_id.format(id, 'D'))[0].value
@@ -213,6 +211,5 @@ function read_vec3_input(id, type="XYZ"){
 }
 
 function read_num_input(id){
-  console.log("#{0}-val".format(id))
   return $("#{0}-val".format(id))[0].value
 }

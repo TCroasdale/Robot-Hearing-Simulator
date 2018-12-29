@@ -52,7 +52,7 @@
       "style": "box"
      },
      {
-      "Layers": "3",
+      "layers": "3",
       "angle_from_normal": "30",
       "divisions": "5",
       "length": "5",
