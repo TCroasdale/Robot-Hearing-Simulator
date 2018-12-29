@@ -13,17 +13,17 @@ function remove_element(id){
 
 
 
-label_class_3 = "col-md-2 text-info"
-input_class_3 = "col-md-2"
+label_class_3 = "col-md-2 text-info input-group-text"
+input_class_3 = "col-md-2 px-0"
 
-label_class_1 = "col-md-4 text-info"
-input_class_1 = "col-md-8"
+label_class_1 = "col-md-4 text-info input-group-text"
+input_class_1 = "col-md-8 px-0"
 
 
 function create_src_panel(parent, id, i=-1){
   //Creating a src-setup panel
   panel = '<div id="{0}-{1}" ></div>'
-  row = '<div class="row" id="{0}-tr-{1}"></div>'
+  row = '<div class="row input-group mx-0" id="{0}-tr-{1}"></div>'
   body = '<div class="collapse" id="{0}-body-{1}"></div>'
   sel = '<select id="{0}-sel-{1}" class="{2}"/>'
   opt = '<option value="{0}">{0}</option'
@@ -80,7 +80,7 @@ function create_src_panel(parent, id, i=-1){
 function create_box_controls(parent, id, i){
   //Create the controls for a box src-setup
   div = '<div id="{0}-box-{1}"></div>'
-  control = '<hr><p class="text-secondary">{0}</p><div class="row" id="{1}"><div>'
+  control = '<hr><p class="text-secondary">{0}</p><div class="row input-group mx-0" id="{1}"><div>'
   parent.append(div.format(id, i))
   container = $('#{0}-box-{1}'.format(id, i))
 
@@ -98,8 +98,8 @@ function create_box_controls(parent, id, i){
 function create_sphere_controls(parent, id, i){
   //Create the controls for a sphere src-setup
   div = '<div id="{0}-sphere-{1}"></div>'
-  control_lbl = '<hr><p class="text-secondary">{0}</p><div class="row" id="{1}"><div>'
-  control = '<hr><div class="row" id="{0}"><div>'
+  control_lbl = '<hr><p class="text-secondary">{0}</p><div class="row input-group mx-0" id="{1}"><div>'
+  control = '<hr><div class="row input-group mx-0" id="{0}"><div>'
   parent.append(div.format(id, i))
   container = $('#{0}-sphere-{1}'.format(id, i))
 
@@ -119,8 +119,8 @@ function create_sphere_controls(parent, id, i){
 function create_pyramid_controls(parent, id, i){
   //Create the controls for a pyramid src-setup
   div = '<div id="{0}-pyramid-{1}"></div>'
-  control_lbl = '<hr><p class="text-secondary">{0}</p><div class="row" id="{1}"><div>'
-  control = '<hr><div class="row" id="{0}"><div>'
+  control_lbl = '<hr><p class="text-secondary">{0}</p><div class="row input-group mx-0" id="{1}"><div>'
+  control = '<hr><div class="row input-group mx-0" id="{0}"><div>'
   parent.append(div.format(id, i))
   container = $('#{0}-pyramid-{1}'.format(id, i))
 
@@ -169,7 +169,7 @@ function create_position_input(id, def_val=0.0, def_step=0.25){
   parent.append(inp.format(input_class_3, "Z", def_val, def_step, id))
 }
 
-//Creates a vector 3 input with labels W, H and D 
+//Creates a vector 3 input with labels W, H and D
 function create_dimension_input(id, def_val=0.0, def_step=0.25){
   lbl = '<p class="{0}">{1}</p>'
   inp = '<input class="{0}" type="number" value="{2}" step="{3}" id="{4}-{1}"/>'

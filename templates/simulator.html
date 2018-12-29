@@ -8,35 +8,35 @@
 {% block content %}
     <h1>Simulator</h1>
     <div class="row">
-      <div id="3js-container" class="col-md-5">
+      <div id="3js-container" class="col-md-7">
           <canvas>
           </canvas>
       </div>
-      <div id="interface-container" class="col-md-7">
+      <div id="interface-container" class="col-md-5">
         <ul class="nav nav-tabs">
-          <li class="nav-item active" ><a class="nav-link px-1" data-toggle="tab"  href="#sim-config">Simulation Config  <span class="fas fa-wrench"></span></a></li>
-          <li class="nav-item"><a class="nav-link px-1" data-toggle="tab" href="#src-config">Source Config  <span class="fas fa-volume-up"></span></a></li>
-          <li class="nav-item"><a class="nav-link px-1" data-toggle="tab" href="#code">Code Editor <span class="fas fa-code"></span></a></li>
+          <li class="nav-item active" ><a class="nav-link px-1" data-toggle="tab"  href="#sim-config">Simulation <span class="fas fa-wrench"></span></a></li>
+          <li class="nav-item"><a class="nav-link px-1" data-toggle="tab" href="#src-config">Sources  <span class="fas fa-volume-up"></span></a></li>
+          <li class="nav-item"><a class="nav-link px-1" data-toggle="tab" href="#code">Code <span class="fas fa-code"></span></a></li>
           <li class="ml-auto nav-item"><a class="btn btn-primary text-white px-1" id="run_conf">Run <span class="fas fa-play"></span></a></li>
         </ul>
-        <div class="tab-content">
+        <div class="tab-content px-1 py-1">
           <div class="tab-pane active tall no-hor-scroll" id="sim-config">
             <h2>Simulation Config</h2>
             <hr>
             <p class="text-secondary">Room Dimensions</p>
-            <div class="row" id="room-dim"></div>
+            <div class="row input-group mx-0" id="room-dim"></div>
             <hr>
             <p class="text-secondary">Robot Position</p>
-            <div class="row" id="robo-pos"></div>
+            <div class="row input-group mx-0" id="robo-pos"></div>
             <hr>
-            <div class="row" id="rt-60"></div>
+            <div class="row input-group mx-0" id="rt-60"></div>
             <hr>
-            <div class="row" id="sample-rate"></div>
+            <div class="row input-group mx-0" id="sample-rate"></div>
           </div><!-- sim tab -->
           <div class="tab-pane" id="src-config">
             <h2>Source Config</h2>
             <hr>
-            <div class="row">
+            <div class="row mx-0">
               <button class="btn btn-info col-md-1" id="add-src"><span class="fas fa-plus"></span></button>
             </div>
             <div class="pre-scrollable tall no-hor-scroll" id="src-setups">
@@ -60,7 +60,7 @@
             <div class="input-group mr-2 my-2" role="group">
               <label for="utterancefile" class="input-group-text">Utterance</label>
               <input type="file" name="utterancefile" class="btn btn-secondary" id="utterancefile" size="1"/>
-              <select id="utterance-select">
+              <select id="utterance-select" class="w-75 mx-auto">
                   <option value="-1">Upload other file.</option>
                   {% for sound in sounds: %}
                   <option value="{{sound.id}}">{{ sound.name }}</option>
