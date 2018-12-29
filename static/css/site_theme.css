@@ -11,7 +11,9 @@
 .modal-body{
   background-color: #f5f5f5;
 }
-
+body{
+  background-color: #DDDDDD;
+}
 
 
 /* Absolute Center Spinner */

@@ -134,6 +134,9 @@ function update_UI(conf){
       set_number_input('src-conf-sphere-rad-{0}'.format(i), sim_setups[i]['radius'])
       set_vec3_input('src-conf-sphere-pos-{0}'.format(i), sim_setups[i]['origin'])
     }
+    else if(style == "single"){
+      set_vec3_input('src-conf-sin-pos-{0}'.format(i), sim_setups[i]['origin'])
+    }
   }
   if($('#src-setups')[0].children.length > sim_setups.length){
     console.log("mismatched lengths")
@@ -180,6 +183,11 @@ function compile_code(){
       var rad = read_num_input('src-conf-sphere-rad-{0}'.format(i))
       var pos = read_vec3_input('src-conf-sphere-pos-{0}'.format(i))
       src_setup = {"style": style, "origin": pos, "rings": rin, "segments": seg, "radius": rad}
+      sim_setups.push(src_setup)
+    }
+    else if(style == "single"){
+      var pos = read_vec3_input('src-conf-sin-pos-{0}'.format(i))
+      src_setup = {"style": style, "origin": pos}
       sim_setups.push(src_setup)
     }
   }

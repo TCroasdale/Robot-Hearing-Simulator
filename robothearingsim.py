@@ -89,7 +89,12 @@ class RobotHearingSim:
 
         source_positions = []
         for source_setup in simConfig['source_config']['simulation_setups']:
-            if source_setup['style'] == "box":
+            if source_setup['style'] == "single":
+                x = source_setup['origin']['x']
+                y = source_setup['origin']['y']
+                z = source_setup['origin']['z']
+                source_positions += [x, y, z]
+            elif source_setup['style'] == "box":
                 posArray = RobotHearingSim.parse_box_source_setup(source_setup)
                 source_positions += (posArray)
             elif source_setup['style'] == 'sphere':

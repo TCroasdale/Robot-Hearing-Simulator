@@ -28,6 +28,14 @@
      "uid": "-1"
     },
     "simulation_setups": [
+      {
+      "origin": {
+       "x": "2.5",
+       "y": "2.5",
+       "z": "2.5"
+      },
+      "style": "single"
+     },
      {
       "dimensions": {
        "x": "4.0",

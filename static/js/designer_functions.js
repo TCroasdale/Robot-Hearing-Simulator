@@ -72,4 +72,20 @@ $(document).ready(function() {
     }
   })
 
+  //Creating the UI
+  i=0
+  $('#add-mic').click(function(){
+    create_mic_panel($('#mic-setups'), 'mic-conf', i)
+    i += 1
+  })
+  $('#add-mic').click()
+  j=0
+  $('#add-mot').click(function(){
+    create_mot_panel($('#mot-setups'), 'mot-conf', j)
+    j += 1
+  })
+  $('#add-mot').click()
+
+  create_number_input('skin-width', "Skin Width", 0.25, 0.05)
+
 })

@@ -21,7 +21,7 @@
         </ul>
         <div class="tab-content bg-white rounded-top p-1">
           <div class="tab-pane active tall no-hor-scroll" id="sim-config">
-            <h2>Simulation Config</h2>
+            <h2 class="text-center">Simulation Config</h2>
             <hr>
             <p class="text-secondary">Room Dimensions</p>
             <div class="row input-group mx-0" id="room-dim"></div>
@@ -34,7 +34,7 @@
             <div class="row input-group mx-0" id="sample-rate"></div>
           </div><!-- sim tab -->
           <div class="tab-pane" id="src-config">
-            <h2>Source Config</h2>
+            <h2 class="text-center"> Source Config</h2>
             <hr>
             <div class="row mx-0">
               <button class="btn btn-info col-md-1" id="add-src"><span class="fas fa-plus"></span></button>
@@ -52,7 +52,7 @@
               </div>
             </div>
           </div><!-- code tab -->
-        </div>
+        </div><!-- tab content -->
 
         <form id="sound-uploads-form" action="/simulator/uploadsounds" class=" bg-white rounded-bottom p-1" enctype="multipart/form-data" method="POST">
           <hr>
