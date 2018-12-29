@@ -125,11 +125,17 @@ function update_UI(conf){
 
   }
 
-
+  //Cleaning up spare panels
   if($('#mic-setups')[0].children.length > mic_setups.length){
     for(i = mic_setups.length; i < $('#mic-setups')[0].children.length; i++){
       console.log("removing: {0}".format('mic-conf-{0}'.format(i)))
       remove_element('mic-conf-{0}'.format(i))
+    }
+  }
+  if($('#mot-setups')[0].children.length > mot_setups.length){
+    for(i = mot_setups.length; i < $('#mot-setups')[0].children.length; i++){
+      console.log("removing: {0}".format('mot-conf-{0}'.format(i)))
+      remove_element('mot-conf-{0}'.format(i))
     }
   }
 }
