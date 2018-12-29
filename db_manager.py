@@ -15,6 +15,21 @@ class User:
     def from_DB_ls(data_list):
         return [User.from_DB(d) for d in data_list]
 
+class Microphone:
+    def __init__(self, name, pathToFile, userID, id=0, visibility=0):
+        self.id = id
+        self.name = name
+        self.pathToFile = pathToFile
+        self.userID = userID
+        self.visibility = visibility
+
+    def from_DB(data):
+        if data is None: return None
+        return Microphone(data[1], data[2], data[3], data[0], data[4])
+
+    def from_DB_ls(data_list):
+        return [Microphone.from_DB(d) for d in data_list]
+
 class Sound:
     def __init__(self, name, path, userID, id=0, visibility=0):
         self.id = id
@@ -145,6 +160,16 @@ class DB_Manager:
             else:
                 return type.from_DB(cur.fetchall())
 
+    def insert_microphone(self, mic):
+        with sql.connect("Database/database.db") as con:
+            cur = con.cursor()
+
+            cur.execute("INSERT INTO microphones (name, pathToFile) VALUES (?,?,?)",(mic.name, mic.pathToFile, mic.userID))
+            rowid = cur.lastrowid
+            con.commit()
+            cur.execute("SELECT * FROM microphone WHERE id=?", [rowid])
+            return Microphone.from_DB(cur.fetchone())
+
 
     def insert_simulation(self, sim):
         with sql.connect("Database/database.db") as con:
@@ -181,6 +206,13 @@ class DB_Manager:
 
             cur.execute("SELECT * FROM sounds WHERE id=?", [id])
             return Sound.from_DB(cur.fetchone())
+
+    def get_microphone(self, id):
+        with sql.connect("Database/database.db") as con:
+            cur = con.cursor()
+
+            cur.execute("SELECT * FROM microphones WHERE id=?", [id])
+            return Microphone.from_DB(cur.fetchone())
 
     def get_robot(self, id):
         with sql.connect("Database/database.db") as con:
