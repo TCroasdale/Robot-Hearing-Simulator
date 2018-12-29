@@ -6,6 +6,11 @@ String.prototype.format = function() {
   });
 };
 
+var event = new Event('config-update')
+
+$('input').change(function(){
+  $(document).trigger('config-update')
+})
 
 function remove_element(id){
   $('#{0}'.format(id)).remove()
@@ -146,7 +151,7 @@ function create_pyramid_controls(parent, id, i){
 //Creates a basic number input with a label
 function create_number_input(id, label, def_val=0.0, def_step=0.25){
   lbl = '<p class="{0}">{1}</p>'
-  inp = '<input class="{0}" type="number" value="{1}" step="{2}" id="{4}-val"/>'
+  inp = '<input class="{0}" type="number" value="{1}" step="{2}" id="{3}-val"/>'
 
   parent = $('#{0}'.format(id))
 
@@ -182,4 +187,32 @@ function create_dimension_input(id, def_val=0.0, def_step=0.25){
   parent.append(inp.format(input_class_3, "H", def_val, def_step, id))
   parent.append(lbl.format(label_class_3, "D"))
   parent.append(inp.format(input_class_3, "D", def_val, def_step, id))
+}
+
+// Functions for reading the inputs
+// returns JSON objects
+function read_vec3_input(id, type="XYZ"){
+  if(type != "XYZ" & type != "WHD"){
+    console.log("invalid read type, using XYZ")
+    type = "XYZ"
+  }
+
+  input = { "x": "0.0", "y": "0.0", "z": "0.0"}
+  base_id = "#{0}-{1}"
+  if(type == "XYZ"){
+    input['x'] = $(base_id.format(id, 'X'))[0].value
+    input['y'] = $(base_id.format(id, 'Y'))[0].value
+    input['z'] = $(base_id.format(id, 'Z'))[0].value
+  }else{
+    console.log(base_id.format(id, 'W'))
+    input['x'] = $(base_id.format(id, 'W'))[0].value
+    input['y'] = $(base_id.format(id, 'H'))[0].value
+    input['z'] = $(base_id.format(id, 'D'))[0].value
+  }
+  return input
+}
+
+function read_num_input(id){
+  console.log("#{0}-val".format(id))
+  return $("#{0}-val".format(id))[0].value
 }

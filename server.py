@@ -154,7 +154,7 @@ def remove_robot():
 
 @app.route('/simulator/uploadsounds', methods=['POST'])
 def processSoundUploads():
-    if 'userID' not in session: return redirect('/login?ref=simulator')
+    if 'userID' not in session: return redirect('/login?ref=simulator') # Cannot redirect from this POST
 
     # check if the post request has the file part
     if 'utterancefile' not in request.files:

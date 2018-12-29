@@ -88,4 +88,24 @@ $(document).ready(function() {
   create_dimension_input('room-dim', 5.0, 0.25)
   create_number_input('rt-60', 'RT 60', 0.4, 0.1)
   create_number_input('sample-rate', 'Sample Rate', 16000, 100)
+
+  $('#code-tab').click(function(){
+    console.log("UPDATING")
+    var robopos = read_vec3_input('robo-pos')
+    var roomdim = read_vec3_input('room-dim', "WHD")
+    var rt60 = read_num_input('rt-60')
+    var sample = read_num_input('sample-rate')
+    sim_config = {"robo_pos": robopos, "room_dimensions": roomdim, "rt60": rt60, "sample_rate": sample}
+
+    editor.setValue(JSON.stringify(compile_code(sim_config), null, " "))
+  })
 })
+
+function compile_code(sim_conf){
+  code = {}
+  sim_conf['robot_config'] = {"uid": "-1"} //Add the robot config field in for later.
+  //Add the sim_config to the code
+  code["simulation_config"] = sim_conf
+
+  return code
+}
