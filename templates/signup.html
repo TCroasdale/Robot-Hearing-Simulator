@@ -1,17 +1,39 @@
 {% extends "layout.html" %}
-{% block title %}Index{% endblock %}
+{% block title %}Signup{% endblock %}
 {% block head %}
 {% endblock %}
 {% block content %}
-    <h1>Sign up</h1>
-    <form action='/signup' method="post">
-        <p>
-            <label for="email">Your E-Mail</label>
-            <input name="email" type="email">
-        </p>
-        <p>
-            <label for="password">Your Password</label>
-            <input name="password" type="password">
-        </p>
-    </form>
+    <div class="row text-center">
+      <div class="col-md-auto mx-auto">
+        <h1>Sign up</h1>
+        <form action='/signup' method="post">
+            <div class="form-group">
+                <label for="email">Your E-Mail</label>
+                {% if message=="used-email" %}
+                <p class="text-danger">E-Mail already in use!</p>
+                {% endif %}
+                <input class="form-control" name="email" type="email">
+            </div>
+            <div class="form-group">
+                <label for="password">Your Password</label>
+                {% if message=="short-pass" %}
+                  <p class="text-danger">Password must be at least 8 characters long</p>
+                {% elif message=="no-match-pass" %}
+                  <p class="text-muted">Password must be at least 8 characters long</p>
+                  <p class="text-danger">Passwords do not match</p>
+                {% else %}
+                  <p class="text-muted">Password must be at least 8 characters long</p>
+                {% endif %}
+                <input class="form-control" name="password" type="password">
+            </div>
+            <div class="form-group">
+                <label for="confirm-password">Confirm Password</label>
+                <input class="form-control" name="confirm-password" type="password">
+            </div>
+            <div class="form-group">
+              <input type="submit" name="submit" class="form-control btn btn-info" value="Sign Up!"></input>
+            </div>
+        </form>
+      </div>
+    </div>
 {% endblock %}

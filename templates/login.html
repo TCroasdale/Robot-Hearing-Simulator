@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+{% block title %}Log in{% endblock %}
+{% block head %}
+{% endblock %}
+{% block content %}
+    <div class="row text-center">
+      <div class="col-md-auto mx-auto">
+        <h1>Log in</h1>
+        <form action='/login' method="post">
+            <div class="form-group">
+                <label for="email">Your E-Mail</label>
+                {% if message=="no-match-email" %}
+                <p class="text-danger">Account not found</p>
+                {% endif %}
+                <input class="form-control" name="email" type="email">
+            </div>
+            <div class="form-group">
+                <label for="password">Your Password</label>
+                {% if message=="wrong-pass" %}
+                <p class="text-danger">Invalid password!</p>
+                {% endif %}
+                <input class="form-control" name="password" type="password">
+            </div>
+            <div class="form-group">
+              <input type="submit" name="submit" class="form-control btn btn-info" value="Log In!"></input>
+            </div>
+        </form>
+      </div>
+    </div>
+{% endblock %}

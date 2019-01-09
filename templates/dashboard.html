@@ -1,0 +1,78 @@
+{% extends "layout.html" %}
+{% block title %}{{ user.email }} - Dashboard{% endblock %}
+{% block head %}
+{% endblock %}
+{% block content %}
+    <h1>{{ user.email }}</h1>
+    <div class="row">
+      <div id="simulations" class="col-lg-4">
+        <h3>Simulations</h3>
+        <ul id="sim-list" class="list-group">
+          {% for sim in simulations: %}
+            <li class="list-group-item" id="sim_{{ sim.id }}">
+              <h5>Simulation</h5>
+              <div class="row">
+                <p class="col-sm-4">{{ sim.dateCreated }}</p>
+                <p class="col-sm-5"></p>
+                <p class="col-sm-3 text-right" id="sim_{{ sim.id }}-state">{{ sim.state }}</p>
+              </div>
+              <div class="row">
+                <p class="col-sm-6">Actions</p>
+                {% if sim.state == "finished": %}
+                <a class="btn btn-info col-sm-2" download href="{{sim.pathToZip}}"><span class="fas fa-download"></span></a>
+                {% elif sim.state == "running" %}
+                <button class="btn btn-warning col-sm-2" onclick="endTask({{ sim.id }})"><span class="fas fa-ban"></span></button>
+                {% else %}
+                <div class="col-sm-2"></div>
+                {% endif %}
+                <button class="btn btn-info col-sm-2 disabled"><span class="fas fa-redo"></span></button>
+                <button class="btn btn-danger col-sm-2" onclick="deleteSimulation({{ sim.id }})"><span class="fas fa-trash-alt"></span></button>
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div id="sounds" class="col-lg-4">
+        <h3>Sounds</h3>
+        <ul id="sound-list" class="list-group">
+          {% for sound in sounds: %}
+            <li class="list-group-item" id="sound_{{ sound.id }}">
+              <div class="row">
+                <h5 class="col-sm-8">Sound</h5>
+                <p class="col-sm-4 text-right">{{ sound.name }}</p>
+              </div>
+              <div class="row">
+                <p class="col-sm-6">Actions</p>
+                <div class="col-sm-2"></div>
+                <button class="btn btn-info col-sm-2" onclick="playSound('{{sound.pathToFile}}')"><span class="fas fa-play"></span></button>
+                <button class="btn btn-danger col-sm-2" onclick="deleteSound({{sound.id}})"><span class="fas fa-trash-alt"></span></button>
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div id="robots" class="col-lg-4">
+        <h3>Robots</h3>
+        <ul id="robot-list" class="list-group">
+          {% for robot in robots: %}
+            <li class="list-group-item" id="robot_{{ robot.id }}">
+              <div class="row">
+                <h5 class="col-sm-8">Robot</h5>
+                <p class="col-sm-4 text-right">{{ robot.name }}</p>
+              </div>
+              <div class="row">
+                <p class="col-sm-6">Actions</p>
+                <div class="col-sm-2"></div>
+                <button class="btn btn-info col-sm-2"><span class="fas fa-edit"></span></button>
+                <button class="btn btn-danger col-sm-2" onclick="deleteRobot({{robot.id}})"><span class="fas fa-trash-alt"></span></button>
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+    <audio id="sound-preview">
+      <source src="" type="audio/wav" id="audio-src">
+    </audio>
+    <script src="{{ url_for('static', filename='js/dashboard_functions.js') }}" type="text/javascript"></script>
+{% endblock %}

@@ -1,10 +1,31 @@
 {% extends "layout.html" %}
-{% block title %}Index{% endblock %}
+{% block title %}Home{% endblock %}
 {% block head %}
 {% endblock %}
 {% block content %}
-    <h1>Index</h1>
-    <p class="important">
-      Welcome to my awesome homepage.
-    </p>
+    <div class="row">
+      <div class="col-md-4">
+        <h1>Robot Hearing Simulator</h1>
+        <p class="important">
+          Welcome to the Robot Hearing Simulator.
+        </p>
+      </div>
+      <div class="col-md-8 text-center">
+        {% if 'userID' in session %}
+        <a href="/simulator"><button class="btn btn-info w-75">Simulator</button></a>
+        {% else %}
+        <a href="/signup"><button class="btn btn-info w-75">Sign Up!</button></a>
+        {% endif %}
+        <div class="row my-3">
+          <hr class="col-md-4 w-25">
+          <p>or</p>
+          <hr class="col-md-4 w-25">
+        </div>
+        {% if 'userID' in session %}
+        <a href="/robotdesign"><button class="btn btn-info w-75">Robot Designer</button></a>
+        {% else %}
+        <a href="/login"><button class="btn btn-secondary w-75">Login</button></a>
+        {% endif %}
+      </div>
+    </div>
 {% endblock %}
