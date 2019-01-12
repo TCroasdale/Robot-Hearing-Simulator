@@ -87,7 +87,7 @@ $(document).ready(function() {
   })
   $('#add-mot').click()
 
-  create_number_input('skin-width', "Skin Width", 0.25, 0.05)
+  create_number_input($('#skin-width'), "Skin Width", 0.25, 0.05)
 
   editor.on('change', function(obj){
     update_UI(JSON.parse(editor.getValue()))
@@ -168,3 +168,4 @@ function compile_code(){
 
   return code
 }
+

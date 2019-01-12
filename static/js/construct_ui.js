@@ -6,15 +6,7 @@ String.prototype.format = function() {
   });
 };
 
-var event = new Event('config-update')
 
-$('input').change(function(){
-  $(document).trigger('config-update')
-})
-
-function remove_element(id){
-  $('#{0}'.format(id)).remove()
-}
 
 
 
@@ -55,14 +47,9 @@ function create_mic_panel(parent, id, i=-1){
   }
 
   //Creating the controls
-  body.append(control.format('{0}-id-{1}'.format(id, i)))
-  create_number_input('{0}-id-{1}'.format(id, i), "ID", i, 1.0)
-
-  body.append(control_lbl.format('Position', '{0}-pos-{1}'.format(id, i)))
-  create_position_input('{0}-pos-{1}'.format(id, i), 0, 0.25)
-
-  body.append(control_lbl.format('Rotation', '{0}-rot-{1}'.format(id, i)))
-  create_rotation_input('{0}-rot-{1}'.format(id, i), 0, 5)
+  create_number_input(body, "ID", i, 1.0, true)
+  create_vector3_input(body, "Position", 0, 0.25, "POS")
+  create_vector3_input(body, "Rotation", '{0}-rot-{1}'.format(id, i), 0, 5, "ROT")
 
   //MIC STYLE
 }
@@ -96,11 +83,8 @@ function create_mot_panel(parent, id, i=-1){
   }
 
   //Creating the controls
-  body.append(control.format('{0}-id-{1}'.format(id, i)))
-  create_number_input('{0}-id-{1}'.format(id, i), "ID", i, 1.0)
-
-  body.append(control_lbl.format('Position', '{0}-pos-{1}'.format(id, i)))
-  create_position_input('{0}-pos-{1}'.format(id, i), 0, 0.25)
+  create_number_input(body, "ID", i, 1.0)
+  create_vector3_input(body, "Position", 0, 0.25, "POS")
 
   body.append("<p>TODO ADD MOTOR NOISE</p>")
 }
@@ -242,46 +226,6 @@ function create_singlesrc_controls(parent, id, i){
 }
 
 
-//Creates a basic number input with a label
-function create_number_input(id, label, def_val=0.0, def_step=0.25){
-  lbl = '<p class="{0}">{1}</p>'
-  inp = '<input class="{0}" type="number" value="{1}" step="{2}" id="{3}-val"/>'
-
-  parent = $('#{0}'.format(id))
-
-  parent.append(lbl.format(label_class_1, label))
-  parent.append(inp.format(input_class_1, def_val, def_step, id))
-}
-
-//Creates a vector 3 input with labels X, Y, and Z
-function create_position_input(id, def_val=0.0, def_step=0.25){
-  lbl = '<p class="{0}">{1}</p>'
-  inp = '<input class="{0}" type="number" value="{2}" step="{3}" id="{4}-{1}"/>'
-
-  parent = $('#{0}'.format(id))
-
-  parent.append(lbl.format(label_class_3, "X"))
-  parent.append(inp.format(input_class_3, "X", def_val, def_step, id))
-  parent.append(lbl.format(label_class_3, "Y"))
-  parent.append(inp.format(input_class_3, "Y", def_val, def_step, id))
-  parent.append(lbl.format(label_class_3, "Z"))
-  parent.append(inp.format(input_class_3, "Z", def_val, def_step, id))
-}
-
-//Creates a vector 3 input with labels YAW, PITCH and ROll RYP
-function create_rotation_input(id, def_val=0.0, def_step=0.25){
-  lbl = '<p class="{0}">{1}</p>'
-  inp = '<input class="{0}" type="number" value="{2}" step="{3}" id="{4}-{1}"/>'
-
-  parent = $('#{0}'.format(id))
-
-  parent.append(lbl.format(label_class_3, "Roll"))
-  parent.append(inp.format(input_class_3, "R", def_val, def_step, id))
-  parent.append(lbl.format(label_class_3, "Yaw"))
-  parent.append(inp.format(input_class_3, "Y", def_val, def_step, id))
-  parent.append(lbl.format(label_class_3, "Pitch"))
-  parent.append(inp.format(input_class_3, "P", def_val, def_step, id))
-}
 
 function set_vec3_input(id, obj, type="XYZ"){
   $('#{0}-{1}'.format(id, type[0])).val(obj['x'])
@@ -297,20 +241,7 @@ function set_selection_input(id, i, val){
   $('#{0}-sel-{1}'.format(id, i)).val(val)
 }
 
-//Creates a vector 3 input with labels W, H and D
-function create_dimension_input(id, def_val=0.0, def_step=0.25){
-  lbl = '<p class="{0}">{1}</p>'
-  inp = '<input class="{0}" type="number" value="{2}" step="{3}" id="{4}-{1}"/>'
 
-  parent = $('#{0}'.format(id))
-
-  parent.append(lbl.format(label_class_3, "W"))
-  parent.append(inp.format(input_class_3, "W", def_val, def_step, id))
-  parent.append(lbl.format(label_class_3, "H"))
-  parent.append(inp.format(input_class_3, "H", def_val, def_step, id))
-  parent.append(lbl.format(label_class_3, "D"))
-  parent.append(inp.format(input_class_3, "D", def_val, def_step, id))
-}
 
 // Functions for reading the inputs
 // returns JSON objects
@@ -331,4 +262,63 @@ function read_vec3_input(id, type="XYZ"){
 
 function read_num_input(id){
   return $("#{0}-val".format(id))[0].value
+}
+
+V3Styles = function(style){
+  this.POS = function(){
+    return Object.freeze({first: "X", second:  "Y", third: "Z"})
+  }
+  this.DIM = function(){
+    return Object.freeze({first: "W", second:  "H", third: "D"})
+  }
+  this.ROT = function(){
+    return Object.freeze({first: "Roll", second:  "Yaw", third: "Pitch"})
+  }
+  
+  if(style = "POS"){ return this.POS() }
+  if(style = "ROT"){ return this.ROT() }
+  if(style = "DIM"){ return this.DIM() } 
+}
+
+
+
+// ====== Classes for Input Groups ====== //
+
+Vector3Input = function(label, id, def_val=0.0, def_step=0.25, style="POS"){
+  inp_1 = NumberInput(V3Styles(style).first, "{0}-{1}".format(id, V3Styles(style).first), def_val, def_step, false)
+  inp_2 = NumberInput(V3Styles(style).second, "{0}-{1}".format(id, V3Styles(style).second), def_val, def_step, false)
+  inp_3 = NumberInput(V3Styles(style).third, "{0}-{1}".format(id, V3Styles(style).third), def_val, def_step, false)
+
+  return '<hr/> \
+          <p class="text-secondary">{0}</p> \
+          <div id="{1}" class="row input-group mx-0"> \
+            {2} {3} {4} \
+          </div>'.format(label, id, inp_1, inp_2, inp_3)
+}
+
+NumberInput = function(label, id, def_val, def_step, use_outer_div = true){
+  start = '<div class="input-group">'
+  end = '</div>'
+  if(use_outer_div == true){
+    return start + NumberInput(label, id, def_val, def_step, false) + end
+  }
+  else{
+    return '<div class="input-group-prepend">\
+              <p class="text-info input-group-text">{0}</p> \
+            </div> \
+            <input class="form-control pr-0" type="number" value="{1}" step="{2}" id="{3}"/> \
+             '.format(label, def_val, def_step, "{0}-val".format(id))
+  }
+} 
+
+// ====== Functions To add Input Groups to the pages ===== //
+
+//Creates a vector 3 input with labels X, Y, and Z
+function create_vector3_input(parent, label, style, def_val=0.0, def_step=0.25){
+  parent.append(Vector3Input(label, parent.id, def_val, def_step, style))
+}
+
+//Creates a basic number input with a label
+function create_number_input(parent, label, def_val=0.0, def_step=0.25){
+  parent.append(NumberInput(label, parent.id, def_val, def_step))
 }

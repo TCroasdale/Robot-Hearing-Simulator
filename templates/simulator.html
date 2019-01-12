@@ -2,7 +2,10 @@
 {% block title %}Simulator{% endblock %}
 {% block head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/editor.css') }}" media="screen">
-<script src="{{ url_for('static', filename='js/construct_ui.js') }}" type="text/javascript"></script>
+<script crossorigin src="https://unpkg.com/react@16/umd/react.development.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/react/0.13.3/JSXTransformer.js"></script>
+<script src="{{ url_for('static', filename='js/construct_ui.js') }}" type="text/jsx"></script>
 <script src="{{ url_for('static', filename='js/simulator_functions.js') }}" type="text/javascript"></script>
 {% endblock %}
 {% block content %}
@@ -29,7 +32,9 @@
             <p class="text-secondary">Robot Position</p>
             <div class="row input-group mx-0" id="robo-pos"></div>
             <hr>
-            <div class="row input-group mx-0" id="rt-60"></div>
+            <div class="row input-group mx-0" id="rt-60">
+              <!-- <NumberInput name="RT 60" def_val="0.4" def_step="0.05"> -->
+            </div>
             <hr>
             <div class="row input-group mx-0" id="sample-rate"></div>
           </div><!-- sim tab -->
@@ -96,6 +101,4 @@
       </div>
     </section>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.2/ace.js" type="text/javascript"></script>
-    <script crossorigin src="https://unpkg.com/react@16/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js"></script>
 {% endblock %}
