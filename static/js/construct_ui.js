@@ -228,9 +228,9 @@ function create_singlesrc_controls(parent, id, i){
 
 
 function set_vec3_input(id, obj, type="XYZ"){
-  $('#{0}-{1}'.format(id, type[0])).val(obj['x'])
-  $('#{0}-{1}'.format(id, type[1])).val(obj['y'])
-  $('#{0}-{1}'.format(id, type[2])).val(obj['z'])
+  set_number_input('{0}-{1}'.format(id, type[0])).val(obj['x'])
+  set_number_input('{0}-{1}'.format(id, type[1])).val(obj['y'])
+  set_number_input('{0}-{1}'.format(id, type[2])).val(obj['z'])
 }
 
 function set_number_input(id, val){
@@ -247,15 +247,14 @@ function set_selection_input(id, i, val){
 // returns JSON objects
 function read_vec3_input(id, type="XYZ"){
   if(type != "XYZ" && type != "WHD" && type != "RYP"){
-    console.log("invalid read type, using XYZ")
+    console.log("invalid read type, reading using XYZ")
     type = "XYZ"
   }
 
   input = { "x": "0.0", "y": "0.0", "z": "0.0"}
-  base_id = "#{0}-{1}"
-  input['x'] = $(base_id.format(id, type[0]))[0].value
-  input['y'] = $(base_id.format(id, type[1]))[0].value
-  input['z'] = $(base_id.format(id, type[2]))[0].value
+  input['x'] = read_num_input("{0}-{1}".format(id, type[0]))
+  input['y'] = read_num_input("{0}-{1}".format(id, type[0]))
+  input['z'] = read_num_input("{0}-{1}".format(id, type[0]))
 
   return input
 }
