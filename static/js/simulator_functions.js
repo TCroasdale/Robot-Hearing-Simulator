@@ -86,10 +86,10 @@ $(document).ready(function() {
   })
   $('#add-src').click()
 
-  // create_position_input('robo-pos', 2.5, 0.25)
-  // create_dimension_input('room-dim', 5.0, 0.25)
-  create_number_input('rt-60', 'RT 60', 0.4, 0.1)
-  create_number_input('sample-rate', 'Sample Rate', 16000, 100)
+  create_vector3_input($('#robo-pos'), "Position", "POS", 2.5, 0.25,)
+  create_vector3_input($('#room-dim'), "Room Dimensions", "DIM", 5.0, 0.25)
+  create_number_input($('#rt-60'), 'RT 60', 0.4, 0.1)
+  create_number_input($('#sample-rate'), 'Sample Rate', 16000, 100)
 
   editor.on('change', function(obj){
     update_UI(JSON.parse(editor.getValue()))
