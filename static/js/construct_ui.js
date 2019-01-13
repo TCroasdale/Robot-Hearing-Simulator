@@ -10,16 +10,16 @@ String.prototype.format = function() {
 
 function create_mic_panel(parent, id, i=-1){
   //Creating a microphone panel setup
-  if(i == -1){  i = parent.children.length - 1 }
+  if(i == -1){ i = parent.children.length - 1 }
   parent.append(Panel(id, i, "Microphones"))
   body = $('#{0}-body-{1}'.format(id, i))
 
-  //Remove delete button if first 
+  //Remove delete button if first
   if(i == 0){ $('#{0}-del-{1}'.format(id, i)).remove() }
   if( i > 0){
     // Add functionality to delete button
-    $($('#{0}-del-{1}'.format(id, i))).click(function(){ 
-      remove_element('{0}-{1}'.format(id, i)) 
+    $($('#{0}-del-{1}'.format(id, i))).click(function(){
+      remove_element('{0}-{1}'.format(id, i))
     })
   }
 
@@ -38,12 +38,12 @@ function create_mot_panel(parent, id, i=-1){
   parent.append(Panel(id, i, "Motors"))
   body = $('#{0}-body-{1}'.format(id, i))
 
-  //Remove delete button if first 
+  //Remove delete button if first
   if(i == 0){ $('#{0}-del-{1}'.format(id, i)).remove() }
   if( i > 0){
     // Add functionality to delete button
-    $($('#{0}-del-{1}'.format(id, i))).click(function(){ 
-      remove_element('{0}-{1}'.format(id, i)) 
+    $($('#{0}-del-{1}'.format(id, i))).click(function(){
+      remove_element('{0}-{1}'.format(id, i))
     })
   }
 
@@ -58,17 +58,17 @@ function create_mot_panel(parent, id, i=-1){
 function create_src_panel(parent, id, i=-1){
   //Creating a src-setup panel
   if(i == -1){  i = parent.children.length - 1 }
-  
+
   opts = ["single", "box", "pyramid", "sphere"]
   parent.append(Panel(id, i, SelectInput("{0}-{1}".format(id, i), opts)))
   body = $('#{0}-body-{1}'.format(id, i))
 
-  //Remove delete button if first 
+  //Remove delete button if first
   if(i == 0){ $('#{0}-del-{1}'.format(id, i)).remove() }
   if( i > 0){
     // Add functionality to delete button
-    $($('#{0}-del-{1}'.format(id, i))).click(function(){ 
-      remove_element('{0}-{1}'.format(id, i)) 
+    $($('#{0}-del-{1}'.format(id, i))).click(function(){
+      remove_element('{0}-{1}'.format(id, i))
     })
   }
 
@@ -183,10 +183,10 @@ V3Styles = function(style){
   this.ROT = function(){
     return Object.freeze({first: "Roll", second:  "Yaw", third: "Pitch"})
   }
-  
+
   if(style = "POS"){ return this.POS() }
   else if(style = "ROT"){ return this.ROT() }
-  else if(style = "DIM"){ return this.DIM() } 
+  else if(style = "DIM"){ return this.DIM() }
   else{ return this.POS() }
 }
 
@@ -222,7 +222,7 @@ NumberInput = function(label, id, def_val, def_step, use_outer_div = true){
             <input class="form-control pr-0" type="number" value="{1}" step="{2}" id="{3}"/> \
              '.format(label, def_val, def_step, "{0}-val".format(id))
   }
-} 
+}
 
 // HTML Tempalte for a select input
 SelectInput = function(id, options){
