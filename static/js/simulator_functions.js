@@ -81,7 +81,19 @@ $(document).ready(function() {
 
   i=0
   $('#add-src').click(function(){
-    create_src_panel($('#src-setups'), 'src-conf', i)
+    id = 'src-conf-{0}'.format(i)
+    appendTemplate($('#src-setups'), 'source-block', {'id': id})
+    $('#{0}-sel'.format(id)).change(function(){
+      val = $('#{0}-sel option:selected'.format(id))[0].value
+      console.log('#{0}-pyramid'.format(id))
+      console.log($('#{0}-pyramid'.format(id)))
+      $('#{0}-pyramid'.format(id)).hide()
+      $('#{0}-box'.format(id)).hide()
+      $('#{0}-sphere'.format(id)).hide()
+      $('#{0}-single'.format(id)).hide()
+
+      $('#{0}-{1}'.format(id, val)).show()
+    })
     i += 1
   })
   $('#add-src').click()

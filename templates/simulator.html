@@ -91,3 +91,45 @@
     </section>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.2/ace.js" type="text/javascript"></script>
 {% endblock %}
+{% block templates %}
+<template id="source-block">
+  <div id="{id}" class="my-1">
+    <div class="row input-group mx-0" id="{id}-tr">
+      <select class="col-md-10" id="{id}-sel">
+        <option value="single">single</option>
+        <option value="box">box</option>
+        <option value="sphere">sphere</option>
+        <option value="pyramid">pyramid</option>
+      </select>
+      <button class="btn btn-info col-md-1 p-0" id="{id}-col" data-toggle="collapse" data-target="#{id}-body" aria-example="True" aria-controls="{id}-body">
+        <fas-icon icon-name="sort-down"></fas-icon>
+      </button>
+      <button class="btn btn-danger col-md-1 p-0" id="{id}-del"><fas-icon icon-name="minus"></fas-icon></button>
+    </div>
+    <div class="collapse" id="{id}-body">
+      <div id="{id}-single">
+        <vec3-input label="Position" value="0.0" step="0.25" id-suffix="pos" label-style="POS"></vec3-input>
+      </div>
+      <div id="{id}-box">
+        <vec3-input label="Dimensions" label-style="DIM" value="1.0" step="0.25" id-suffix="dim"></vec3-input>
+        <vec3-input label="Divisions"  label-style="DIM" value="2.0" step="1.0" id-suffix="div"></vec3-input>
+        <vec3-input label="Origin" label-style="POS" value="2.5" step="0.25" id-suffix="pos"></vec3-input>
+      </div>
+      <div id="{id}-sphere">
+        <number-input label="Rings"  value="4.0" step="1.0" id-suffix="rings"></number-input>
+        <number-input label="Segments"  value="8.0" step="1.0" id-suffix="segs"></number-input>
+        <number-input label="Radius" value="4.0" step="0.25" id-suffix="rad"></number-input>
+        <vec3-input label="Origin" label-style="POS" value="2.5" step="0.25" id-suffix="pos"></vec3-input>
+      </div>
+      <div id="{id}-pyramid">
+        <number-input label="Divisions" value="3.0" step="1.0" id-suffix="divs"></number-input>
+        <number-input label="Layers" value="4.0" step="1.0" id-suffix="lays"></number-input>
+        <number-input label="Length" value="8.0" step="0.25" id-suffix="len"></number-input>
+        <number-input label="Angle"  value="30.0" step="5.0" id-suffix="ang"></number-input>
+        <vec3-input label="Origin" label-style="POS" value="2.5" step="0.25" id-suffix="pos"></vec3-input>
+      </div>
+
+    </div>
+  </div>
+</template> <!-- Template for a source panel -->
+{% endblock %}

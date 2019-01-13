@@ -9,9 +9,7 @@ String.prototype.format = function() {
 //For inserting arguments into strings, but from a dictionary
 String.prototype.smartFormat = function(){
   var args = arguments;
-  console.log(this)
   return this.replace(/{(\S+)}/gi, function(match, key) {
-    console.log("found match: {0}, replacing with: {1}".format(match, args[0][key]))
     return typeof args[0][key] != 'undefined' ? args[0][key] : match;
   });
 }
@@ -34,86 +32,6 @@ function appendTemplate(parent, panelID, options){
   }
 }
 
-function create_src_panel(parent, id, i=-1){
-  //Creating a src-setup panel
-  if(i == -1){  i = parent.children.length - 1 }
-
-  opts = ["single", "box", "pyramid", "sphere"]
-  parent.append(panel(id, i, SelectInput("{0}-{1}".format(id, i), opts)))
-  body = $('#{0}-body-{1}'.format(id, i))
-
-  //Remove delete button if first
-  if(i == 0){ $('#{0}-del-{1}'.format(id, i)).remove() }
-  if( i > 0){
-    // Add functionality to delete button
-    $($('#{0}-del-{1}'.format(id, i))).click(function(){
-      remove_element('{0}-{1}'.format(id, i))
-    })
-  }
-
-  toprow = $('#{0}-tr-{1}'.format(id, i))
-  body = $('#{0}-body-{1}'.format(id, i))
-
-  // toprow.append(SelectInput("{0}-{1}".format(id, i), opts))
-
-  $('#{0}-{1}-sel'.format(id, i)).change(function(){
-    val = $('#{0}-{1}-sel option:selected'.format(id, i))[0].value
-    $('#{0}-pyramid-{1}'.format(id, i)).hide()
-    $('#{0}-box-{1}'.format(id, i)).hide()
-    $('#{0}-sphere-{1}'.format(id, i)).hide()
-    $('#{0}-single-{1}'.format(id, i)).hide()
-
-    $('#{0}-{2}-{1}'.format(id, i, val)).show()
-  })
-
-
-  //Create the main controls for each
-  create_singlesrc_controls(body, id, i)
-  create_box_controls(body, id, i)
-  create_pyramid_controls(body, id, i)
-  create_sphere_controls(body, id, i)
-  //Only box should be shown by default
-  $('#{0}-pyramid-{1}'.format(id, i)).hide()
-  $('#{0}-sphere-{1}'.format(id, i)).hide()
-  $('#{0}-box-{1}'.format(id, i)).hide()
-
-}
-
-
-function create_box_controls(parent, id, i){
-  //Create the controls for a box src-setup
-  parent.append('<div id="{0}-box-{1}"></div>'.format(id, i))
-  create_vector3_input($("#{0}-box-{1}".format(id, i)), "Dimensions", "DIM", def_val=1.0, def_step=0.25, "dim")
-  create_vector3_input($("#{0}-box-{1}".format(id, i)), "Divisions", "DIM", def_val=2.0, def_step=1.0, "div")
-  create_vector3_input($("#{0}-box-{1}".format(id, i)), "Origin", "POS", def_val=2.5, def_step=0.25, "pos")
-
-}
-
-function create_sphere_controls(parent, id, i){
-  parent.append('<div id="{0}-sphere-{1}"></div>'.format(id, i))
-  create_number_input($('#{0}-sphere-{1}'.format(id, i)), "Rings", def_val=4.0, def_step=1.0, "rings")
-  create_number_input($('#{0}-sphere-{1}'.format(id, i)), "Segments", def_val=8.0, def_step=1.0, "segs")
-  create_number_input($('#{0}-sphere-{1}'.format(id, i)), "Radius", def_val=8.0, def_step=0.25, "rad")
-  create_vector3_input($("#{0}-sphere-{1}".format(id, i)), "Origin", "POS", def_val=2.5, def_step=0.25, "pos")
-}
-
-function create_pyramid_controls(parent, id, i){
-  //Create the controls for a pyramid src-setup
-  parent.append('<div id="{0}-pyramid-{1}"></div>'.format(id, i))
-  create_number_input($('#{0}-pyramid-{1}'.format(id, i)), "Layers", def_val=3.0, def_step=1.0, "lays")
-  create_number_input($('#{0}-pyramid-{1}'.format(id, i)), "Divisions", def_val=4.0, def_step=1.0, "divs")
-  create_number_input($('#{0}-pyramid-{1}'.format(id, i)), "Length", def_val=8.0, def_step=0.25, "len")
-  create_number_input($('#{0}-pyramid-{1}'.format(id, i)), "Angle", def_val=30, def_step=5, "ang")
-  create_vector3_input($("#{0}-pyramid-{1}".format(id, i)), "Origin", "POS", def_val=2.5, def_step=0.25, "pos")
-
-}
-
-function create_singlesrc_controls(parent, id, i){
-  //Create the controls for a pyramid src-setup
-  parent.append('<div id="{0}-single-{1}"></div>'.format(id, i))
-  create_vector3_input($("#{0}-single-{1}".format(id, i)),"Position", "POS", def_val=2.5, def_step=0.25, "pos")
-}
-
 
 
 function set_vec3_input(id, obj, type="XYZ"){
@@ -129,8 +47,6 @@ function set_number_input(id, val){
 function set_selection_input(id, i, val){
   $('#{0}-sel-{1}'.format(id, i)).val(val)
 }
-
-
 
 // Functions for reading the inputs
 // returns JSON objects
@@ -203,36 +119,11 @@ function numberInput(label, id, def_val, def_step, use_outer_div = true){
   }
 }
 
-// HTML Tempalte for a select input
-function selectInput(id, options){
-  optionsHTML = ''
-  for(i=0;i<options.length; i++){
-    optionsHTML += '<option value="{0}">{0}</option>\n'.format(options[i])
-  }
-
-  return '<select id="{0}-sel" class="w-100">\
-          {1} \
-          </select>'.format(id, optionsHTML)
-}
 
 // HTML Template for a span containing an fas icon
 function fasIcon(iconName){
   return '<span class="fas fa-{0}"></span>'.format(iconName)
 }
-
-// HTML Tempalte for a collapsing panel
-function panel(id, index, title){
-  return '<div id="{0}-{1}"> \
-    <div class="row input-group mx-0" id="{0}-tr-{1}"> \
-      <h5 class="text-secondary col-md-10 p-0">{4}</h5> \
-      <button class="btn btn-info col-md-1 p-0" id="{0}-col-{1}" data-toggle="collapse" data-target="#{0}-body-{1}" aria-example="True" aria-controls="{0}-body-{1}">{3}</button> \
-      <button class="btn btn-danger col-md-1 -p-0" id="{0}-del-{1}">{2}</button> \
-    </div> \
-    <div class="collapse" id="{0}-body-{1}"> \
-    </div> \
-  </div>'.format(id, index, fasIcon("minus"), fasIcon("sort-down"), title)
-}
-
 
 
 // ====== Functions To add Input Groups to the pages ===== //
