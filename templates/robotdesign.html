@@ -2,8 +2,8 @@
 {% block title %}Robot Designer{% endblock %}
 {% block head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/editor.css') }}" media="screen">
-<script src="{{ url_for('static', filename='js/construct_ui.js') }}" type="text/javascript"></script>
-<script src="{{ url_for('static', filename='js/designer_functions.js') }}" type="text/javascript"></script>
+<script src="{{ url_for('static', filename='js/construct_ui.js') }}" type="text/javascript" defer></script>
+<script src="{{ url_for('static', filename='js/designer_functions.js') }}" type="text/javascript" defer></script>
 {% endblock %}
 {% block content %}
     <h1>Robot Designer</h1>
@@ -13,6 +13,7 @@
           </canvas>
       </div>
       <div id="interface-container" class="bg-gray py-1 col-md-5">
+        <vec3-input label="Numbers" id="thingymajig" value="25" step="13" label-style="ROT"></vec3-input>
         <ul class="nav nav-tabs border-bottom-0">
           <li class="ml-1 nav-item active" ><a class="nav-link px-1" data-toggle="tab"  href="#robo-config">Robot <span class="fas fa-robot"></span></a></li>
           <li class="nav-item"><a class="nav-link px-1" data-toggle="tab" href="#mic-config">Microphones <span class="fas fa-microphone"></span></a></li>
@@ -96,4 +97,38 @@
     </section>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.2/ace.js" type="text/javascript"></script>
 
+{% endblock %}
+{% block templates %}
+<template id="mic-block">
+  <div id="{id}" class="my-1">
+    <div class="row input-group mx-0" id="{id}-tr">
+      <h5 class="text-secondary col-md-10 p-0">Microphone</h5>
+      <button class="btn btn-info col-md-1 p-0" id="{id}-col" data-toggle="collapse" data-target="#{id}-body" aria-example="True" aria-controls="{id}-body">
+        <fas-icon icon-name="sort-down"></fas-icon>
+      </button>
+      <button class="btn btn-danger col-md-1 p-0" id="{id}-del"><fas-icon icon-name="minus"></fas-icon></button>
+    </div>
+    <div class="collapse" id="{id}-body">
+      <number-input label="ID" id="{id}-id" value="1" step="1.0"></number-input>
+      <vec3-input label="Origin" id="{id}-pos" value="0" step="0.25" label-style="POS"></vec3-input>
+      <vec3-input label="Rotation" id="{id}-rot" value="0" step="30" label-style="ROT"></vec3-input>
+    </div>
+  </div>
+</template> <!-- Template for a mic panel -->
+<template id="motor-block">
+  <div id="{id}" class="my-1">
+    <div class="row input-group mx-0" id="{id}-tr">
+      <h5 class="text-secondary col-md-10 p-0">Motor</h5>
+      <button class="btn btn-info col-md-1 p-0" id="{id}-col" data-toggle="collapse" data-target="#{id}-body" aria-example="True" aria-controls="{id}-body">
+        <fas-icon icon-name="sort-down"></fas-icon>
+      </button>
+      <button class="btn btn-danger col-md-1 p-0" id="{id}-del"><fas-icon icon-name="minus"></fas-icon></button>
+    </div>
+    <div class="collapse" id="{id}-body">
+      <number-input label="ID" id="{id}-id" value="1" step="1.0"></number-input>
+      <vec3-input label="Origin" id="{id}-pos" value="0" step="0.26" label-style="POS"></vec3-input>
+      <p> TODO ADD MOTOR NOISE </p>
+    </div>
+  </div>
+</template> <!-- Template for a mic panel -->
 {% endblock %}

@@ -6,61 +6,40 @@ String.prototype.format = function() {
   });
 };
 
-
-
-function create_mic_panel(parent, id, i=-1){
-  //Creating a microphone panel setup
-  if(i == -1){ i = parent.children.length - 1 }
-  parent.append(Panel(id, i, "Microphones"))
-  body = $('#{0}-body-{1}'.format(id, i))
-
-  //Remove delete button if first
-  if(i == 0){ $('#{0}-del-{1}'.format(id, i)).remove() }
-  if( i > 0){
-    // Add functionality to delete button
-    $($('#{0}-del-{1}'.format(id, i))).click(function(){
-      remove_element('{0}-{1}'.format(id, i))
-    })
-  }
-
-  //Creating the controls
-  create_number_input(body, "ID", i, 1.0, true)
-  create_vector3_input(body, "Position", "POS", 0, 0.25, "pos")
-  create_vector3_input(body, "Rotation", "ROT", 0, 5, "rot")
-
-  //MIC STYLE
+//For inserting arguments into strings, but from a dictionary
+String.prototype.smartFormat = function(){
+  var args = arguments;
+  console.log(this)
+  return this.replace(/{(\S+)}/gi, function(match, key) {
+    console.log("found match: {0}, replacing with: {1}".format(match, args[0][key]))
+    return typeof args[0][key] != 'undefined' ? args[0][key] : match;
+  });
 }
 
-function create_mot_panel(parent, id, i=-1){
-  //Creating a motor-setup panel
-  //Creating a microphone panel setup
-  if(i == -1){  i = parent.children.length - 1 }
-  parent.append(Panel(id, i, "Motors"))
-  body = $('#{0}-body-{1}'.format(id, i))
+//Clones a template into the page, with dictionary options
+function appendTemplate(parent, panelID, options){
+  //Test for browser support
+  if('content' in document.createElement('template')){
+    var panel = $("#{0}".format(panelID))
 
-  //Remove delete button if first
-  if(i == 0){ $('#{0}-del-{1}'.format(id, i)).remove() }
-  if( i > 0){
-    // Add functionality to delete button
-    $($('#{0}-del-{1}'.format(id, i))).click(function(){
-      remove_element('{0}-{1}'.format(id, i))
-    })
+    if(panel[0].content != undefined){
+      parent.append(document.importNode(panel[0].content, true))
+
+      innerHTML = parent[0].innerHTML
+      parent[0].innerHTML= innerHTML.smartFormat(options)
+    }
+    else{
+      console.log("Couldn't find template")
+    }
   }
-
-  //Creating the controls
-  create_number_input(body, "ID", i, 1.0, true, "id")
-  create_vector3_input(body, "Position", "POS", 0, 0.25, "pos")
-
-  body.append("<p>TODO ADD MOTOR NOISE</p>")
 }
-
 
 function create_src_panel(parent, id, i=-1){
   //Creating a src-setup panel
   if(i == -1){  i = parent.children.length - 1 }
 
   opts = ["single", "box", "pyramid", "sphere"]
-  parent.append(Panel(id, i, SelectInput("{0}-{1}".format(id, i), opts)))
+  parent.append(panel(id, i, SelectInput("{0}-{1}".format(id, i), opts)))
   body = $('#{0}-body-{1}'.format(id, i))
 
   //Remove delete button if first
@@ -195,10 +174,10 @@ V3Styles = function(style){
 // ====== Classes for Input Groups ====== //
 
 // HTML Template for a Vector3 input
-Vector3Input = function(label, id, def_val=0.0, def_step=0.25, style="POS"){
-  inp_1 = NumberInput(V3Styles(style).first, "{0}-{1}".format(id, V3Styles(style).first), def_val, def_step, false)
-  inp_2 = NumberInput(V3Styles(style).second, "{0}-{1}".format(id, V3Styles(style).second), def_val, def_step, false)
-  inp_3 = NumberInput(V3Styles(style).third, "{0}-{1}".format(id, V3Styles(style).third), def_val, def_step, false)
+function vector3Input(label, id, def_val=0.0, def_step=0.25, style="POS"){
+  inp_1 = numberInput(V3Styles(style).first, "{0}-{1}".format(id, V3Styles(style).first), def_val, def_step, false)
+  inp_2 = numberInput(V3Styles(style).second, "{0}-{1}".format(id, V3Styles(style).second), def_val, def_step, false)
+  inp_3 = numberInput(V3Styles(style).third, "{0}-{1}".format(id, V3Styles(style).third), def_val, def_step, false)
 
   return '<hr/> \
           <p class="text-secondary">{0}</p> \
@@ -209,23 +188,23 @@ Vector3Input = function(label, id, def_val=0.0, def_step=0.25, style="POS"){
 
 //  HTML template for a Number input
 //  use_outer_div = true will put it in an individual input group
-NumberInput = function(label, id, def_val, def_step, use_outer_div = true){
-  start = '<div class="input-group">'
+function numberInput(label, id, def_val, def_step, use_outer_div = true){
+  start = '<hr/ ><div class="input-group">'
   end = '</div>'
   if(use_outer_div == true){
-    return start + NumberInput(label, id, def_val, def_step, false) + end
+    return start + numberInput(label, id, def_val, def_step, false) + end
   }
   else{
     return '<div class="input-group-prepend">\
               <p class="text-info input-group-text">{0}</p> \
             </div> \
-            <input class="form-control pr-0" type="number" value="{1}" step="{2}" id="{3}"/> \
+            <input class="form-control pr-1" type="number" value="{1}" step="{2}" id="{3}"/> \
              '.format(label, def_val, def_step, "{0}-val".format(id))
   }
 }
 
 // HTML Tempalte for a select input
-SelectInput = function(id, options){
+function selectInput(id, options){
   optionsHTML = ''
   for(i=0;i<options.length; i++){
     optionsHTML += '<option value="{0}">{0}</option>\n'.format(options[i])
@@ -237,12 +216,12 @@ SelectInput = function(id, options){
 }
 
 // HTML Template for a span containing an fas icon
-FASIcon = function(iconName){
+function fasIcon(iconName){
   return '<span class="fas fa-{0}"></span>'.format(iconName)
 }
 
 // HTML Tempalte for a collapsing panel
-Panel = function(id, index, title){
+function panel(id, index, title){
   return '<div id="{0}-{1}"> \
     <div class="row input-group mx-0" id="{0}-tr-{1}"> \
       <h5 class="text-secondary col-md-10 p-0">{4}</h5> \
@@ -251,8 +230,9 @@ Panel = function(id, index, title){
     </div> \
     <div class="collapse" id="{0}-body-{1}"> \
     </div> \
-  </div>'.format(id, index, FASIcon("minus"), FASIcon("sort-down"), title)
+  </div>'.format(id, index, fasIcon("minus"), fasIcon("sort-down"), title)
 }
+
 
 
 // ====== Functions To add Input Groups to the pages ===== //
@@ -269,15 +249,43 @@ Panel = function(id, index, title){
 //Creates a vector 3 input with labels X, Y, and Z
 function create_vector3_input(parent, label, style, def_val=0.0, def_step=0.25, id_suffix=""){
   if(id_suffix == "")
-    parent.append(Vector3Input(label, parent[0].id, def_val, def_step, style))
+    parent.append(vector3Input(label, parent[0].id, def_val, def_step, style))
   else
-    parent.append(Vector3Input(label, parent[0].id+"-{0}".format(id_suffix), def_val, def_step, style))
+    parent.append(vector3Input(label, parent[0].id+"-{0}".format(id_suffix), def_val, def_step, style))
 }
 
 //Creates a basic number input with a label
 function create_number_input(parent, label, def_val=0.0, def_step=0.25, id_suffix=""){
   if(id_suffix == "")
-    parent.append(NumberInput(label, parent[0].id, def_val, def_step))
+    parent.append(numberInput(label, parent[0].id, def_val, def_step))
   else
-    parent.append(NumberInput(label, parent[0].id+"-{0}".format(id_suffix), def_val, def_step))
+    parent.append(numberInput(label, parent[0].id+"-{0}".format(id_suffix), def_val, def_step))
 }
+
+
+// ===== Custom HTML Element Handlesr ===== //
+customElements = Window.customElements
+
+class FasIcon extends HTMLElement{
+  constructor(){
+    super()
+    this.innerHTML = fasIcon(this.getAttribute('icon-name'))
+  }
+}
+
+class NumberInput extends HTMLElement{
+  constructor(){
+    super()
+    this.innerHTML = numberInput(this.getAttribute('label'), this.id, this.getAttribute('value'), this.getAttribute('step'))
+  }
+}
+class Vector3Input extends HTMLElement{
+  constructor(){
+    super()
+    this.innerHTML = vector3Input(this.getAttribute('label'), this.id, this.getAttribute('value'), this.getAttribute('step'), this.getAttribute('label-style'))
+  }
+}
+
+customElements.define('fas-icon', FasIcon)
+customElements.define('number-input', NumberInput)
+customElements.define('vec3-input', Vector3Input)

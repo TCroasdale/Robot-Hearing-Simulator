@@ -76,16 +76,19 @@ $(document).ready(function() {
   //Creating the UI
   i=0
   $('#add-mic').click(function(){
-    create_mic_panel($('#mic-setups'), 'mic-conf', i)
+    appendTemplate($('#mic-setups'), 'mic-block', {'id': 'mic-conf-{0}'.format(i)})
+
     i += 1
   })
   $('#add-mic').click()
+  $('#mic-conf-0-del').remove()
   j=0
   $('#add-mot').click(function(){
-    create_mot_panel($('#mot-setups'), 'mot-conf', j)
+    appendTemplate($('#mot-setups'), 'motor-block', {'id': 'mot-conf-{0}'.format(j)})
     j += 1
   })
   $('#add-mot').click()
+  $('#mot-conf-0-del').remove()
 
   create_number_input($('#skin-width'), "Skin Width", 0.25, 0.05)
 
@@ -109,6 +112,7 @@ function update_UI(conf){
   for(i = 0; i < mic_setups.length; i++){
     if(i >= $('#mic-setups')[0].children.length){
       create_src_panel($('#mic-setups'), 'mic-conf', i)
+      // appendPanel($('#mic-setups'), 'mic-block')
     }
     set_number_input('mic-conf-id-{0}'.format(i), mic_setups[i]['id'])
     set_vec3_input('mic-conf-pos-{0}'.format(i), mic_setups[i]['local_pos'])
@@ -168,4 +172,3 @@ function compile_code(){
 
   return code
 }
-

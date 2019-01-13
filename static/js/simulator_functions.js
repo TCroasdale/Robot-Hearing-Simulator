@@ -88,8 +88,8 @@ $(document).ready(function() {
 
   create_vector3_input($('#robo-pos'), "Position", "POS", 2.5, 0.25,)
   create_vector3_input($('#room-dim'), "Room Dimensions", "DIM", 5.0, 0.25)
-  create_number_input($('#rt-60'), 'RT 60', 0.4, 0.1)
-  create_number_input($('#sample-rate'), 'Sample Rate', 16000, 100)
+  create_number_input($('#rt-60'), 'RT 60', 0.4, 0.1, true)
+  create_number_input($('#sample-rate'), 'Sample Rate', 16000, 100, true)
 
   editor.on('change', function(obj){
     update_UI(JSON.parse(editor.getValue()))
