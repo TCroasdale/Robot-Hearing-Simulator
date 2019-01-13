@@ -97,6 +97,7 @@ $(document).ready(function() {
     i += 1
   })
   $('#add-src').click()
+  $('#src-conf-0-del').remove()
 
   create_vector3_input($('#robo-pos'), "Position", "POS", 2.5, 0.25,)
   create_vector3_input($('#room-dim'), "Room Dimensions", "DIM", 5.0, 0.25)
