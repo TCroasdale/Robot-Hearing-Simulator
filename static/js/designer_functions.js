@@ -152,9 +152,9 @@ function compile_code(){
   num_mics = $('#mic-setups')[0].children.length
   mic_setups = []
   for(i = 0; i < num_mics; i++){
-    var id = read_num_input('mic-conf-id-{0}'.format(i))
-    var pos = read_vec3_input('mic-conf-pos-{0}'.format(i))
-    var rot = read_vec3_input('mic-conf-rot-{0}'.format(i), "RYP")
+    var id = read_num_input('mic-conf-{0}-id'.format(i))
+    var pos = read_vec3_input('mic-conf-{0}-pos'.format(i))
+    var rot = read_vec3_input('mic-conf-{0}-rot'.format(i), "ROT")
     //READ MIC STYLE
     mic = {"id": id, "local_pos": pos, "local_rot": rot, "mic_style": {"uid": "-1"}}
     mic_setups.push(mic)
@@ -162,8 +162,8 @@ function compile_code(){
   num_mots = $('#mot-setups')[0].children.length
   mot_setups = []
   for(i = 0; i < num_mots; i++){
-    var id = read_num_input('mot-conf-id-{0}'.format(i))
-    var pos = read_vec3_input('mot-conf-pos-{0}'.format(i))
+    var id = read_num_input('mot-conf-{0}-id'.format(i))
+    var pos = read_vec3_input('mot-conf-{0}-pos'.format(i))
     mot = {"id": id, "local_pos": pos, "sound": {"uid": "-1"}}
     //READ SOUND SRC
     mot_setups.push(mot)

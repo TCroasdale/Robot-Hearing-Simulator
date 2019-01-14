@@ -95,7 +95,7 @@
 <template id="source-block">
   <div id="{id}" class="my-1">
     <div class="row mx-0" id="{id}-tr">
-      <select class="col-md-10 form-control" id="{id}-sel">
+      <select class="col-md-10 form-control" id="{id}-sel" ev-change="sel-change">
         <option value="single">single</option>
         <option value="box">box</option>
         <option value="sphere">sphere</option>
@@ -108,25 +108,25 @@
     </div>
     <div class="collapse" id="{id}-body">
       <div id="{id}-single">
-        <vec3-input label="Position" value="0.0" step="0.25" id-suffix="pos" label-style="POS"></vec3-input>
+        <vec3-input label="Position" id="{id}-single" value="0.0" step="0.25" id-suffix="pos" label-style="POS"></vec3-input>
       </div>
       <div id="{id}-box">
-        <vec3-input label="Dimensions" label-style="DIM" value="1.0" step="0.25" id-suffix="dim"></vec3-input>
-        <vec3-input label="Divisions"  label-style="DIM" value="2.0" step="1.0" id-suffix="div"></vec3-input>
-        <vec3-input label="Origin" label-style="POS" value="2.5" step="0.25" id-suffix="pos"></vec3-input>
+        <vec3-input label="Dimensions" id="{id}-box" label-style="DIM" value="1.0" step="0.25" id-suffix="dim"></vec3-input>
+        <vec3-input label="Divisions"  id="{id}-box" label-style="DIM" value="2.0" step="1.0" id-suffix="div"></vec3-input>
+        <vec3-input label="Origin" id="{id}-box" label-style="POS" value="2.5" step="0.25" id-suffix="pos"></vec3-input>
       </div>
       <div id="{id}-sphere">
-        <number-input label="Rings"  value="4.0" step="1.0" id-suffix="rings"></number-input>
-        <number-input label="Segments"  value="8.0" step="1.0" id-suffix="segs"></number-input>
-        <number-input label="Radius" value="4.0" step="0.25" id-suffix="rad"></number-input>
-        <vec3-input label="Origin" label-style="POS" value="2.5" step="0.25" id-suffix="pos"></vec3-input>
+        <number-input label="Rings" id="{id}-sphere" value="4.0" step="1.0" id-suffix="rings"></number-input>
+        <number-input label="Segments" id="{id}-sphere" value="8.0" step="1.0" id-suffix="segs"></number-input>
+        <number-input label="Radius" id="{id}-sphere" value="4.0" step="0.25" id-suffix="rad"></number-input>
+        <vec3-input label="Origin" id="{id}-sphere" label-style="POS" value="2.5" step="0.25" id-suffix="pos"></vec3-input>
       </div>
       <div id="{id}-pyramid">
-        <number-input label="Divisions" value="3.0" step="1.0" id-suffix="divs"></number-input>
-        <number-input label="Layers" value="4.0" step="1.0" id-suffix="lays"></number-input>
-        <number-input label="Length" value="8.0" step="0.25" id-suffix="len"></number-input>
-        <number-input label="Angle"  value="30.0" step="5.0" id-suffix="ang"></number-input>
-        <vec3-input label="Origin" label-style="POS" value="2.5" step="0.25" id-suffix="pos"></vec3-input>
+        <number-input label="Divisions" id="{id}-pyramid" value="3.0" step="1.0" id-suffix="divs"></number-input>
+        <number-input label="Layers" id="{id}-pyramid" value="4.0" step="1.0" id-suffix="lays"></number-input>
+        <number-input label="Length" id="{id}-pyramid" value="8.0" step="0.25" id-suffix="len"></number-input>
+        <number-input label="Angle"  id="{id}-pyramid" value="30.0" step="5.0" id-suffix="ang"></number-input>
+        <vec3-input label="Origin" id="{id}-pyramid" label-style="POS" value="2.5" step="0.25" id-suffix="pos"></vec3-input>
       </div>
 
     </div>

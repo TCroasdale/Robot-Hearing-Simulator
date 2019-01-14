@@ -13,7 +13,6 @@
           </canvas>
       </div>
       <div id="interface-container" class="bg-gray py-1 col-md-5">
-        <vec3-input label="Numbers" id="thingymajig" value="25" step="13" label-style="ROT"></vec3-input>
         <ul class="nav nav-tabs border-bottom-0">
           <li class="ml-1 nav-item active" ><a class="nav-link px-1" data-toggle="tab"  href="#robo-config">Robot <fas-icon icon-name="robot"></fas-icon></a></li>
           <li class="nav-item"><a class="nav-link px-1" data-toggle="tab" href="#mic-config">Microphones <fas-icon icon-name="microphone"></fas-icon></a></li>
@@ -116,7 +115,7 @@
   </div>
 </template> <!-- Template for a mic panel -->
 <template id="motor-block">
-  <div id="{id}" class="my-1">
+  <div id="{id}" class="my-1" >
     <div class="row input-group mx-0" id="{id}-tr">
       <h5 class="text-secondary col-md-10 p-0">Motor</h5>
       <button class="btn btn-info col-md-1 p-0" id="{id}-col" data-toggle="collapse" data-target="#{id}-body" aria-example="True" aria-controls="{id}-body">

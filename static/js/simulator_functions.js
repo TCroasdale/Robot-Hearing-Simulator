@@ -79,21 +79,21 @@ $(document).ready(function() {
 
   //Creating UI
 
+  on_sel_change = function(){
+    val = $('#{0}-sel option:selected'.format(id))[0].value
+    $('#{0}-pyramid'.format(id)).hide()
+    $('#{0}-box'.format(id)).hide()
+    $('#{0}-sphere'.format(id)).hide()
+    $('#{0}-single'.format(id)).hide()
+
+    $('#{0}-{1}'.format(id, val)).show()
+  }
+
   i=0
   $('#add-src').click(function(){
     id = 'src-conf-{0}'.format(i)
-    appendTemplate($('#src-setups'), 'source-block', {'id': id})
-    $('#{0}-sel'.format(id)).change(function(){
-      val = $('#{0}-sel option:selected'.format(id))[0].value
-      console.log('#{0}-pyramid'.format(id))
-      console.log($('#{0}-pyramid'.format(id)))
-      $('#{0}-pyramid'.format(id)).hide()
-      $('#{0}-box'.format(id)).hide()
-      $('#{0}-sphere'.format(id)).hide()
-      $('#{0}-single'.format(id)).hide()
+    appendTemplate($('#src-setups'), 'source-block', {'id': id}, {'sel-change': on_sel_change})
 
-      $('#{0}-{1}'.format(id, val)).show()
-    })
     i += 1
   })
   $('#add-src').click()
@@ -101,8 +101,8 @@ $(document).ready(function() {
 
   create_vector3_input($('#robo-pos'), "Position", "POS", 2.5, 0.25,)
   create_vector3_input($('#room-dim'), "Room Dimensions", "DIM", 5.0, 0.25)
-  create_number_input($('#rt-60'), 'RT 60', 0.4, 0.1, true)
-  create_number_input($('#sample-rate'), 'Sample Rate', 16000, 100, true)
+  create_number_input($('#rt-60'), 'RT 60', 0.4, 0.1, "", true)
+  create_number_input($('#sample-rate'), 'Sample Rate', 16000, 100, "", true)
 
   editor.on('change', function(obj){
     update_UI(JSON.parse(editor.getValue()))
@@ -117,7 +117,7 @@ $(document).ready(function() {
 
 function update_UI(conf){
   set_vec3_input('robo-pos', conf['simulation_config']['robot_pos'])
-  set_vec3_input('room-dim', conf['simulation_config']['room_dimensions'], "WHD")
+  set_vec3_input('room-dim', conf['simulation_config']['room_dimensions'], "DIM")
   set_number_input('rt-60', conf['simulation_config']['rt60'])
   set_number_input('sample-rate', conf['simulation_config']['sample_rate'])
 
@@ -130,8 +130,8 @@ function update_UI(conf){
     var style = sim_setups[i]['style']
     set_selection_input('src-conf', i, style)
     if(style == "box"){
-      set_vec3_input('src-conf-box-dim-{0}'.format(i), sim_setups[i]['dimensions'], "WHD")
-      set_vec3_input('src-conf-box-div-{0}'.format(i), sim_setups[i]['divisions'], "WHD")
+      set_vec3_input('src-conf-box-dim-{0}'.format(i), sim_setups[i]['dimensions'], "DIM")
+      set_vec3_input('src-conf-box-div-{0}'.format(i), sim_setups[i]['divisions'], "DIM")
       set_vec3_input('src-conf-box-pos-{0}'.format(i), sim_setups[i]['origin'])
     }
     else if(style == "pyramid"){
@@ -164,7 +164,7 @@ function update_UI(conf){
 function compile_code(){
   console.log("Compiling Code..")
   var robopos = read_vec3_input('robo-pos')
-  var roomdim = read_vec3_input('room-dim', "WHD")
+  var roomdim = read_vec3_input('room-dim', "DIM")
   var rt60 = read_num_input('rt-60')
   var sample = read_num_input('sample-rate')
   sim_config = {"robot_pos": robopos, "room_dimensions": roomdim, "rt60": rt60, "sample_rate": sample}
@@ -173,33 +173,33 @@ function compile_code(){
   sim_setups = []
   for(i = 0; i < num_srcs; i++){
     src_setup = {}
-    var style = $('#src-conf-sel-{0}'.format(i))[0].value
+    var style = $('#src-conf-{0}-sel'.format(i))[0].value
     if(style == "box"){
-      var dim = read_vec3_input('src-conf-box-dim-{0}'.format(i), "WHD")
-      var div = read_vec3_input('src-conf-box-div-{0}'.format(i), "WHD")
-      var or = read_vec3_input('src-conf-box-pos-{0}'.format(i))
+      var dim = read_vec3_input('src-conf-{0}-box-dim'.format(i), "DIM")
+      var div = read_vec3_input('src-conf-{0}-box-div'.format(i), "DIM")
+      var or = read_vec3_input('src-conf-{0}-box-pos'.format(i))
       src_setup = {"style": style, "origin": or, "dimensions": dim, "divisions": div}
       sim_setups.push(src_setup)
     }
     else if(style == "pyramid"){
-      var lay = read_num_input('src-conf-pyr-lays-{0}'.format(i))
-      var div = read_num_input('src-conf-pyr-divs-{0}'.format(i))
-      var len = read_num_input('src-conf-pyr-len-{0}'.format(i))
-      var ang = read_num_input('src-conf-pyr-ang-{0}'.format(i))
-      var pos = read_vec3_input('src-conf-pyr-pos-{0}'.format(i))
+      var lay = read_num_input('src-conf-{0}-pyramid-lays'.format(i))
+      var div = read_num_input('src-conf-{0}-pyramid-divs'.format(i))
+      var len = read_num_input('src-conf-{0}-pyramid-len'.format(i))
+      var ang = read_num_input('src-conf-{0}-pyramid-ang'.format(i))
+      var pos = read_vec3_input('src-conf-pyr-pos'.format(i))
       src_setup = {"style": style, "origin": pos, "layers": lay, "divisions": div, "angle_from_normal": ang, "length": len}
       sim_setups.push(src_setup)
     }
     else if(style == "sphere"){
-      var rin = read_num_input('src-conf-sphere-rings-{0}'.format(i))
-      var seg = read_num_input('src-conf-sphere-segs-{0}'.format(i))
-      var rad = read_num_input('src-conf-sphere-rad-{0}'.format(i))
-      var pos = read_vec3_input('src-conf-sphere-pos-{0}'.format(i))
+      var rin = read_num_input('src-conf-{0}-sphere-rings'.format(i))
+      var seg = read_num_input('src-conf-{0}-sphere-segs'.format(i))
+      var rad = read_num_input('src-conf-{0}-sphere-rad'.format(i))
+      var pos = read_vec3_input('src-conf-{0}-sphere-pos'.format(i))
       src_setup = {"style": style, "origin": pos, "rings": rin, "segments": seg, "radius": rad}
       sim_setups.push(src_setup)
     }
     else if(style == "single"){
-      var pos = read_vec3_input('src-conf-sin-pos-{0}'.format(i))
+      var pos = read_vec3_input('src-conf-{0}-single-pos'.format(i))
       src_setup = {"style": style, "origin": pos}
       sim_setups.push(src_setup)
     }

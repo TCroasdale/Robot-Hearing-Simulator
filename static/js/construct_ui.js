@@ -14,8 +14,29 @@ String.prototype.smartFormat = function(){
   });
 }
 
+function attachEvents(node, events){
+  var children = node.children;
+  for (var i = 0; i < children.length; i++) {
+    var child = children[i];
+
+    //Attach events to the children as well
+    attachEvents(child, events)
+
+    for(var j = 0; j < child.attributes.length; j++){
+      attr = child.attributes[j]
+      found = attr.name.match(/ev-([a-z]+)/) // Looks for attribute ev-{event name}
+      if(found){
+        //Attach an event listener to the element
+        //found[1] is the event type, such as change or click, should work for custom events too
+        $('#{0}'.format(child.id)).on(found[1], events[child.getAttribute('ev-change')])
+      }
+    }
+  }
+
+}
+
 //Clones a template into the page, with dictionary options
-function appendTemplate(parent, panelID, options){
+function appendTemplate(parent, panelID, options, events){
   //Test for browser support
   if('content' in document.createElement('template')){
     var panel = $("#{0}".format(panelID))
@@ -25,6 +46,8 @@ function appendTemplate(parent, panelID, options){
 
       innerHTML = parent[0].innerHTML
       parent[0].innerHTML= innerHTML.smartFormat(options)
+
+      attachEvents(parent[0], events)
     }
     else{
       console.log("Couldn't find template")
@@ -50,16 +73,13 @@ function set_selection_input(id, i, val){
 
 // Functions for reading the inputs
 // returns JSON objects
-function read_vec3_input(id, type="XYZ"){
-  if(type != "XYZ" && type != "WHD" && type != "RYP"){
-    console.log("invalid read type, reading using XYZ")
-    type = "XYZ"
-  }
+function read_vec3_input(id, type="POS"){
+  style = V3Styles(type)
 
   input = { "x": "0.0", "y": "0.0", "z": "0.0"}
-  input['x'] = read_num_input("{0}-{1}".format(id, type[0]))
-  input['y'] = read_num_input("{0}-{1}".format(id, type[0]))
-  input['z'] = read_num_input("{0}-{1}".format(id, type[0]))
+  input['x'] = read_num_input("{0}-{1}".format(id, style.first))
+  input['y'] = read_num_input("{0}-{1}".format(id, style.second))
+  input['z'] = read_num_input("{0}-{1}".format(id, style.third))
 
   return input
 }
@@ -79,9 +99,9 @@ V3Styles = function(style){
     return Object.freeze({first: "Roll", second:  "Yaw", third: "Pitch"})
   }
 
-  if(style = "POS"){ return this.POS() }
-  else if(style = "ROT"){ return this.ROT() }
-  else if(style = "DIM"){ return this.DIM() }
+  if(style == "POS"){ return this.POS() }
+  else if(style == "ROT"){ return this.ROT() }
+  else if(style == "DIM"){ return this.DIM() }
   else{ return this.POS() }
 }
 
@@ -167,13 +187,15 @@ class FasIcon extends HTMLElement{
 class NumberInput extends HTMLElement{
   constructor(){
     super()
-    this.innerHTML = numberInput(this.getAttribute('label'), this.id, this.getAttribute('value'), this.getAttribute('step'))
+    var id = this.id + (this.hasAttribute("id-suffix") ? "-" + this.getAttribute('id-suffix') : "");
+    this.innerHTML = numberInput(this.getAttribute('label'), id, this.getAttribute('value'), this.getAttribute('step'))
   }
 }
 class Vector3Input extends HTMLElement{
   constructor(){
     super()
-    this.innerHTML = vector3Input(this.getAttribute('label'), this.id, this.getAttribute('value'), this.getAttribute('step'), this.getAttribute('label-style'))
+    var id = this.id + (this.hasAttribute("id-suffix") ? "-" + this.getAttribute('id-suffix') : "");
+    this.innerHTML = vector3Input(this.getAttribute('label'), id, this.getAttribute('value'), this.getAttribute('step'), this.getAttribute('label-style'))
   }
 }
 
