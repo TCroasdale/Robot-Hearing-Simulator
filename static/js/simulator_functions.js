@@ -79,7 +79,8 @@ $(document).ready(function() {
 
   //Creating UI
 
-  on_sel_change = function(){
+  on_sel_change = function(id){
+
     val = $('#{0}-sel option:selected'.format(id))[0].value
     $('#{0}-pyramid'.format(id)).hide()
     $('#{0}-box'.format(id)).hide()
@@ -89,10 +90,19 @@ $(document).ready(function() {
     $('#{0}-{1}'.format(id, val)).show()
   }
 
+  del_src = function(id){
+    $('#{0}'.format(id)).remove()
+  }
+
   i=0
   $('#add-src').click(function(){
-    id = 'src-conf-{0}'.format(i)
-    appendTemplate($('#src-setups'), 'source-block', {'id': id}, {'sel-change': on_sel_change})
+    let id = 'src-conf-{0}'.format(i)
+    appendTemplate($('#src-setups'), 'source-block', {'id': id},
+    {'sel-change': function(){
+      on_sel_change(id)
+    }, 'del-source': function(){
+      del_src(id)
+    }})
 
     i += 1
   })
@@ -186,7 +196,7 @@ function compile_code(){
       var div = read_num_input('src-conf-{0}-pyramid-divs'.format(i))
       var len = read_num_input('src-conf-{0}-pyramid-len'.format(i))
       var ang = read_num_input('src-conf-{0}-pyramid-ang'.format(i))
-      var pos = read_vec3_input('src-conf-pyr-pos'.format(i))
+      var pos = read_vec3_input('src-conf-{0}-pyramid-pos'.format(i))
       src_setup = {"style": style, "origin": pos, "layers": lay, "divisions": div, "angle_from_normal": ang, "length": len}
       sim_setups.push(src_setup)
     }

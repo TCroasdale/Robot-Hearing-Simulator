@@ -14,7 +14,7 @@
       </div>
       <div id="interface-container" class="bg-gray py-1 col-md-5">
         <ul class="nav nav-tabs border-bottom-0">
-          <li class="ml-1 nav-item active" ><a class="nav-link px-1" data-toggle="tab"  href="#sim-config">Simulation <span class="fas fa-wrench"></span></a></li>
+          <li class="ml-1 nav-item active" ><a class="nav-link active px-1" data-toggle="tab"  href="#sim-config">Simulation <span class="fas fa-wrench"></span></a></li>
           <li class="nav-item"><a class="nav-link px-1" data-toggle="tab" href="#src-config">Sources  <span class="fas fa-volume-up"></span></a></li>
           <li class="nav-item"><a class="nav-link px-1" data-toggle="tab" id="code-tab" href="#code">Code <span class="fas fa-code"></span></a></li>
           <li class="ml-auto nav-item"><a class="btn btn-primary text-white px-1" id="run_conf">Run <span class="fas fa-play"></span></a></li>
@@ -104,31 +104,30 @@
       <button class="btn btn-info col-md-1 p-0" id="{id}-col" data-toggle="collapse" data-target="#{id}-body" aria-example="True" aria-controls="{id}-body">
         <fas-icon icon-name="sort-down"></fas-icon>
       </button>
-      <button class="btn btn-danger col-md-1 p-0" id="{id}-del"><fas-icon icon-name="minus"></fas-icon></button>
+      <button class="btn btn-danger col-md-1 p-0" id="{id}-del" ev-click="del-source"><fas-icon icon-name="minus"></fas-icon></button>
     </div>
     <div class="collapse" id="{id}-body">
       <div id="{id}-single">
         <vec3-input label="Position" id="{id}-single" value="0.0" step="0.25" id-suffix="pos" label-style="POS"></vec3-input>
       </div>
-      <div id="{id}-box">
+      <div id="{id}-box" style="display: none">
         <vec3-input label="Dimensions" id="{id}-box" label-style="DIM" value="1.0" step="0.25" id-suffix="dim"></vec3-input>
         <vec3-input label="Divisions"  id="{id}-box" label-style="DIM" value="2.0" step="1.0" id-suffix="div"></vec3-input>
         <vec3-input label="Origin" id="{id}-box" label-style="POS" value="2.5" step="0.25" id-suffix="pos"></vec3-input>
       </div>
-      <div id="{id}-sphere">
+      <div id="{id}-sphere" style="display: none">
+        <vec3-input label="Origin" id="{id}-sphere" label-style="POS" value="2.5" step="0.25" id-suffix="pos"></vec3-input>
         <number-input label="Rings" id="{id}-sphere" value="4.0" step="1.0" id-suffix="rings"></number-input>
         <number-input label="Segments" id="{id}-sphere" value="8.0" step="1.0" id-suffix="segs"></number-input>
         <number-input label="Radius" id="{id}-sphere" value="4.0" step="0.25" id-suffix="rad"></number-input>
-        <vec3-input label="Origin" id="{id}-sphere" label-style="POS" value="2.5" step="0.25" id-suffix="pos"></vec3-input>
       </div>
-      <div id="{id}-pyramid">
+      <div id="{id}-pyramid" style="display: none">
+        <vec3-input label="Origin" id="{id}-pyramid" label-style="POS" value="2.5" step="0.25" id-suffix="pos"></vec3-input>
         <number-input label="Divisions" id="{id}-pyramid" value="3.0" step="1.0" id-suffix="divs"></number-input>
         <number-input label="Layers" id="{id}-pyramid" value="4.0" step="1.0" id-suffix="lays"></number-input>
         <number-input label="Length" id="{id}-pyramid" value="8.0" step="0.25" id-suffix="len"></number-input>
         <number-input label="Angle"  id="{id}-pyramid" value="30.0" step="5.0" id-suffix="ang"></number-input>
-        <vec3-input label="Origin" id="{id}-pyramid" label-style="POS" value="2.5" step="0.25" id-suffix="pos"></vec3-input>
       </div>
-
     </div>
   </div>
 </template> <!-- Template for a source panel -->

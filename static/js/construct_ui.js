@@ -14,6 +14,8 @@ String.prototype.smartFormat = function(){
   });
 }
 
+
+
 function attachEvents(node, events){
   var children = node.children;
   for (var i = 0; i < children.length; i++) {
@@ -21,18 +23,34 @@ function attachEvents(node, events){
 
     //Attach events to the children as well
     attachEvents(child, events)
-
     for(var j = 0; j < child.attributes.length; j++){
       attr = child.attributes[j]
       found = attr.name.match(/ev-([a-z]+)/) // Looks for attribute ev-{event name}
-      if(found){
+      if(found != null){
         //Attach an event listener to the element
         //found[1] is the event type, such as change or click, should work for custom events too
-        $('#{0}'.format(child.id)).on(found[1], events[child.getAttribute('ev-change')])
+        let fn = events[child.getAttribute(found[0])]
+        $('#{0}'.format(child.id)).on(found[1], fn)
+        child.removeAttribute(found[0])
       }
     }
   }
+}
 
+function formatAttributes(node, opts){
+  var children = node.children;
+  for(var j = 0; j < node.attributes.length; j++){
+    node.setAttribute(node.attributes[j].name, node.attributes[j].value.smartFormat(opts))
+  }
+  for (var i = 0; i < children.length; i++) {
+    var child = children[i];
+
+    //Attach events to the children as well
+    formatAttributes(child, opts)
+    for(var j = 0; j < child.attributes.length; j++){
+      child.setAttribute(child.attributes[j].name, child.attributes[j].value.smartFormat(opts))
+    }
+  }
 }
 
 //Clones a template into the page, with dictionary options
@@ -44,10 +62,8 @@ function appendTemplate(parent, panelID, options, events){
     if(panel[0].content != undefined){
       parent.append(document.importNode(panel[0].content, true))
 
-      innerHTML = parent[0].innerHTML
-      parent[0].innerHTML= innerHTML.smartFormat(options)
-
-      attachEvents(parent[0], events)
+      formatAttributes(parent[0].lastElementChild, options)
+      attachEvents(parent[0].lastElementChild, events)
     }
     else{
       console.log("Couldn't find template")
