@@ -76,18 +76,29 @@ $(document).ready(function() {
   //Creating the UI
   i=0
   $('#add-mic').click(function(){
-    create_mic_panel($('#mic-setups'), 'mic-conf', i)
+    let id = 'mic-conf-{0}'.format(i)
+    appendTemplate($('#mic-setups'), 'mic-block', {'id': 'mic-conf-{0}'.format(i)},
+    {'del-mic': function(){
+      $('#{0}'.format(id)).remove()
+    }})
+
     i += 1
   })
   $('#add-mic').click()
+  $('#mic-conf-0-del').remove()
   j=0
   $('#add-mot').click(function(){
-    create_mot_panel($('#mot-setups'), 'mot-conf', j)
+    let id = 'mot-conf-{0}'.format(j)
+    appendTemplate($('#mot-setups'), 'motor-block', {'id': 'mot-conf-{0}'.format(j)},
+    {'del-motor': function(){
+      $('#{0}'.format(id)).remove()
+    }})
     j += 1
   })
   $('#add-mot').click()
+  $('#mot-conf-0-del').remove()
 
-  create_number_input('skin-width', "Skin Width", 0.25, 0.05)
+  create_number_input($('#skin-width'), "Skin Width", 0.25, 0.05)
 
   editor.on('change', function(obj){
     update_UI(JSON.parse(editor.getValue()))
@@ -109,6 +120,7 @@ function update_UI(conf){
   for(i = 0; i < mic_setups.length; i++){
     if(i >= $('#mic-setups')[0].children.length){
       create_src_panel($('#mic-setups'), 'mic-conf', i)
+      // appendPanel($('#mic-setups'), 'mic-block')
     }
     set_number_input('mic-conf-id-{0}'.format(i), mic_setups[i]['id'])
     set_vec3_input('mic-conf-pos-{0}'.format(i), mic_setups[i]['local_pos'])
@@ -148,9 +160,9 @@ function compile_code(){
   num_mics = $('#mic-setups')[0].children.length
   mic_setups = []
   for(i = 0; i < num_mics; i++){
-    var id = read_num_input('mic-conf-id-{0}'.format(i))
-    var pos = read_vec3_input('mic-conf-pos-{0}'.format(i))
-    var rot = read_vec3_input('mic-conf-rot-{0}'.format(i), "RYP")
+    var id = read_num_input('mic-conf-{0}-id'.format(i))
+    var pos = read_vec3_input('mic-conf-{0}-pos'.format(i))
+    var rot = read_vec3_input('mic-conf-{0}-rot'.format(i), "ROT")
     //READ MIC STYLE
     mic = {"id": id, "local_pos": pos, "local_rot": rot, "mic_style": {"uid": "-1"}}
     mic_setups.push(mic)
@@ -158,8 +170,8 @@ function compile_code(){
   num_mots = $('#mot-setups')[0].children.length
   mot_setups = []
   for(i = 0; i < num_mots; i++){
-    var id = read_num_input('mot-conf-id-{0}'.format(i))
-    var pos = read_vec3_input('mot-conf-pos-{0}'.format(i))
+    var id = read_num_input('mot-conf-{0}-id'.format(i))
+    var pos = read_vec3_input('mot-conf-{0}-pos'.format(i))
     mot = {"id": id, "local_pos": pos, "sound": {"uid": "-1"}}
     //READ SOUND SRC
     mot_setups.push(mot)

@@ -6,287 +6,77 @@ String.prototype.format = function() {
   });
 };
 
-var event = new Event('config-update')
-
-$('input').change(function(){
-  $(document).trigger('config-update')
-})
-
-function remove_element(id){
-  $('#{0}'.format(id)).remove()
+//For inserting arguments into strings, but from a dictionary
+String.prototype.smartFormat = function(){
+  var args = arguments;
+  return this.replace(/{(\S+)}/gi, function(match, key) {
+    return typeof args[0][key] != 'undefined' ? args[0][key] : match;
+  });
 }
 
 
 
-label_class_3 = "col-md-2 text-info input-group-text"
-input_class_3 = "col-md-2 px-0"
+function attachEvents(node, events){
+  var children = node.children;
+  for (var i = 0; i < children.length; i++) {
+    var child = children[i];
 
-label_class_1 = "col-md-4 text-info input-group-text"
-input_class_1 = "col-md-8 px-0"
-
-fasicon = '<span class="fas fa-{0}"></span>'
-
-function create_mic_panel(parent, id, i=-1){
-  //Creating a mic-setup panel
-  panel = '<div id="{0}-{1}" ></div>'
-  row = '<div class="row input-group mx-0" id="{0}-tr-{1}"></div>'
-  body = '<div class="collapse" id="{0}-body-{1}"></div>'
-  del = '<button class="btn btn-{0} {4}" id="{1}-del-{2}">{3}</button>'
-  col = '<button class="btn btn-{0} {4}" id="{1}-col-{2}" data-toggle="collapse" data-target="#{1}-body-{2}" aria-example="True" aria-controls="{1}-body-{2}">{3}</button>'
-  control_lbl = '<hr><p class="text-secondary">{0}</p><div class="row input-group mx-0" id="{1}"><div>'
-  control = '<hr><div class="row input-group mx-0" id="{0}"><div>'
-
-  if(i == -1){  i = parent.children.length - 1 }
-
-  parent.append(panel.format(id, i))
-  panel = $('#{0}-{1}'.format(id, i))
-
-  panel.append(row.format(id, i))
-  toprow = $('#{0}-tr-{1}'.format(id, i))
-  panel.append(body.format(id, i))
-  body = $('#{0}-body-{1}'.format(id, i))
-
-  //Collapse and delete buttons
-  toprow.append('<h5 class="text-secondary col-md-10 py-1">Microphone</h5>')
-  toprow.append(col.format("info", id, i, fasicon.format("sort-down"), "col-md-1"))
-  if( i > 0){
-    toprow.append(del.format("danger", id, i, fasicon.format("minus"), "col-md-1")) //Add the delete button
-    $($('#{0}-del-{1}'.format(id, i))).click(function(){ remove_element('{0}-{1}'.format(id, i)) })
+    //Attach events to the children as well
+    attachEvents(child, events)
+    for(var j = 0; j < child.attributes.length; j++){
+      attr = child.attributes[j]
+      found = attr.name.match(/ev-([a-z]+)/) // Looks for attribute ev-{event name}
+      if(found != null){
+        //Attach an event listener to the element
+        //found[1] is the event type, such as change or click, should work for custom events too
+        let fn = events[child.getAttribute(found[0])]
+        $('#{0}'.format(child.id)).on(found[1], fn)
+        child.removeAttribute(found[0])
+      }
+    }
   }
-
-  //Creating the controls
-  body.append(control.format('{0}-id-{1}'.format(id, i)))
-  create_number_input('{0}-id-{1}'.format(id, i), "ID", i, 1.0)
-
-  body.append(control_lbl.format('Position', '{0}-pos-{1}'.format(id, i)))
-  create_position_input('{0}-pos-{1}'.format(id, i), 0, 0.25)
-
-  body.append(control_lbl.format('Rotation', '{0}-rot-{1}'.format(id, i)))
-  create_rotation_input('{0}-rot-{1}'.format(id, i), 0, 5)
-
-  //MIC STYLE
 }
 
-function create_mot_panel(parent, id, i=-1){
-  //Creating a motor-setup panel
-  panel = '<div id="{0}-{1}" ></div>'
-  row = '<div class="row input-group mx-0" id="{0}-tr-{1}"></div>'
-  body = '<div class="collapse" id="{0}-body-{1}"></div>'
-  del = '<button class="btn btn-{0} {4}" id="{1}-del-{2}">{3}</button>'
-  col = '<button class="btn btn-{0} {4}" id="{1}-col-{2}" data-toggle="collapse" data-target="#{1}-body-{2}" aria-example="True" aria-controls="{1}-body-{2}">{3}</button>'
-  control_lbl = '<hr><p class="text-secondary">{0}</p><div class="row input-group mx-0" id="{1}"><div>'
-  control = '<hr><div class="row input-group mx-0" id="{0}"><div>'
-
-  if(i == -1){  i = parent.children.length - 1 }
-
-  parent.append(panel.format(id, i))
-  panel = $('#{0}-{1}'.format(id, i))
-
-  panel.append(row.format(id, i))
-  toprow = $('#{0}-tr-{1}'.format(id, i))
-  panel.append(body.format(id, i))
-  body = $('#{0}-body-{1}'.format(id, i))
-
-  //Collapse and delete buttons
-  toprow.append('<h5 class="text-secondary col-md-10 py-1">Motor</h5>')
-  toprow.append(col.format("info", id, i, fasicon.format("sort-down"), "col-md-1"))
-  if( i > 0){
-    toprow.append(del.format("danger", id, i, fasicon.format("minus"), "col-md-1")) //Add the delete button
-    $($('#{0}-del-{1}'.format(id, i))).click(function(){ remove_element('{0}-{1}'.format(id, i)) })
+function formatAttributes(node, opts){
+  var children = node.children;
+  for(var j = 0; j < node.attributes.length; j++){
+    node.setAttribute(node.attributes[j].name, node.attributes[j].value.smartFormat(opts))
   }
+  for (var i = 0; i < children.length; i++) {
+    var child = children[i];
 
-  //Creating the controls
-  body.append(control.format('{0}-id-{1}'.format(id, i)))
-  create_number_input('{0}-id-{1}'.format(id, i), "ID", i, 1.0)
-
-  body.append(control_lbl.format('Position', '{0}-pos-{1}'.format(id, i)))
-  create_position_input('{0}-pos-{1}'.format(id, i), 0, 0.25)
-
-  body.append("<p>TODO ADD MOTOR NOISE</p>")
-}
-
-
-function create_src_panel(parent, id, i=-1){
-  //Creating a src-setup panel
-  panel = '<div id="{0}-{1}" ></div>'
-  row = '<div class="row input-group mx-0" id="{0}-tr-{1}"></div>'
-  body = '<div class="collapse" id="{0}-body-{1}"></div>'
-  sel = '<select id="{0}-sel-{1}" class="{2}"/>'
-  opt = '<option value="{0}">{0}</option'
-  del = '<button class="btn btn-{0} {4}" id="{1}-del-{2}">{3}</button>'
-  col = '<button class="btn btn-{0} {4}" id="{1}-col-{2}" data-toggle="collapse" data-target="#{1}-body-{2}" aria-example="True" aria-controls="{1}-body-{2}">{3}</button>'
-
-  if(i == -1){  i = parent.children.length - 1 }
-
-  parent.append(panel.format(id, i))
-  panel = $('#{0}-{1}'.format(id, i))
-
-  panel.append(row.format(id, i))
-  toprow = $('#{0}-tr-{1}'.format(id, i))
-  panel.append(body.format(id, i))
-  body = $('#{0}-body-{1}'.format(id, i))
-
-  //Select
-  toprow.append(sel.format(id, i, "col-md-10"))
-  $('#{0}-sel-{1}'.format(id, i)).append(opt.format("single"))
-  $('#{0}-sel-{1}'.format(id, i)).append(opt.format("box"))
-  $('#{0}-sel-{1}'.format(id, i)).append(opt.format("pyramid"))
-  $('#{0}-sel-{1}'.format(id, i)).append(opt.format("sphere"))
-  $('#{0}-sel-{1}'.format(id, i)).change(function(){
-    val = $('#{0}-sel-{1} option:selected'.format(id, i))[0].value
-    $('#{0}-pyramid-{1}'.format(id, i)).hide()
-    $('#{0}-box-{1}'.format(id, i)).hide()
-    $('#{0}-sphere-{1}'.format(id, i)).hide()
-    $('#{0}-single-{1}'.format(id, i)).hide()
-
-    $('#{0}-{2}-{1}'.format(id, i, val)).show()
-  })
-
-  //Collapse and delete buttons
-  toprow.append(col.format("info", id, i, fasicon.format("sort-down"), "col-md-1"))
-  if( i > 0){
-    toprow.append(del.format("danger", id, i, fasicon.format("minus"), "col-md-1"))
-
-    $($('#{0}-del-{1}'.format(id, i))).click(function(){
-      remove_element('{0}-{1}'.format(id, i))
-    })
+    //Attach events to the children as well
+    formatAttributes(child, opts)
+    for(var j = 0; j < child.attributes.length; j++){
+      child.setAttribute(child.attributes[j].name, child.attributes[j].value.smartFormat(opts))
+    }
   }
+}
 
-  //Create the main controls for each
-  create_singlesrc_controls(body, id, i)
-  create_box_controls(body, id, i)
-  create_pyramid_controls(body, id, i)
-  create_sphere_controls(body, id, i)
-  //Only box should be shown by default
-  $('#{0}-pyramid-{1}'.format(id, i)).hide()
-  $('#{0}-sphere-{1}'.format(id, i)).hide()
-  $('#{0}-box-{1}'.format(id, i)).hide()
+//Clones a template into the page, with dictionary options
+function appendTemplate(parent, panelID, options, events){
+  //Test for browser support
+  if('content' in document.createElement('template')){
+    var panel = $("#{0}".format(panelID))
 
+    if(panel[0].content != undefined){
+      parent.append(document.importNode(panel[0].content, true))
+
+      formatAttributes(parent[0].lastElementChild, options)
+      attachEvents(parent[0].lastElementChild, events)
+    }
+    else{
+      console.log("Couldn't find template")
+    }
+  }
 }
 
 
-function create_box_controls(parent, id, i){
-  //Create the controls for a box src-setup
-  div = '<div id="{0}-box-{1}"></div>'
-  control = '<hr><p class="text-secondary">{0}</p><div class="row input-group mx-0" id="{1}"><div>'
-  parent.append(div.format(id, i))
-  container = $('#{0}-box-{1}'.format(id, i))
-
-  container.append(control.format("Dimensions", "{0}-box-dim-{1}".format(id, i)))
-  create_dimension_input("{0}-box-dim-{1}".format(id, i), def_val=1.0, def_step=0.25)
-
-  container.append(control.format("Divisions", "{0}-box-div-{1}".format(id, i)))
-  create_dimension_input("{0}-box-div-{1}".format(id, i), def_val=2.0, def_step=1.0)
-
-  container.append(control.format("Origin", "{0}-box-pos-{1}".format(id, i)))
-  create_position_input("{0}-box-pos-{1}".format(id, i), def_val=2.5, def_step=0.25)
-
-}
-
-function create_sphere_controls(parent, id, i){
-  //Create the controls for a sphere src-setup
-  div = '<div id="{0}-sphere-{1}"></div>'
-  control_lbl = '<hr><p class="text-secondary">{0}</p><div class="row input-group mx-0" id="{1}"><div>'
-  control = '<hr><div class="row input-group mx-0" id="{0}"><div>'
-  parent.append(div.format(id, i))
-  container = $('#{0}-sphere-{1}'.format(id, i))
-
-  container.append(control.format('{0}-sphere-rings-{1}'.format(id, i)))
-  create_number_input('{0}-sphere-rings-{1}'.format(id, i), "Rings", def_val=4.0, def_step=1.0)
-
-  container.append(control.format('{0}-sphere-segs-{1}'.format(id, i)))
-  create_number_input('{0}-sphere-segs-{1}'.format(id, i), "Segments", def_val=8.0, def_step=1.0)
-
-  container.append(control.format('{0}-sphere-rad-{1}'.format(id, i)))
-  create_number_input('{0}-sphere-rad-{1}'.format(id, i), "Radius", def_val=8.0, def_step=0.25)
-
-  container.append(control_lbl.format("Origin", "{0}-sphere-pos-{1}".format(id, i)))
-  create_position_input("{0}-sphere-pos-{1}".format(id, i), def_val=2.5, def_step=0.25)
-}
-
-function create_pyramid_controls(parent, id, i){
-  //Create the controls for a pyramid src-setup
-  div = '<div id="{0}-pyramid-{1}"></div>'
-  control_lbl = '<hr><p class="text-secondary">{0}</p><div class="row input-group mx-0" id="{1}"><div>'
-  control = '<hr><div class="row input-group mx-0" id="{0}"><div>'
-  parent.append(div.format(id, i))
-  container = $('#{0}-pyramid-{1}'.format(id, i))
-
-
-  container.append(control.format('{0}-pyr-lays-{1}'.format(id, i)))
-  create_number_input('{0}-pyr-lays-{1}'.format(id, i), "Layers", def_val=3.0, def_step=1.0)
-
-  container.append(control.format('{0}-pyr-divs-{1}'.format(id, i)))
-  create_number_input('{0}-pyr-divs-{1}'.format(id, i), "Divisions", def_val=4.0, def_step=1.0)
-
-  container.append(control.format('{0}-pyr-len-{1}'.format(id, i)))
-  create_number_input('{0}-pyr-len-{1}'.format(id, i), "Length", def_val=8.0, def_step=0.25)
-
-  container.append(control.format('{0}-pyr-ang-{1}'.format(id, i)))
-  create_number_input('{0}-pyr-ang-{1}'.format(id, i), "Angle", def_val=30, def_step=5)
-
-  container.append(control_lbl.format("Origin", "{0}-pyr-pos-{1}".format(id, i)))
-  create_position_input("{0}-pyr-pos-{1}".format(id, i), def_val=2.5, def_step=0.25)
-
-}
-
-function create_singlesrc_controls(parent, id, i){
-  //Create the controls for a pyramid src-setup
-  div = '<div id="{0}-single-{1}"></div>'
-  control_lbl = '<hr><p class="text-secondary">{0}</p><div class="row input-group mx-0" id="{1}"><div>'
-
-  parent.append(div.format(id, i))
-  container = $('#{0}-single-{1}'.format(id, i))
-  container.append(control_lbl.format("Position", "{0}-sin-pos-{1}".format(id, i)))
-  create_position_input("{0}-sin-pos-{1}".format(id, i), def_val=2.5, def_step=0.25)
-}
-
-
-//Creates a basic number input with a label
-function create_number_input(id, label, def_val=0.0, def_step=0.25){
-  lbl = '<p class="{0}">{1}</p>'
-  inp = '<input class="{0}" type="number" value="{1}" step="{2}" id="{3}-val"/>'
-
-  parent = $('#{0}'.format(id))
-
-  parent.append(lbl.format(label_class_1, label))
-  parent.append(inp.format(input_class_1, def_val, def_step, id))
-}
-
-//Creates a vector 3 input with labels X, Y, and Z
-function create_position_input(id, def_val=0.0, def_step=0.25){
-  lbl = '<p class="{0}">{1}</p>'
-  inp = '<input class="{0}" type="number" value="{2}" step="{3}" id="{4}-{1}"/>'
-
-  parent = $('#{0}'.format(id))
-
-  parent.append(lbl.format(label_class_3, "X"))
-  parent.append(inp.format(input_class_3, "X", def_val, def_step, id))
-  parent.append(lbl.format(label_class_3, "Y"))
-  parent.append(inp.format(input_class_3, "Y", def_val, def_step, id))
-  parent.append(lbl.format(label_class_3, "Z"))
-  parent.append(inp.format(input_class_3, "Z", def_val, def_step, id))
-}
-
-//Creates a vector 3 input with labels YAW, PITCH and ROll RYP
-function create_rotation_input(id, def_val=0.0, def_step=0.25){
-  lbl = '<p class="{0}">{1}</p>'
-  inp = '<input class="{0}" type="number" value="{2}" step="{3}" id="{4}-{1}"/>'
-
-  parent = $('#{0}'.format(id))
-
-  parent.append(lbl.format(label_class_3, "Roll"))
-  parent.append(inp.format(input_class_3, "R", def_val, def_step, id))
-  parent.append(lbl.format(label_class_3, "Yaw"))
-  parent.append(inp.format(input_class_3, "Y", def_val, def_step, id))
-  parent.append(lbl.format(label_class_3, "Pitch"))
-  parent.append(inp.format(input_class_3, "P", def_val, def_step, id))
-}
 
 function set_vec3_input(id, obj, type="XYZ"){
-  $('#{0}-{1}'.format(id, type[0])).val(obj['x'])
-  $('#{0}-{1}'.format(id, type[1])).val(obj['y'])
-  $('#{0}-{1}'.format(id, type[2])).val(obj['z'])
+  set_number_input('{0}-{1}'.format(id, type[0])).val(obj['x'])
+  set_number_input('{0}-{1}'.format(id, type[1])).val(obj['y'])
+  set_number_input('{0}-{1}'.format(id, type[2])).val(obj['z'])
 }
 
 function set_number_input(id, val){
@@ -297,34 +87,15 @@ function set_selection_input(id, i, val){
   $('#{0}-sel-{1}'.format(id, i)).val(val)
 }
 
-//Creates a vector 3 input with labels W, H and D
-function create_dimension_input(id, def_val=0.0, def_step=0.25){
-  lbl = '<p class="{0}">{1}</p>'
-  inp = '<input class="{0}" type="number" value="{2}" step="{3}" id="{4}-{1}"/>'
-
-  parent = $('#{0}'.format(id))
-
-  parent.append(lbl.format(label_class_3, "W"))
-  parent.append(inp.format(input_class_3, "W", def_val, def_step, id))
-  parent.append(lbl.format(label_class_3, "H"))
-  parent.append(inp.format(input_class_3, "H", def_val, def_step, id))
-  parent.append(lbl.format(label_class_3, "D"))
-  parent.append(inp.format(input_class_3, "D", def_val, def_step, id))
-}
-
 // Functions for reading the inputs
 // returns JSON objects
-function read_vec3_input(id, type="XYZ"){
-  if(type != "XYZ" && type != "WHD" && type != "RYP"){
-    console.log("invalid read type, using XYZ")
-    type = "XYZ"
-  }
+function read_vec3_input(id, type="POS"){
+  style = V3Styles(type)
 
   input = { "x": "0.0", "y": "0.0", "z": "0.0"}
-  base_id = "#{0}-{1}"
-  input['x'] = $(base_id.format(id, type[0]))[0].value
-  input['y'] = $(base_id.format(id, type[1]))[0].value
-  input['z'] = $(base_id.format(id, type[2]))[0].value
+  input['x'] = read_num_input("{0}-{1}".format(id, style.first))
+  input['y'] = read_num_input("{0}-{1}".format(id, style.second))
+  input['z'] = read_num_input("{0}-{1}".format(id, style.third))
 
   return input
 }
@@ -332,3 +103,118 @@ function read_vec3_input(id, type="XYZ"){
 function read_num_input(id){
   return $("#{0}-val".format(id))[0].value
 }
+
+V3Styles = function(style){
+  this.POS = function(){
+    return Object.freeze({first: "X", second:  "Y", third: "Z"})
+  }
+  this.DIM = function(){
+    return Object.freeze({first: "W", second:  "H", third: "D"})
+  }
+  this.ROT = function(){
+    return Object.freeze({first: "Roll", second:  "Yaw", third: "Pitch"})
+  }
+
+  if(style == "POS"){ return this.POS() }
+  else if(style == "ROT"){ return this.ROT() }
+  else if(style == "DIM"){ return this.DIM() }
+  else{ return this.POS() }
+}
+
+
+
+// ====== Classes for Input Groups ====== //
+
+// HTML Template for a Vector3 input
+function vector3Input(label, id, def_val=0.0, def_step=0.25, style="POS"){
+  inp_1 = numberInput(V3Styles(style).first, "{0}-{1}".format(id, V3Styles(style).first), def_val, def_step, false)
+  inp_2 = numberInput(V3Styles(style).second, "{0}-{1}".format(id, V3Styles(style).second), def_val, def_step, false)
+  inp_3 = numberInput(V3Styles(style).third, "{0}-{1}".format(id, V3Styles(style).third), def_val, def_step, false)
+
+  return '<hr/> \
+          <p class="text-secondary">{0}</p> \
+          <div id="{1}" class="row input-group mx-0"> \
+            {2} {3} {4} \
+          </div>'.format(label, id, inp_1, inp_2, inp_3)
+}
+
+//  HTML template for a Number input
+//  use_outer_div = true will put it in an individual input group
+function numberInput(label, id, def_val, def_step, use_outer_div = true){
+  start = '<hr/ ><div class="input-group">'
+  end = '</div>'
+  if(use_outer_div == true){
+    return start + numberInput(label, id, def_val, def_step, false) + end
+  }
+  else{
+    return '<div class="input-group-prepend">\
+              <p class="text-info input-group-text">{0}</p> \
+            </div> \
+            <input class="form-control pr-1" type="number" value="{1}" step="{2}" id="{3}"/> \
+             '.format(label, def_val, def_step, "{0}-val".format(id))
+  }
+}
+
+
+// HTML Template for a span containing an fas icon
+function fasIcon(iconName){
+  return '<span class="fas fa-{0}"></span>'.format(iconName)
+}
+
+
+// ====== Functions To add Input Groups to the pages ===== //
+// Common Parameter Explanations:
+/* label      =   The Text Label for the input
+*  parent     =   The JQuery Object which the input will attach to
+*  style      =   The Vector3 Label style to be used, "POS", "ROT", or "DIM"
+*  id_suffix  =   A suffix to add to the id
+*  def_val    =   The Default value
+*  def_step   =   The Step size
+*/
+
+
+//Creates a vector 3 input with labels X, Y, and Z
+function create_vector3_input(parent, label, style, def_val=0.0, def_step=0.25, id_suffix=""){
+  if(id_suffix == "")
+    parent.append(vector3Input(label, parent[0].id, def_val, def_step, style))
+  else
+    parent.append(vector3Input(label, parent[0].id+"-{0}".format(id_suffix), def_val, def_step, style))
+}
+
+//Creates a basic number input with a label
+function create_number_input(parent, label, def_val=0.0, def_step=0.25, id_suffix=""){
+  if(id_suffix == "")
+    parent.append(numberInput(label, parent[0].id, def_val, def_step))
+  else
+    parent.append(numberInput(label, parent[0].id+"-{0}".format(id_suffix), def_val, def_step))
+}
+
+
+// ===== Custom HTML Element Handlesr ===== //
+customElements = Window.customElements
+
+class FasIcon extends HTMLElement{
+  constructor(){
+    super()
+    this.innerHTML = fasIcon(this.getAttribute('icon-name'))
+  }
+}
+
+class NumberInput extends HTMLElement{
+  constructor(){
+    super()
+    var id = this.id + (this.hasAttribute("id-suffix") ? "-" + this.getAttribute('id-suffix') : "");
+    this.innerHTML = numberInput(this.getAttribute('label'), id, this.getAttribute('value'), this.getAttribute('step'))
+  }
+}
+class Vector3Input extends HTMLElement{
+  constructor(){
+    super()
+    var id = this.id + (this.hasAttribute("id-suffix") ? "-" + this.getAttribute('id-suffix') : "");
+    this.innerHTML = vector3Input(this.getAttribute('label'), id, this.getAttribute('value'), this.getAttribute('step'), this.getAttribute('label-style'))
+  }
+}
+
+customElements.define('fas-icon', FasIcon)
+customElements.define('number-input', NumberInput)
+customElements.define('vec3-input', Vector3Input)
