@@ -76,7 +76,11 @@ $(document).ready(function() {
   //Creating the UI
   i=0
   $('#add-mic').click(function(){
-    appendTemplate($('#mic-setups'), 'mic-block', {'id': 'mic-conf-{0}'.format(i)})
+    let id = 'mic-conf-{0}'.format(i)
+    appendTemplate($('#mic-setups'), 'mic-block', {'id': 'mic-conf-{0}'.format(i)},
+    {'del-mic': function(){
+      $('#{0}'.format(id)).remove()
+    }})
 
     i += 1
   })
@@ -84,7 +88,11 @@ $(document).ready(function() {
   $('#mic-conf-0-del').remove()
   j=0
   $('#add-mot').click(function(){
-    appendTemplate($('#mot-setups'), 'motor-block', {'id': 'mot-conf-{0}'.format(j)})
+    let id = 'mot-conf-{0}'.format(j)
+    appendTemplate($('#mot-setups'), 'motor-block', {'id': 'mot-conf-{0}'.format(j)},
+    {'del-motor': function(){
+      $('#{0}'.format(id)).remove()
+    }})
     j += 1
   })
   $('#add-mot').click()
