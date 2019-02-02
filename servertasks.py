@@ -9,26 +9,17 @@ def endTask(taskID):
     celeryApp.control.revoke(taskID, terminate=True)
 
 @celeryApp.task(bind=True)
-def runSimulation(self, simconfig, roboconfig, filename, simid):
+def runSimulation(self, db, simconfig, roboconfig, filename, simid):
     sim_config = util.objectifyJson(simconfig)
     robo_config = util.objectifyJson(roboconfig)
     downloadPath = "{0}.zip".format(filename)
-    with sql.connect("Database/database.db") as con:
-        cur = con.cursor()
-        cur.execute("UPDATE simulations SET state = ?, taskID = ? WHERE id = ?" , ("running", self.request.id, simid))
-        con.commit()
+
+    db.run_query("UPDATE simulations SET state = ?, taskID = ? WHERE id = ?" , ("running", self.request.id, simid))
 
     try:
         dlFile = sim.run_from_json_config(sim_config, robo_config, filename)
+        db.run_query("UPDATE simulations SET state = ? WHERE id = ?" , ("finished", simid))
+        db.run_query("UPDATE simulations SET pathToZip = ? WHERE id = ?" , (dlFile, simid))
 
-        with sql.connect("Database/database.db") as con:
-            cur = con.cursor()
-            cur.execute("UPDATE simulations SET state = ? WHERE id = ?" , ("finished", simid))
-            con.commit()
-            cur.execute("UPDATE simulations SET pathToZip = ? WHERE id = ?" , (dlFile, simid))
-            con.commit()
     except:
-        with sql.connect("Database/database.db") as con:
-            cur = con.cursor()
-            cur.execute("UPDATE simulations SET state = ? WHERE id = ?" , ("errored", simid))
-            con.commit()
+        db.run_query("UPDATE simulations SET state = ? WHERE id = ?" , ("errored", simid))

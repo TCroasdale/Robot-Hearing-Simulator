@@ -1,4 +1,5 @@
-from database import db_manager
+from .db_manager import DB_Manager, User, Simulation, Sound, Robot
+from pymongo import MongoClient
 
 class DB_Manager_MongoDB(DB_Manager):
     def __init__(self): pass

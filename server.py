@@ -16,7 +16,8 @@ import os
 import uuid
 from datetime import datetime as dt
 from servertasks import *
-from database import db_manager_sqlite
+from database.db_manager import User, Simulation, Sound, Robot
+from database.db_manager_sqlite import DB_Manager_SQLite
 from config import *
 app = Flask(__name__)
 
@@ -237,7 +238,7 @@ def run_simulation():
     robot_conf_dict = json.loads(robot_conf)
 
 
-    runSimulation.delay(strdict, robot_conf_dict, unique_name, sim.id)
+    runSimulation.delay(db, strdict, robot_conf_dict, unique_name, sim.id)
 
     return jsonify({"success": "true"})
 

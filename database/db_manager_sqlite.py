@@ -1,4 +1,4 @@
-from database import db_manager
+from .db_manager import DB_Manager, User, Simulation, Sound, Robot
 import sqlite3 as sql
 
 class DB_Manager_SQLite(DB_Manager):

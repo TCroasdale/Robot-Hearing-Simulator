@@ -15,7 +15,7 @@
 
 ### Setup Config.py
 - Create Config.py file
-- Needs fields ''' SECRET_KEY '''
+- Needs fields ``` SECRET_KEY ```
 
 #### To Run Webserver
 - Run `celery -A servertasks worker --loglevel=info` 
