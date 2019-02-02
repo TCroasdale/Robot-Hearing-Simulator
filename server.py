@@ -13,11 +13,11 @@ from flask import Flask, session, redirect, url_for, request, render_template, j
 import hashlib
 import json
 import os
-import sqlite3 as sql# Temporary
 import uuid
 from datetime import datetime as dt
 from servertasks import *
-from db_manager import *
+from database.db_manager import User, Simulation, Sound, Robot
+from database.db_manager_sqlite import DB_Manager_SQLite
 from config import *
 app = Flask(__name__)
 
@@ -238,7 +238,7 @@ def run_simulation():
     robot_conf_dict = json.loads(robot_conf)
 
 
-    runSimulation.delay(strdict, robot_conf_dict, unique_name, sim.id)
+    runSimulation.delay(db, strdict, robot_conf_dict, unique_name, sim.id)
 
     return jsonify({"success": "true"})
 
@@ -299,6 +299,9 @@ class BadSoundIDException(Exception):
     pass
 
 if __name__ == "__main__":
-    db = DB_Manager("Database/database.db")
+    if DATABASE == "SQLite":
+        db = DB_Manager_SQLite("Database/database.db")
+    else:
+        db = DB_Manager
     app.secret_key = SECRET_KEY
     app.run(debug=True)

@@ -11,10 +11,17 @@
 .modal-body{
   background-color: #f5f5f5;
 }
-body{
+html, body{
   background-color: #DDDDDD;
+  height: 100%;
 }
 
+.footer{
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+}
 
 /* Absolute Center Spinner */
 .loading {
