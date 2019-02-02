@@ -299,6 +299,9 @@ class BadSoundIDException(Exception):
     pass
 
 if __name__ == "__main__":
-    db = DB_Manager_SQLite("Database/database.db")
+    if DATABASE == "SQLite":
+        db = DB_Manager_SQLite("Database/database.db")
+    else:
+        db = DB_Manager
     app.secret_key = SECRET_KEY
     app.run(debug=True)

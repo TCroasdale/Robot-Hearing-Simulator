@@ -79,6 +79,7 @@ class Simulation:
         return [Simulation.from_DB(d) for d in data_list]
 
 class DB_Manager:
+    
     def __init__(self): pass
 
     def is_email_used(self, email): pass

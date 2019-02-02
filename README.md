@@ -15,7 +15,9 @@
 
 ### Setup Config.py
 - Create Config.py file
-- Needs fields ``` SECRET_KEY ```
+- Needs fields
+    - ``` SECRET_KEY ``` A string used for se
+    - ``` DATABASE ``` Can be 'SQLite', or in the future 'MongoDB'
 
 #### To Run Webserver
 - Run `celery -A servertasks worker --loglevel=info` 
