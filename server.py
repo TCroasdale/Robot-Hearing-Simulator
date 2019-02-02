@@ -200,7 +200,6 @@ def run_simulation():
 
 
     # Fix the file paths
-
     try:
         (strdict, robotPath) = insert_config_paths(strdict)
     except BadSoundIDException:
@@ -240,13 +239,11 @@ def insertSoundPaths(conf, sounds, motid_to_id):
     motors = conf['robot_config']['motors']
     for motor in motors:
         if motor['id'] in motid_to_id:
-            print(motid_to_id[motor['id']])
-            print(sounds)
-            if motid_to_id[motor['id']] in sounds:
-                motor['sound']['uid'] = sounds[motid_to_id[motor['id']]].id
-            else: #Must be a direct sound id
-                
-                motor['sound']['uid'] = db.get_sound(motid_to_id[motor['id']]).id
+            snd_id = '{0}'.format(motid_to_id[motor['id']])
+            if snd_id in sounds:
+                motor['sound']['uid'] = sounds[snd_id].id
+            else: # else Must be a direct sound id
+                motor['sound']['uid'] = db.get_sound(snd_id).id
     return conf
 
 @app.route('/designer/save', methods=['POST'])
@@ -258,7 +255,7 @@ def save_robot_config():
     for id in request.files:
         f = request.files[id]
         sound = processSoundUpload(f, session['userID']) 
-        sounds[id] = sound
+        sounds[str(id)] = sound
 
     #Load config and mot_id to i map
     conf = json.loads(request.form['robot-config'])
@@ -273,7 +270,7 @@ def save_robot_config():
     filename = "uploads/robot_configs/{0}.json".format(unique_name)
 
     with open(filename, 'w') as f:
-        f.write(conf)
+        json.dump(conf, f, sort_keys=False, indent=4, ensure_ascii = False)
 
     robot = Robot(request.form['robot_name'], filename, session['userID'])
     robot = db.insert_robot(robot)

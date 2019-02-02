@@ -50,45 +50,64 @@
 
         <form id="sound-uploads-form" action="/simulator/uploadsounds" class=" bg-white rounded-bottom p-1" enctype="multipart/form-data" method="POST">
           <hr>
-          <div id="utterance-input-controls" class="btn-toolbar" role="toolbar">
-            <div class="input-group mr-2 my-2" role="group">
-              <label for="utterancefile" class="input-group-text">Utterance</label>
-              <input type="file" name="utterancefile" class="btn btn-secondary" id="utterancefile" size="1"/>
-              <select id="utterance-select" class="w-75 mx-auto">
+          <div class="input-group mr-2 my-w" role="group" id="utterance-input-controls">
+            <div class="input-group-prepend"> 
+              <p class="text-info input-group-text">Utterance</p>
+            </div>
+            <label for="utterancefile" class="input-group-text btn btn-info" id="utterancefile-lbl"><fas-icon icon-name="upload"></fas-icon> Browse...</label>
+            <input type="file" name="utterancefile" class="form-control" id="utterancefile" size="1">
+            <select id="utterance-select" class="form-control">
+                <option value="-1">Upload other file.</option>
+                {% for sound in sounds: %}
+                <option value="{{sound.id}}">{{ sound.name }}</option>
+                {% endfor %}
+            </select>
+          </div>
+          <hr>
+            <div class="input-group mr-2 my-w" role="group" id="bgnoise-input-controls">
+              <div class="input-group-prepend"> 
+                <p class="text-info input-group-text">Background Noise</p>
+              </div>
+              <label for="bgnoise" class="input-group-text btn btn-info" id="bgnoise-lbl"><fas-icon icon-name="upload"></fas-icon> Browse...</label>
+              <input type="file" name="bgnoise" class="form-control" id="bgnoise" size="1">
+              <select id="bgnoise-select" class="form-control">
                   <option value="-1">Upload other file.</option>
                   {% for sound in sounds: %}
                   <option value="{{sound.id}}">{{ sound.name }}</option>
                   {% endfor %}
               </select>
             </div>
-          </div>
-          <div id="select-input-controls" class="btn-toolbar" role="toolbar">
-            <div class="input-group mr-2 my-2" role="group">
-              <label for="robot-select" class="input-group-text">Robot</label>
-              <!-- <input type="file" name="utterancefile" class="btn btn-secondary" id="utterancefile" size="1"/> -->
-              <select id="robot-select">
+            <hr>
+              <div class="input-group mr-2 my-2" role="group" class="robot-select-controls">
+                <div class="input-group-prepend"> 
+                    <p class="text-info input-group-text">Robot</p>
+                  </div>
+              {% if robots: %}
+              <select id="robot-select" class="form-control">
                   {% for robot in robots: %}
                   <option value="{{robot.id}}">{{ robot.name }}</option>
                   {% endfor %}
               </select>
+              {% else %}
+              <a href="/robotdesign"><p class="input-group-text btn btn-info px-5">Click to create a robot!</p></a>
+              {% endif %}
             </div>
-          </div>
         </form>
       </div>
     </div>
     <section id="uploadpopup" class="modal fade">
-      <div class="modal-dialog">
-        <div class="modal-body">
-          <div id="spinner" class="loading">
-            Loading&#8230;
+        <div class="modal-dialog">
+          <div class="modal-body loading-body">
+            <p>Uploading...</p>
+            <div id="spinner" class="loading">
+              <fas-icon icon-name="robot"></fas-icon>
+            </div>
           </div>
-          <p>Uploading...</p>
+          <div class="modal-footer">
+            <p class="text-secondary">This could take a few minutes...</p>
+          </div>
         </div>
-        <div class="modal-footer">
-          <p>please wait</p>
-        </div>
-      </div>
-    </section>
+      </section>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.2/ace.js" type="text/javascript"></script>
 {% endblock %}
 {% block templates %}

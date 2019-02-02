@@ -35,7 +35,7 @@ $(document).ready(function() {
       var child = $('#mot-setups')[0].children[i]
 
       soundupload = $('#{0}-mot-sound'.format(child.id))
-      if(!soundupload.disabled){
+      if(!soundupload.disabled){ //If an existing sound is selected
         fData.append('{0}'.format(i), soundupload[0].files[0])
 
         var mot_id = read_num_input('{0}-id'.format(child.id))
@@ -98,9 +98,9 @@ $(document).ready(function() {
   $('#add-mot').click(function(){
     let id = 'mot-conf-{0}'.format(j)
     appendTemplate($('#mot-setups'), 'motor-block', {'id': 'mot-conf-{0}'.format(j), 'num': j},
-    {'del-motor': function(){
+    {'del-motor': function(){ //Function to remove a motor
       $('#{0}'.format(id)).remove()
-    }, 'sel-change': function(){
+    }, 'sel-change': function(){ //Function to disable file upload if needed
       var index = this.selectedIndex
       id = this.id.replace('-sound-select', '')
       if(index == 0){
@@ -115,10 +115,6 @@ $(document).ready(function() {
   })
   $('#add-mot').click()
   $('#mot-conf-0-del').remove()
-
-  // create_number_input($('#skin-width'), "Skin Width", 0.25, 0.05)
-
-  //
 
   editor.on('change', function(obj){
     update_UI(JSON.parse(editor.getValue()))
