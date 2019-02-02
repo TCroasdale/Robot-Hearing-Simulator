@@ -152,27 +152,6 @@ def remove_robot():
 
     return jsonify({'success': 'true'})
 
-@app.route('/simulator/uploadsounds', methods=['POST'])
-def processSoundUploads():
-    if 'userID' not in session: return redirect('/login?ref=simulator') # Cannot redirect from this POST
-
-    # check if the post request has the file part
-    if 'utterancefile' not in request.files:
-        # print("no file in uploads!")
-        return jsonify({'success': 'false'})
-    file = request.files['utterancefile']
-    # if user does not select file, browser also submit a empty part without filename
-    if file.filename == '':
-        # print("no file selected in uploads!")
-        return jsonify({'success': 'false'})
-    if file and allowed_file(file.filename):
-        unique_name = uuid.uuid4()
-        file.save('uploads/sounds/{0}.wav'.format(unique_name))
-
-        utt_sound = db.insert_sound(Sound(file.filename, 'uploads/sounds/{0}.wav'.format(unique_name), session['userID']))
-
-        return jsonify({'success': 'true', 'sound_ids': {'utterance_id': utt_sound.id}})
-    return jsonify({'success': 'false'})
 
 @app.route('/revoke_simulation', methods=['POST'])
 def revoke_simulation():
@@ -243,15 +222,58 @@ def run_simulation():
     return jsonify({"success": "true"})
 
 
+def processSoundUpload(file, user_id):
+    # if user does not select file, browser also submit a empty part without filename
+    if file.filename == '':
+        # print("no file selected in uploads!")
+        return None
+    if file and allowed_file(file.filename):
+        unique_name = uuid.uuid4()
+        file.save('uploads/sounds/{0}.wav'.format(unique_name))
+
+        sound = db.insert_sound(Sound(file.filename, 'uploads/sounds/{0}.wav'.format(unique_name), user_id))
+        return sound
+    return None
+
+
+def insertSoundPaths(conf, sounds, motid_to_id):
+    motors = conf['robot_config']['motors']
+    for motor in motors:
+        if motor['id'] in motid_to_id:
+            print(motid_to_id[motor['id']])
+            print(sounds)
+            if motid_to_id[motor['id']] in sounds:
+                motor['sound']['uid'] = sounds[motid_to_id[motor['id']]].id
+            else: #Must be a direct sound id
+                
+                motor['sound']['uid'] = db.get_sound(motid_to_id[motor['id']]).id
+    return conf
+
 @app.route('/designer/save', methods=['POST'])
 def save_robot_config():
     if 'userID' not in session: return jsonify({"success": "false"})
+    
+    # Process Sounds
+    sounds = {}
+    for id in request.files:
+        f = request.files[id]
+        sound = processSoundUpload(f, session['userID']) 
+        sounds[id] = sound
 
+    #Load config and mot_id to i map
+    conf = json.loads(request.form['robot-config'])
+    id_map = json.loads(request.form['id_map'])
+    # Update the config with new id values
+    print(conf)
+    print(id_map)
+    conf = insertSoundPaths(conf, sounds, id_map)
+
+    # Write the config to a file
     unique_name = uuid.uuid4()
     filename = "uploads/robot_configs/{0}.json".format(unique_name)
 
     with open(filename, 'w') as f:
-        f.write(request.form['config'])
+        f.write(conf)
 
     robot = Robot(request.form['robot_name'], filename, session['userID'])
     robot = db.insert_robot(robot)

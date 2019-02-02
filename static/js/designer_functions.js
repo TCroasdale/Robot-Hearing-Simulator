@@ -22,48 +22,56 @@ $(document).ready(function() {
     });
   })
 
-  var save_robot = function (data) {
-    if(data.success == "true"){
-      var config = editor.getValue()
-      jsConfig = JSON.parse(config)
-      // jsConfig.simulation_config.source_config.input_utterance.uid = data.sound_ids.utterance_id
-
-      $.post('/designer/save', {config: JSON.stringify(jsConfig), robot_name: $('#robot-name').val()}, function(data){
-        $('#uploadpopup').modal("hide")
-      })
-    }else{
-      $('#uploadpopup').modal("hide")
-    }
-  }
-
-  $("#sound-uploads-form").submit(function(e) {
-    e.preventDefault();
-    var formData = new FormData(this);
-
-    $.ajax({
-        url: 'simulator/uploadsounds',
-        type: 'POST',
-        data: formData,
-        success: save_robot,
-        cache: false,
-        contentType: false,
-        processData: false
-    });
-});
-
   $('#save-robot').click(function(){
     $('#uploadpopup').modal({backdrop: 'static', keyboard: false})
-    var i = $('#utterance-select')[0].selectedIndex
-    if(i == 0){
-      $('#sound-uploads-form').submit()
+
+    //Find all sounds and add them to the file
+    fData = new FormData();
+    id_to_sound_map = {} // Map from motor id to i value
+
+    //Needs to exit on invalid sound files
+    num_mots = $('#mot-setups')[0].children.length
+    for(var i=0; i<num_mots; i++){
+      var child = $('#mot-setups')[0].children[i]
+
+      soundupload = $('#{0}-mot-sound'.format(child.id))
+      if(!soundupload.disabled){
+        fData.append('{0}'.format(i), soundupload[0].files[0])
+
+        var mot_id = read_num_input('{0}-id'.format(child.id))
+        id_to_sound_map[mot_id] = i
+      }else{
+        id_to_sound_map[mot_id] = $('#{0}-sound-select'.format(child.id))[0].value
+      }
     }
-    else{
-      data = JSON.parse('{"success": "true", "sound_ids": {"utterance_id":' + $('#utterance-select')[0][i].value + '}}')
-      save_robot(data)
-    }
+
+    fData.append("id_map", JSON.stringify(id_to_sound_map))
+    
+    compile_code()
+    var config = editor.getValue()
+    fData.append('robot-config', config)
+
+    fData.append('robot_name', $('#robot-name')[0].value)
+
+    //Upload form data
+    $.ajax({
+      url: 'designer/save',
+      type: 'POST',
+      data: fData,
+      
+      success: function(data){
+        console.log(data.success)
+      },
+      cache: false,
+      contentType: false,
+      dataType: 'json',
+      enctype: 'multipart/form-data',
+      processData: false
+    });
+
   })
 
-  $('#utterance-select').change(function(){
+  $('#-select').change(function(){
     var index = $('#utterance-select')[0].selectedIndex
     console.log(index)
     if(index == 0){
@@ -77,7 +85,7 @@ $(document).ready(function() {
   i=0
   $('#add-mic').click(function(){
     let id = 'mic-conf-{0}'.format(i)
-    appendTemplate($('#mic-setups'), 'mic-block', {'id': 'mic-conf-{0}'.format(i)},
+    appendTemplate($('#mic-setups'), 'mic-block', {'id': 'mic-conf-{0}'.format(i), 'num': i},
     {'del-mic': function(){
       $('#{0}'.format(id)).remove()
     }})
@@ -89,16 +97,28 @@ $(document).ready(function() {
   j=0
   $('#add-mot').click(function(){
     let id = 'mot-conf-{0}'.format(j)
-    appendTemplate($('#mot-setups'), 'motor-block', {'id': 'mot-conf-{0}'.format(j)},
+    appendTemplate($('#mot-setups'), 'motor-block', {'id': 'mot-conf-{0}'.format(j), 'num': j},
     {'del-motor': function(){
       $('#{0}'.format(id)).remove()
+    }, 'sel-change': function(){
+      var index = this.selectedIndex
+      id = this.id.replace('-sound-select', '')
+      if(index == 0){
+        $("#{0}-mot-sound".format(id))[0].disabled = false
+        $("#{0}-mot-sound-lbl".format(id)).removeClass("disabled")
+      }else{
+        $("#{0}-mot-sound".format(id))[0].disabled = true
+        $("#{0}-mot-sound-lbl".format(id)).addClass("disabled")
+      }
     }})
     j += 1
   })
   $('#add-mot').click()
   $('#mot-conf-0-del').remove()
 
-  create_number_input($('#skin-width'), "Skin Width", 0.25, 0.05)
+  // create_number_input($('#skin-width'), "Skin Width", 0.25, 0.05)
+
+  //
 
   editor.on('change', function(obj){
     update_UI(JSON.parse(editor.getValue()))

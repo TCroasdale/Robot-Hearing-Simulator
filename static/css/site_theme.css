@@ -23,6 +23,13 @@ html, body{
   width: 100%;
 }
 
+input[type="file"]{
+  display: none;
+}
+
+
+
+
 /* Absolute Center Spinner */
 .loading {
   z-index: 999;
