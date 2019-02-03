@@ -60,7 +60,6 @@ class DB_Manager_SQLite(DB_Manager):
         with sql.connect("Database/database.db") as con:
             cur = con.cursor()
 
-            # print(sound_id)
             cur.execute(q, a)
             if type is None:
                 return cur.fetchone()
@@ -73,13 +72,12 @@ class DB_Manager_SQLite(DB_Manager):
         with sql.connect("Database/database.db") as con:
             cur = con.cursor()
 
-            # print(sound_id)
             cur.execute(q, a)
 
             if type is None:
                 return cur.fetchall()
             else:
-                return type.from_DB(cur.fetchall())
+                return type.from_DB_ls(cur.fetchall())
 
     def insert_microphone(self, mic):
         with sql.connect("Database/database.db") as con:

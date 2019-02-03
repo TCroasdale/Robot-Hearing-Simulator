@@ -13,6 +13,7 @@ CREATE TABLE simulations (
   id INT NOT NULL AUTO_INCREMENT,
   pathToConfig VARCHAR(255) NOT NULL,
   dateCreated DATETIME,
+  dateFinished DATETIME,
   state VARCHAR(16) DEFAULT 'Scheduled',
   seed INT NOT NULL,
   userID INT NOT NULL,

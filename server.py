@@ -15,6 +15,8 @@ import json
 import os
 import uuid
 from datetime import datetime as dt
+from datetime import timedelta
+from apscheduler.schedulers.background import BackgroundScheduler
 from servertasks import *
 from database.db_manager import User, Simulation, Sound, Robot
 from database.db_manager_sqlite import DB_Manager_SQLite
@@ -340,10 +342,32 @@ class BadRobotIDException(Exception):
 class BadSoundIDException(Exception):
     pass
 
+# Deletes files older than a week
+def cleanup_old_files():
+    allsims = db.get_all('SELECT * FROM simulations WHERE state="finished"', [], type=Simulation)
+    for sim in allsims:
+        finishDate = dt.strptime(sim.dateFinished, '%Y-%m-%d')
+        if dt.now() - timedelta(days=FILE_EXPIRY_DAYS) > finishDate:
+            db.run_query("UPDATE simulations SET state = ? WHERE id = ?" , ("expired", sim.id))
+            db.run_query("UPDATE simulations SET pathToZip = ? WHERE id = ?" , ("", sim.id))
+            try:
+                os.remove(sim.pathToZip)
+            except:
+                print("Cannot delete simulation file, they're not here!")
+    
+
 if __name__ == "__main__":
     if DATABASE == "SQLite":
         db = DB_Manager_SQLite("Database/database.db")
     else:
         db = DB_Manager
+
+    
+    scheduler = BackgroundScheduler()
+    # scheduler.add_job(cleanup_old_files, 'interval', hours=24)
+    scheduler.add_job(cleanup_old_files, 'interval', seconds=20)
+    scheduler.start()
+
+
     app.secret_key = SECRET_KEY
     app.run(debug=True)

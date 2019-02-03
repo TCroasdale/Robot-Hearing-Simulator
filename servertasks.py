@@ -3,6 +3,7 @@ from utilities import Utilities as util
 from database.db_manager import User, Simulation, Sound, Robot
 from database.db_manager_sqlite import DB_Manager_SQLite
 from celery import Celery
+from datetime import datetime as dt
 
 celeryApp = Celery('servertasks', broker='pyamqp://guest@localhost//')
 
@@ -21,6 +22,9 @@ def runSimulation(self, db, simconfig, roboconfig, filename, simid):
         dlFile = sim.run_from_json_config(sim_config, robo_config, filename)
         db.run_query("UPDATE simulations SET state = ? WHERE id = ?" , ("finished", simid))
         db.run_query("UPDATE simulations SET pathToZip = ? WHERE id = ?" , (dlFile, simid))
+        db.run_query("UPDATE simulations SET dateFinished = ? WHERE id = ?" , (str(dt.now().date()), simid))
 
     except Exception as e:
         db.run_query("UPDATE simulations SET state = ? WHERE id = ?" , ("errored", simid))
+
+

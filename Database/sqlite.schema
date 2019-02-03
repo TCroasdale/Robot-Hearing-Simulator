@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS `simulations` (
 	`id`	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
 	`pathToConfig`	TEXT NOT NULL,
 	`dateCreated`	TEXT,
+	`dateFinished`	TEXT,
 	`state`	TEXT DEFAULT 'scheduled',
 	`seed`	INTEGER NOT NULL,
 	`pathToZip`	INTEGER,

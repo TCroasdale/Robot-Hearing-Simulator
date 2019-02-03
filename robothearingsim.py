@@ -39,7 +39,7 @@ class RobotHearingSim:
     # conf[5] is the unique name to use
     # example conf = (data, room_dim, rt60, 16000, unique_name)
     def run_sim(robot_pos, src_pos, i, conf):
-        print("--Generation {0}\n----\t Robot Position:\t{1}\n----\tSource Position:\t{2}\n----\t\t   rt60:\t{3}\n----\tRoom Dimensions:\t{4}\n----\t    Sample Rate:\t{5}\n".format(i, robot_pos, src_pos, conf[2], conf[1], conf[3]))
+        print("--Generation {0}\n----\t Robot Position:\t{1}\n----\tSource Position:\t{2}\n".format(i, robot_pos, src_pos))
         # Advanced Method
         room_dim = conf[1]
         rt60 = conf[2]

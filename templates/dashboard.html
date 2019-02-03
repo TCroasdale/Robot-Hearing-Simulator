@@ -26,7 +26,7 @@
                 {% elif sim.state == "running": %}
                 <button class="form-control btn btn-warning" onclick="endTask({{ sim.id }})"><span class="fas fa-ban"></span></button>
                 {% else %}
-                <button class="form-control btn btn-warning disabled"><span class="fas fa-download"></span></button>
+                <button class="form-control btn btn-info disabled"><span class="fas fa-download"></span></button>
                 {% endif %}
                 <button class="btn btn-info form-control disabled"><span class="fas fa-edit"></span></button>
                 <button class="form-control btn btn-info disabled"><span class="fas fa-redo"></span></button>
