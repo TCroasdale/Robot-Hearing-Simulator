@@ -120,7 +120,7 @@ class RobotHearingSim:
         zipper.make_archive(zip_name, 'zip', directory_name)
         for i in range(len(source_positions)):
             os.remove('temp_data/{0}/data_gen_{1}.{2}'.format(unique_num, i, SIM_FILE_EXT))
-
+        os.rmdir('temp_data/{0}'.format(unique_num))
         return zip_name + ".zip"
 
 
