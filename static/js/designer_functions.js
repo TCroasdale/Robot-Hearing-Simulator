@@ -72,16 +72,6 @@ $(document).ready(function() {
 
   })
 
-  $('#-select').change(function(){
-    var index = $('#utterance-select')[0].selectedIndex
-    console.log(index)
-    if(index == 0){
-      $("#utterancefile").removeClass("disabled")
-    }else{
-      $("#utterancefile").addClass("disabled")
-    }
-  })
-
   //Creating the UI
   i=0
   $('#add-mic').click(function(){
@@ -118,7 +108,12 @@ $(document).ready(function() {
   $('#mot-conf-0-del').remove()
 
   editor.on('change', function(obj){
-    update_UI(JSON.parse(editor.getValue()))
+    try{
+      update_UI(JSON.parse(editor.getValue()))
+    }
+    catch{
+      console.log("invalid json,")
+    }
   })
 
   $('#code-tab').click(function(e){

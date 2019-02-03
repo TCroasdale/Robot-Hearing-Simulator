@@ -216,6 +216,9 @@ def run_simulation():
         strdict['simulation_config']['source_config']['background_noise']['uid'] = request.form['bgnoise_id']
     
     strdict['simulation_config']['robot_config']['uid'] = request.form['robot_id']
+    seed = str(uuid.uuid4())
+    strdict['simulation_config']['seed'] = seed
+
 
     # Fix the file paths
     try:
@@ -233,7 +236,7 @@ def run_simulation():
         json.dump(strdict, f, sort_keys=False, indent=4, ensure_ascii = False)
 
     date = str(dt.now().date())
-    sim = Simulation(filename, date, str(uuid.uuid4()), session['userID'])
+    sim = Simulation(filename, date, seed, session['userID'])
     sim = db.insert_simulation(sim)
 
 

@@ -127,7 +127,12 @@ $(document).ready(function() {
   create_number_input($('#sample-rate'), 'Sample Rate', 16000, 100, "", true)
 
   editor.on('change', function(obj){
-    update_UI(JSON.parse(editor.getValue()))
+    try{
+      update_UI(JSON.parse(editor.getValue()))
+    }
+    catch{
+      console.log("invalid json,")
+    }
   })
 
   $('#code-tab').click(function(e){

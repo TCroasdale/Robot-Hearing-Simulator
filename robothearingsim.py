@@ -18,6 +18,7 @@ import shutil as zipper
 import os
 import uuid
 import math
+import random
 from joblib import Parallel, delayed
 import time
 from config import *
@@ -39,11 +40,15 @@ class RobotHearingSim:
     # conf[5] is the unique name to use
     # example conf = (data, room_dim, rt60, 16000, unique_name)
     def run_sim(robot_pos, src_pos, i, conf):
-        print("--Generation {0}\n----\t Robot Position:\t{1}\n----\tSource Position:\t{2}\n".format(i, robot_pos, src_pos))
+        robot = conf[4] # Setting position of the robot
+        robot.set_pos(robot_pos[0], robot_pos[1], robot_pos[2])
+
+        print("\n--Generation {0}\n----\t Robot Position:\t{1}\n----\tSource Position:\t{2}\n".format(i, robot.transform.get_world_pos(), src_pos))
         # Advanced Method
         room_dim = conf[1]
         rt60 = conf[2]
         sample_rate = conf[3]
+
 
         absorption = roomsimove_single.rt60_to_absorption(conf[1], rt60)
         room = roomsimove_single.Room(room_dim, abs_coeff=absorption)
@@ -65,34 +70,65 @@ class RobotHearingSim:
         data_rev = np.array(data_rev) #put the data together
         sf.write('temp_data/{0}/data_gen_{1}.{2}'.format(conf[5], i, SIM_FILE_EXT), data_rev.T, sample_rate) #Write new file into a folder called temp_data
 
+    def parse_random_number(r_str, rand):
+        inner_str = r_str[r_str.find("{")+1:r_str.find("}")].strip()
+        index = inner_str.find(";")
+        min = max = 0
+        if index > 0:
+            min_s = inner_str[:index].strip()
+            max_s = inner_str[index+1:].strip()
+            min = float(min_s)
+            max = float(max_s)
+        else:
+            print("d b")
+            max = float(inner_str)
+
+        print("d")
+        print(rand.random())
+        r_num = rand.random()
+        print("d {0}".format(r_num))
+        length = max - min
+        print("d {0}".format(length))
+
+        return min + round((r_num * length), 2)
+        
+    def check_value(val, rand):
+        print("c")
+        if type(val) is str:
+            print("c str")
+            return RobotHearingSim.parse_random_number(val, rand)
+        else:
+            print("c num")
+            return val
+
 
     def run_from_json_config(sim_config, robot_config, filename):
+        print('b')
         simConfig = sim_config['simulation_config']
+        print('b')
         roboConfig = robot_config['robot_config']
-        rt60 = simConfig['rt60']
+        print('b')
+        rand = random.Random()
+        rand.seed(simConfig['seed'])
+        print('b')
+
+        rt60 = RobotHearingSim.check_value(simConfig['rt60'], rand)
+        print('b')
         sampling_rate = int(simConfig['sample_rate'])
+        print('b')
         room_dim = [simConfig['room_dimensions']['x'], simConfig['room_dimensions']['y'], simConfig['room_dimensions']['z']]
+        print('b')
+        room_dim = [RobotHearingSim.check_value(x, rand) for x in room_dim] # Check for random numbers
+        print("room_dim: {0}".format(room_dim))
+        print('b')
 
-        mics = []
-        for mic in roboConfig['microphones']:
-            pos = [mic['local_pos']['x'], mic['local_pos']['y'], mic['local_pos']['z']]
-            rot = [mic['local_rot']['x'], mic['local_rot']['y'], mic['local_rot']['z']]
-            microphone = roboconf.RobotMicrophone(pos, rot, 'cardioid', mic['id'])
-            mics.append(microphone)
-
-        # Do motors
-        motors = []
-
-        robopos = [simConfig['robot_pos']['x'], simConfig['robot_pos']['y'], simConfig['robot_pos']['z']]
-        roborot = [0.0,0.0,0.0] #[simConfig['robot_rot']['x'], simConfig['robot_rot']['y'], simConfig['robot_rot']['z']]
-        robot = roboconf.Robot(robopos, roborot, mics, motors, roboConfig['skin_width'])
 
         source_positions = []
         for source_setup in simConfig['source_config']['simulation_setups']:
             if source_setup['style'] == "single":
-                x = source_setup['origin']['x']
-                y = source_setup['origin']['y']
-                z = source_setup['origin']['z']
+                x = RobotHearingSim.check_value(source_setup['origin']['x'], rand)
+                y = RobotHearingSim.check_value(source_setup['origin']['y'], rand)
+                z = RobotHearingSim.check_value(source_setup['origin']['z'], rand)
                 source_positions.append([x, y, z])
             elif source_setup['style'] == "box":
                 posArray = RobotHearingSim.parse_box_source_setup(source_setup)
@@ -102,18 +138,47 @@ class RobotHearingSim:
                 source_positions += (posArray)
             # Calculate other source setups
 
+        print("e")
+        mics = []
+        print("e")
+        for mic in roboConfig['microphones']:
+            print("e")
+            pos = [mic['local_pos']['x'], mic['local_pos']['y'], mic['local_pos']['z']]
+            print("e")
+            rot = [mic['local_rot']['x'], mic['local_rot']['y'], mic['local_rot']['z']]
+            print("e")
+            microphone = roboconf.RobotMicrophone(pos, rot, 'cardioid', mic['id'])
+            print("e")
+            mics.append(microphone)
+
+        # Do motors
+        motors = []
+
+        robopos = [simConfig['robot_pos']['x'], simConfig['robot_pos']['y'], simConfig['robot_pos']['z']]
+        roborot = [0.0,0.0,0.0] #[simConfig['robot_rot']['x'], simConfig['robot_rot']['y'], simConfig['robot_rot']['z']]
+        all_robot_pos = [robopos] * len(source_positions)
+        print("fuck me")
+        all_pos = [[RobotHearingSim.check_value(val, rand) for val in pos] for pos in all_robot_pos]
+        print(all_pos)
+        robot = roboconf.Robot(all_pos[0], roborot, mics, motors, roboConfig['skin_width'])
+        print("f")
+
         # Reading the data from the source file
         [data, fs] = sf.read(simConfig['source_config']['input_utterance']['path'], always_2d=True)
+        print("f")
         data =  data[:,0]
+        print("f")
 
         unique_num = uuid.uuid4()
 
         ## Multithreaded
         config = (data, room_dim, rt60, fs, robot, unique_num)
-        all_robot_pos = [robopos] * len(source_positions)
         os.mkdir('temp_data/{0}'.format(unique_num)) # Create folder for temp data
-        Parallel(n_jobs=int(1))(delayed(RobotHearingSim.run_sim)(all_robot_pos[i], source_positions[i], i, config) for i in range(len(source_positions)))
+        print("f")
 
+        Parallel(n_jobs=int(1))(delayed(RobotHearingSim.run_sim)(all_pos[i], source_positions[i], i, config) for i in range(len(source_positions)))
+
+        print("f")
         # Zip up new files, and delete old ones.
         zip_name = 'static/dl/{0}'.format(filename)
         directory_name = 'temp_data/{0}'.format(unique_num)

@@ -26,6 +26,12 @@ class Transform(object):
         self.y_pos += s[0]
         self.z_pos += s[0]
 
+    def set_position(self, x, y, z):
+        print("setting pos")
+        self.x_pos = x
+        self.y_pos = y
+        self.z_pos = z
+
     def rotate(self, q):
         self.orientation[0] + q[0]
         if self.orientation[0] > 360: self.orientation[0] = 0
@@ -47,6 +53,7 @@ class Transform(object):
 
 
     def get_world_pos(self):
+        print("FUCK ME")
         if self.parent == None:
             return [self.x_pos, self.y_pos, self.z_pos]
         else:
@@ -110,6 +117,10 @@ class Robot(object):
         #Set the world position of the microphones and motors
         for mic in robo_mics: self.attach_transform(mic.transform)
         for mot in robo_motors: self.attach_transform(mot.transform)
+
+    def set_pos(self, x, y, z):
+        print("120")
+        self.transform.set_position(x, y, z)
 
     def attach_transform(self, transform):
         transform.parent = self.transform
