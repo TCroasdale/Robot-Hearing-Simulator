@@ -16,17 +16,20 @@
                 <p class="col-sm-5"></p>
                 <p class="col-sm-3 text-right" id="sim_{{ sim.id }}-state">{{ sim.state }}</p>
               </div>
-              <div class="row">
-                <p class="col-sm-6">Actions</p>
+              <div class="input-group" role="group">
+                <div class="input-group-prepend">
+                  <p class="input-group-text">Actions</p>
+                </div>
                 {% if sim.state == "finished": %}
-                <a class="btn btn-info col-sm-2" download href="{{sim.pathToZip}}"><span class="fas fa-download"></span></a>
+                <a class="form-control btn btn-info" download href="{{sim.pathToZip}}"><span class="fas fa-download"></span></a>
                 {% elif sim.state == "running" %}
-                <button class="btn btn-warning col-sm-2" onclick="endTask({{ sim.id }})"><span class="fas fa-ban"></span></button>
+                <button class="form-control btn btn-warning" onclick="endTask({{ sim.id }})"><span class="fas fa-ban"></span></button>
                 {% else %}
-                <div class="col-sm-2"></div>
+                <button class="form-control btn btn-warning disabled"><span class="fas fa-download"></span></button>
                 {% endif %}
-                <button class="btn btn-info col-sm-2 disabled"><span class="fas fa-redo"></span></button>
-                <button class="btn btn-danger col-sm-2" onclick="deleteSimulation({{ sim.id }})"><span class="fas fa-trash-alt"></span></button>
+                <button class="btn btn-info form-control disabled"><span class="fas fa-edit"></span></button>
+                <button class="form-control btn btn-info disabled"><span class="fas fa-redo"></span></button>
+                <button class="form-control btn btn-danger" onclick="deleteSimulation({{ sim.id }})"><span class="fas fa-trash-alt"></span></button>
               </div>
             </li>
           {% endfor %}
@@ -41,11 +44,12 @@
                 <h5 class="col-sm-8">Sound</h5>
                 <p class="col-sm-4 text-right">{{ sound.name }}</p>
               </div>
-              <div class="row">
-                <p class="col-sm-6">Actions</p>
-                <div class="col-sm-2"></div>
-                <button class="btn btn-info col-sm-2" onclick="playSound('{{sound.pathToFile}}')"><span class="fas fa-play"></span></button>
-                <button class="btn btn-danger col-sm-2" onclick="deleteSound({{sound.id}})"><span class="fas fa-trash-alt"></span></button>
+              <div class="input-group" role="group">
+                <div class="input-group-prepend">
+                  <p class="input-group-text">Actions</p>
+                </div>
+                <button class="form-control btn btn-info" onclick="playSound('{{sound.pathToFile}}')"><span class="fas fa-play"></span></button>
+                <button class="form-control btn btn-danger" onclick="deleteSound({{sound.id}})"><span class="fas fa-trash-alt"></span></button>
               </div>
             </li>
           {% endfor %}
@@ -60,11 +64,12 @@
                 <h5 class="col-sm-8">Robot</h5>
                 <p class="col-sm-4 text-right">{{ robot.name }}</p>
               </div>
-              <div class="row">
-                <p class="col-sm-6">Actions</p>
-                <div class="col-sm-2"></div>
-                <button class="btn btn-info col-sm-2"><span class="fas fa-edit"></span></button>
-                <button class="btn btn-danger col-sm-2" onclick="deleteRobot({{robot.id}})"><span class="fas fa-trash-alt"></span></button>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <p class="input-group-text">Actions</p>
+                </div>
+                <button class="btn btn-info form-control disabled"><span class="fas fa-edit"></span></button>
+                <button class="btn btn-danger form-control" onclick="deleteRobot({{robot.id}})"><span class="fas fa-trash-alt"></span></button>
               </div>
             </li>
           {% endfor %}
