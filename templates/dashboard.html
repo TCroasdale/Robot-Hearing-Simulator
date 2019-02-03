@@ -4,6 +4,7 @@
 {% endblock %}
 {% block content %}
     <h1>{{ user.email }}</h1>
+    <hr>
     <div class="row">
       <div id="simulations" class="col-lg-4">
         <h3>Simulations</h3>
@@ -22,7 +23,7 @@
                 </div>
                 {% if sim.state == "finished": %}
                 <a class="form-control btn btn-info" download href="{{sim.pathToZip}}"><span class="fas fa-download"></span></a>
-                {% elif sim.state == "running" %}
+                {% elif sim.state == "running": %}
                 <button class="form-control btn btn-warning" onclick="endTask({{ sim.id }})"><span class="fas fa-ban"></span></button>
                 {% else %}
                 <button class="form-control btn btn-warning disabled"><span class="fas fa-download"></span></button>
