@@ -39,11 +39,13 @@
           </div><!-- source tab -->
           <div class="tab-pane" id="code">
             <div id="editor"></div>
-            <div id="upload_controls" class="btn-toolbar justify-content-between" role="toolbar">
-              <div class="btn-group" role="group">
-                <input type="file" name="fileselect" class="btn btn-secondary" id="fileselect" size="1"/>
-                <button type="submit" id="fileupload" class="btn btn-info">Upload</button>
-              </div>
+              <div class="input-group" role="group" id="upload_controls">
+                <div class="input-group-prepend"> 
+                  <p class="text-info input-group-text">Configuration file.</p>
+                </div>
+                <label for="cfg-file" class="form-control btn btn-secondary" id="cfg-file-lbl"><fas-icon icon-name="upload"></fas-icon> Browse...</label>
+                <input type="file" name="cfg-file" class="btn btn-secondary" id="cfg-file" size="1"/>
+                <button type="submit" id="fileupload" class="form-control btn btn-info">Upload</button>
             </div>
           </div><!-- code tab -->
         </div><!-- tab content -->

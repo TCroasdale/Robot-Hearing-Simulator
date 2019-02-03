@@ -1,6 +1,7 @@
 from robothearingsim import RobotHearingSim as sim
 from utilities import Utilities as util
-import sqlite3 as sql# Temporary
+from database.db_manager import User, Simulation, Sound, Robot
+from database.db_manager_sqlite import DB_Manager_SQLite
 from celery import Celery
 
 celeryApp = Celery('servertasks', broker='pyamqp://guest@localhost//')
@@ -21,5 +22,5 @@ def runSimulation(self, db, simconfig, roboconfig, filename, simid):
         db.run_query("UPDATE simulations SET state = ? WHERE id = ?" , ("finished", simid))
         db.run_query("UPDATE simulations SET pathToZip = ? WHERE id = ?" , (dlFile, simid))
 
-    except:
+    except Exception as e:
         db.run_query("UPDATE simulations SET state = ? WHERE id = ?" , ("errored", simid))

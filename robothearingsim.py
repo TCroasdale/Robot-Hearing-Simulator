@@ -84,7 +84,7 @@ class RobotHearingSim:
         motors = []
 
         robopos = [simConfig['robot_pos']['x'], simConfig['robot_pos']['y'], simConfig['robot_pos']['z']]
-        roborot = [simConfig['robot_rot']['x'], simConfig['robot_rot']['y'], simConfig['robot_rot']['z']]
+        roborot = [0.0,0.0,0.0] #[simConfig['robot_rot']['x'], simConfig['robot_rot']['y'], simConfig['robot_rot']['z']]
         robot = roboconf.Robot(robopos, roborot, mics, motors, roboConfig['skin_width'])
 
         source_positions = []
@@ -93,7 +93,7 @@ class RobotHearingSim:
                 x = source_setup['origin']['x']
                 y = source_setup['origin']['y']
                 z = source_setup['origin']['z']
-                source_positions += [x, y, z]
+                source_positions.append([x, y, z])
             elif source_setup['style'] == "box":
                 posArray = RobotHearingSim.parse_box_source_setup(source_setup)
                 source_positions += (posArray)

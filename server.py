@@ -170,15 +170,24 @@ def insert_config_paths(dict):
     # attach the utterance path
     utteranceid = dict['simulation_config']['source_config']['input_utterance']['uid']
     utterance = db.get_one("SELECT * FROM sounds WHERE id=?", [utteranceid], type=Sound)
-    if utterance is not None or sound.userID == session['userID'] or sound.visibility > 0:
+    if utterance is not None and (utterance.userID == session['userID'] or utterance.visibility > 0):
         dict['simulation_config']['source_config']['input_utterance']['path'] = utterance.pathToFile
+    else:
+        raise BadSoundIDException
+
+    # attach the bgnoise path
+    bgnoiseid = dict['simulation_config']['source_config']['background_noise']['uid']
+    bgnoise = db.get_one("SELECT * FROM sounds WHERE id=?", [bgnoiseid], type=Sound)
+    if bgnoise is not None and (bgnoise.userID == session['userID'] or bgnoise.visibility > 0):
+        dict['simulation_config']['source_config']['background_noise']['path'] = bgnoise.pathToFile
     else:
         raise BadSoundIDException
 
     # Attach the robot config path
     robotid = dict['simulation_config']['robot_config']['uid']
     robot = db.get_one("SELECT * FROM robots WHERE id =?", [robotid], type=Robot)
-    if robot is not None or robot.userID == session['userID'] or robot.visibility > 0:
+    print(robotid)
+    if robot is not None and (robot.userID == session['userID'] or robot.visibility > 0):
         dict['simulation_config']['robot_config']['path'] = robot.pathToConfig
     else:
         raise BadRobotIDException
@@ -190,14 +199,21 @@ def run_simulation():
     if 'userID' not in session: return jsonify({"success": "false"})
 
     strdict = json.loads(request.form['config'])
+    print(request.form)
+    print(request.files)
 
-    # Save the JSON config to a file
-    unique_name = uuid.uuid4()
-    filename = "uploads/simulation_configs/{0}.json".format(unique_name)
-    # print("putting sim file in: {0}".format(filename))
-    with open(filename, 'w') as f:
-        f.write(request.form['config'])
-
+    if 'utterance' in request.files:
+        utt = processSoundUpload(request.files['utterance'], session['userID']) 
+        strdict['simulation_config']['source_config']['input_utterance']['uid'] = utt.id
+    else:
+        strdict['simulation_config']['source_config']['input_utterance']['uid'] = request.form['utterance_id']
+    if 'bgnoise' in request.files:
+        bgnoise = processSoundUpload(request.files['bgnoise'], session['userID']) 
+        strdict['simulation_config']['source_config']['background_noise']['uid'] = bgnoise.id
+    else:
+        strdict['simulation_config']['source_config']['background_noise']['uid'] = request.form['bgnoise_id']
+    
+    strdict['simulation_config']['robot_config']['uid'] = request.form['robot_id']
 
     # Fix the file paths
     try:
@@ -206,6 +222,13 @@ def run_simulation():
         return jsonify({"success": "false", "reason": "bad sound id"})
     except BadRobotIDException:
         return jsonify({"success": "false", "reason": "bad robot id"})
+
+    # Save the JSON config to a file
+    unique_name = uuid.uuid4()
+    filename = "uploads/simulation_configs/{0}.json".format(unique_name)
+    # print("putting sim file in: {0}".format(filename))
+    with open(filename, 'w') as f:
+        json.dump(strdict, f, sort_keys=False, indent=4, ensure_ascii = False)
 
     date = str(dt.now().date())
     sim = Simulation(filename, date, str(uuid.uuid4()), session['userID'])

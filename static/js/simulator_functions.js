@@ -23,59 +23,81 @@ $(document).ready(function() {
     });
   })
 
-  var run_sim = function (data) {
-    if(data.success == "true"){
-      var config = editor.getValue()
-      jsConfig = JSON.parse(config)
-      jsConfig.simulation_config.source_config.input_utterance.uid = data.sound_ids.utterance_id
-      var i = $('#robot-select')[0].selectedIndex
-      jsConfig.simulation_config.robot_config.uid = $('#robot-select')[0][i].value
 
-
-      $.post('/simulator/run_simulation', {config: JSON.stringify(jsConfig)}, function(data){
-        $('#uploadpopup').modal("hide")
-      })
-    }else{
-      $('#uploadpopup').modal("hide")
-    }
-  }
-
-  $("#sound-uploads-form").submit(function(e) {
-    e.preventDefault();
-    var formData = new FormData(this);
-
-    $.ajax({
-        url: 'simulator/uploadsounds',
-        type: 'POST',
-        data: formData,
-        success: run_sim,
-        cache: false,
-        contentType: false,
-        processData: false
-    });
-});
 
   $('#run_conf').click(function(){
     $('#uploadpopup').modal({backdrop: 'static', keyboard: false})
-    var i = $('#utterance-select')[0].selectedIndex
-    if(i == 0){
-      $('#sound-uploads-form').submit()
+
+    //Add utterance and bgnoise to formdata
+    fData = new FormData();
+    uttupload = $('#utterancefile')
+    if(!uttupload[0].disabled){ 
+      fData.append('utterance', uttupload[0].files[0])
+    }else{
+      fData.append('utterance_id', $('#utterance-select')[0].value)
+    }
+
+    bgupload = $('#bgnoise')
+    if(!bgupload[0].disabled){
+      fData.append('bgnoise', bgupload[0].files[0])
     }
     else{
-      data = JSON.parse('{"success": "true", "sound_ids": {"utterance_id":' + $('#utterance-select')[0][i].value + '}}')
-      run_sim(data)
+      fData.append('bgnoise_id', $('#bgnoise-select')[0].value)
     }
+
+    fData.append('robot_id', $('#robot-select')[0].value)
+    
+    compile_code()
+    var config = editor.getValue()
+    fData.append('config', config)
+
+    //Upload form data
+    $.ajax({
+      url: 'simulator/run_simulation',
+      type: 'POST',
+      data: fData,
+      
+      success: function(data){
+        console.log(data)
+        if(data.success == false){
+          console.log(data.reason)
+        }
+        $('#uploadpopup').modal("hide")
+      },
+      cache: false,
+      contentType: false,
+      dataType: 'json',
+      enctype: 'multipart/form-data',
+      processData: false
+    });
   })
 
   $('#utterance-select').change(function(){
     var index = $('#utterance-select')[0].selectedIndex
     console.log(index)
     if(index == 0){
-      $("#utterancefile").removeClass("disabled")
+      $("#utterancefile")[0].disabled = false
+      $("#utterancefile-lbl").removeClass("disabled")
     }else{
-      $("#utterancefile").addClass("disabled")
+      $("#utterancefile")[0].disabled = true
+      $("#utterancefile-lbl").addClass("disabled")
     }
   })
+
+
+  $('#bgnoise-select').change(function(){
+    var index = $('#bgnoise-select')[0].selectedIndex
+    console.log(index)
+    if(index == 0){
+      $("#bgnoise")[0].disabled = false
+      $("#bgnoise-lbl").removeClass("disabled")
+    }else{
+      $("#bgnoise")[0].disabled = true
+      $("#bgnoise-lbl").addClass("disabled")
+    }
+  })
+  $('#utterance-select').change()
+  $('#bgnoise-select').change()
 
   //Creating UI
   i=0

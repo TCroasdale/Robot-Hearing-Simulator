@@ -18,6 +18,7 @@
 - Needs fields
     - ``` SECRET_KEY ``` A string used for se
     - ``` DATABASE ``` Can be 'SQLite', or in the future 'MongoDB'
+    - ``` SIM_FILE_EXT ``` The file extension for sound files generated, 'flac' or 'wav' recomended
 
 #### To Run Webserver
 - Run `celery -A servertasks worker --loglevel=info` 

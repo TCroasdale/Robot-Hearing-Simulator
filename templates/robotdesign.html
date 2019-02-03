@@ -56,11 +56,13 @@
           </div><!-- motor tab -->
           <div class="tab-pane" id="code">
             <div id="editor"></div>
-            <div id="upload_controls" class="btn-toolbar justify-content-between" role="toolbar">
-              <div class="btn-group mr-2" role="group">
-                <input type="file" name="fileselect" class="btn btn-secondary" id="fileselect" size="1"/>
-                <button type="submit" id="fileupload" class="btn btn-info">Upload</button>
+            <div class="btn-group mr-2" role="group" id="upload_controls">
+              <div class="input-group-prepend"> 
+                <p class="text-info input-group-text">Configuration file.</p>
               </div>
+              <label for="fileselect" class="form-control btn btn-secondary" id="cfg-file-lbl"><fas-icon icon-name="upload"></fas-icon> Browse...</label>
+              <input type="file" name="fileselect" class="form-control btn btn-secondary" id="fileselect" size="1"/>
+              <button type="submit" id="fileupload" class="form-control btn btn-info">Upload</button>
             </div>
           </div> <!-- Code tab -->
         </div> <!-- tab content -->
@@ -117,7 +119,7 @@
           <div class="input-group-prepend"> 
             <p class="text-info input-group-text">Motor sound</p>
           </div>
-          <label for="{id}-mot-sound" class="btn btn-secondary" id="{id}-mot-sound-lbl"><fas-icon icon-name="upload"></fas-icon> Browse...</label>
+          <label for="{id}-mot-sound" class="form-control btn btn-secondary" id="{id}-mot-sound-lbl"><fas-icon icon-name="upload"></fas-icon> Browse...</label>
           <input type="file" name="{id}-mot-sound" class="form-control" id="{id}-mot-sound" size="1">
           <select id="{id}-sound-select" class="form-control" ev-change="sel-change">
               <option value="-1">Upload other file.</option>

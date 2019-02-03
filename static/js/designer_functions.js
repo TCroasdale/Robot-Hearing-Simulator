@@ -61,6 +61,7 @@ $(document).ready(function() {
       
       success: function(data){
         console.log(data.success)
+        $('#uploadpopup').modal("hide")
       },
       cache: false,
       contentType: false,
