@@ -73,14 +73,23 @@ function appendTemplate(parent, panelID, options, events){
 
 
 
-function set_vec3_input(id, obj, type="XYZ"){
-  set_number_input('{0}-{1}'.format(id, type[0])).val(obj['x'])
-  set_number_input('{0}-{1}'.format(id, type[1])).val(obj['y'])
-  set_number_input('{0}-{1}'.format(id, type[2])).val(obj['z'])
+function set_vec3_input(id, obj, type="POS"){
+  console.log(obj)
+  style = V3Styles(type)
+
+
+  set_number_input('{0}-{1}'.format(id, style.first), obj['x'])
+  set_number_input('{0}-{1}'.format(id, style.second), obj['y'])
+  set_number_input('{0}-{1}'.format(id, style.third), obj['z'])
 }
 
-function set_number_input(id, val){
-  $('#{0}-val'.format(id)).val(val)
+function set_number_input(id, value){
+  if (isNaN(value)){
+    $('#{0}-val'.format(id))[0].disabled = true
+  }else{
+    $('#{0}-val'.format(id))[0].disabled = false
+    $('#{0}-val'.format(id)).val(value)
+  }
 }
 
 function set_selection_input(id, i, val){
@@ -89,18 +98,21 @@ function set_selection_input(id, i, val){
 
 // Functions for reading the inputs
 // returns JSON objects
-function read_vec3_input(id, type="POS"){
+function read_vec3_input(id, type="POS", fallback={ "x": "0.0", "y": "0.0", "z": "0.0"}){
   style = V3Styles(type)
 
-  input = { "x": "0.0", "y": "0.0", "z": "0.0"}
-  input['x'] = read_num_input("{0}-{1}".format(id, style.first))
-  input['y'] = read_num_input("{0}-{1}".format(id, style.second))
-  input['z'] = read_num_input("{0}-{1}".format(id, style.third))
+  input = fallback//{ "x": "0.0", "y": "0.0", "z": "0.0"}
+  input['x'] = read_num_input("{0}-{1}".format(id, style.first), fallback['x'])
+  input['y'] = read_num_input("{0}-{1}".format(id, style.second), fallback['y'])
+  input['z'] = read_num_input("{0}-{1}".format(id, style.third), fallback['z'])
 
   return input
 }
 
-function read_num_input(id){
+function read_num_input(id, fallback=0.0){
+  if($("#{0}-val".format(id))[0].disabled){
+     return fallback
+  }
   return $("#{0}-val".format(id))[0].value
 }
 

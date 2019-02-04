@@ -1,3 +1,24 @@
+
+function fetchEditorState(){
+  if(ace.edit("editor").getValue() == ""){
+    // Return a default config if editor is empty
+    return {
+      "simulation_config": {
+       "robot_pos": { "x": "2.5", "y": "2.5", "z": "2.5" },
+       "room_dimensions": {"x": "5","y": "5","z": "5"},
+       "rt60": "0.4","sample_rate": "16000",
+       "source_config": {
+         "simulation_setups": [{"style": "single", "origin": { "x": "0.0", "y": "0.0", "z": "0.0" }}], 
+         "background_noise": { "uid": "-1" }, "input_utterance": { "uid": "-1" }
+        }, 
+         "robot_config": { "uid": "-1" }
+      }
+    }
+  }else{
+    return JSON.parse(ace.edit("editor").getValue())
+  }
+} 
+
 $(document).ready(function() {
   $('#uploadpopup').modal("hide")
 
@@ -48,7 +69,8 @@ $(document).ready(function() {
     fData.append('robot_id', $('#robot-select')[0].value)
     
     compile_code()
-    var config = editor.getValue()
+    //THIS MIGHT CAUSE AN ERROR, WAS ORIGINALLY editor.getValue()
+    var config = JSON.stringify(fetchEditorState())
     fData.append('config', config)
 
     //Upload form data
@@ -126,9 +148,11 @@ $(document).ready(function() {
   create_number_input($('#rt-60'), 'RT 60', 0.4, 0.1, "", true)
   create_number_input($('#sample-rate'), 'Sample Rate', 16000, 100, "", true)
 
+     
+
   editor.on('change', function(obj){
     try{
-      update_UI(JSON.parse(editor.getValue()))
+      update_UI(fetchEditorState())
     }
     catch{
       console.log("invalid json,")
@@ -143,13 +167,17 @@ $(document).ready(function() {
 })
 
 function update_UI(conf){
+  console.log("reflecting changes in the ui")
+
   set_vec3_input('robo-pos', conf['simulation_config']['robot_pos'])
   set_vec3_input('room-dim', conf['simulation_config']['room_dimensions'], "DIM")
   set_number_input('rt-60', conf['simulation_config']['rt60'])
   set_number_input('sample-rate', conf['simulation_config']['sample_rate'])
 
   var sim_setups = conf['simulation_config']['source_config']['simulation_setups']
+  console.log(sim_setups)
   for(i = 0; i < sim_setups.length; i++){
+    console.log("updating sim setup")
     if(i >= $('#src-setups')[0].children.length){
       create_src_panel($('#src-setups'), 'src-conf', i)
     }
@@ -157,25 +185,26 @@ function update_UI(conf){
     var style = sim_setups[i]['style']
     set_selection_input('src-conf', i, style)
     if(style == "box"){
-      set_vec3_input('src-conf-box-dim-{0}'.format(i), sim_setups[i]['dimensions'], "DIM")
-      set_vec3_input('src-conf-box-div-{0}'.format(i), sim_setups[i]['divisions'], "DIM")
-      set_vec3_input('src-conf-box-pos-{0}'.format(i), sim_setups[i]['origin'])
+      set_vec3_input('src-conf-{0}-box-dim'.format(i), sim_setups[i]['dimensions'], "DIM")
+      set_vec3_input('src-conf-{0}-box-div'.format(i), sim_setups[i]['divisions'], "DIM")
+      set_vec3_input('src-conf-{0}-box-pos'.format(i), sim_setups[i]['origin'])
     }
     else if(style == "pyramid"){
-      set_number_input('src-conf-pyr-lays-{0}'.format(i), sim_setups[i]['layers'])
-      set_number_input('src-conf-pyr-lays-{0}'.format(i), sim_setups[i]['division'])
-      set_number_input('src-conf-pyr-lays-{0}'.format(i), sim_setups[i]['length'])
-      set_number_input('src-conf-pyr-lays-{0}'.format(i), sim_setups[i]['angle_from_normal'])
-      set_vec3_input('src-conf-pyr-pos-{0}'.format(i), sim_setups[i]['origin'])
+      set_number_input('src-conf-{0}-pyramid-lays'.format(i), sim_setups[i]['layers'])
+      set_number_input('src-conf-{0}-pyramid-lays'.format(i), sim_setups[i]['division'])
+      set_number_input('src-conf-{0}-pyramid-lays'.format(i), sim_setups[i]['length'])
+      set_number_input('src-conf-{0}-pyramid-lays'.format(i), sim_setups[i]['angle_from_normal'])
+      set_vec3_input('src-conf-{0}-pyramid-pos'.format(i), sim_setups[i]['origin'])
     }
     else if(style == "sphere"){
-      set_number_input('src-conf-sphere-rings-{0}'.format(i), sim_setups[i]['rings'])
-      set_number_input('src-conf-sphere-segs-{0}'.format(i), sim_setups[i]['segments'])
-      set_number_input('src-conf-sphere-rad-{0}'.format(i), sim_setups[i]['radius'])
-      set_vec3_input('src-conf-sphere-pos-{0}'.format(i), sim_setups[i]['origin'])
+      set_number_input('src-conf-{0}-sphere-rings'.format(i), sim_setups[i]['rings'])
+      set_number_input('src-conf-{0}-sphere-segs'.format(i), sim_setups[i]['segments'])
+      set_number_input('src-conf-{0}-sphere-rad'.format(i), sim_setups[i]['radius'])
+      set_vec3_input('src-conf-{0}-sphere-pos'.format(i), sim_setups[i]['origin'])
     }
     else if(style == "single"){
-      set_vec3_input('src-conf-sin-pos-{0}'.format(i), sim_setups[i]['origin'])
+      // print(sim_setups[i]['origin'])
+      set_vec3_input('src-conf-{0}-single-pos'.format(i), sim_setups[i]['origin'])
     }
   }
   if($('#src-setups')[0].children.length > sim_setups.length){
@@ -187,13 +216,17 @@ function update_UI(conf){
   }
 }
 
+
 // Compiles the code to the correct format and adds objects that should be there.
 function compile_code(){
+  
+  old_cfg = fetchEditorState()
+  
   console.log("Compiling Code..")
-  var robopos = read_vec3_input('robo-pos')
-  var roomdim = read_vec3_input('room-dim', "DIM")
-  var rt60 = read_num_input('rt-60')
-  var sample = read_num_input('sample-rate')
+  var robopos = read_vec3_input('robo-pos', "POS", old_cfg['simulation_config']['robot_pos'])
+  var roomdim = read_vec3_input('room-dim', "DIM", old_cfg['simulation_config']['room_dimensions'])
+  var rt60 = read_num_input('rt-60', old_cfg['simulation_config']['rt60'])
+  var sample = read_num_input('sample-rate', old_cfg['simulation_config']['sample_rate'])
   sim_config = {"robot_pos": robopos, "room_dimensions": roomdim, "rt60": rt60, "sample_rate": sample}
 
   num_srcs = $('#src-setups')[0].children.length
@@ -201,10 +234,11 @@ function compile_code(){
   for(i = 0; i < num_srcs; i++){
     src_setup = {}
     var style = $('#src-conf-{0}-sel'.format(i))[0].value
+    old_setup = old_cfg['simulation_config']['source_config']['simulation_setups'][i]
     if(style == "box"){
       var dim = read_vec3_input('src-conf-{0}-box-dim'.format(i), "DIM")
       var div = read_vec3_input('src-conf-{0}-box-div'.format(i), "DIM")
-      var or = read_vec3_input('src-conf-{0}-box-pos'.format(i))
+      var or = read_vec3_input('src-conf-{0}-box-pos'.format(i), "POS", old_setup['origin'])
       src_setup = {"style": style, "origin": or, "dimensions": dim, "divisions": div}
       sim_setups.push(src_setup)
     }
@@ -213,7 +247,7 @@ function compile_code(){
       var div = read_num_input('src-conf-{0}-pyramid-divs'.format(i))
       var len = read_num_input('src-conf-{0}-pyramid-len'.format(i))
       var ang = read_num_input('src-conf-{0}-pyramid-ang'.format(i))
-      var pos = read_vec3_input('src-conf-{0}-pyramid-pos'.format(i))
+      var pos = read_vec3_input('src-conf-{0}-pyramid-pos'.format(i), "POS", old_setup['origin'])
       src_setup = {"style": style, "origin": pos, "layers": lay, "divisions": div, "angle_from_normal": ang, "length": len}
       sim_setups.push(src_setup)
     }
@@ -221,12 +255,12 @@ function compile_code(){
       var rin = read_num_input('src-conf-{0}-sphere-rings'.format(i))
       var seg = read_num_input('src-conf-{0}-sphere-segs'.format(i))
       var rad = read_num_input('src-conf-{0}-sphere-rad'.format(i))
-      var pos = read_vec3_input('src-conf-{0}-sphere-pos'.format(i))
+      var pos = read_vec3_input('src-conf-{0}-sphere-pos'.format(i), "POS", old_setup['origin'])
       src_setup = {"style": style, "origin": pos, "rings": rin, "segments": seg, "radius": rad}
       sim_setups.push(src_setup)
     }
     else if(style == "single"){
-      var pos = read_vec3_input('src-conf-{0}-single-pos'.format(i))
+      var pos = read_vec3_input('src-conf-{0}-single-pos'.format(i), "POS", old_setup['origin'])
       src_setup = {"style": style, "origin": pos}
       sim_setups.push(src_setup)
     }

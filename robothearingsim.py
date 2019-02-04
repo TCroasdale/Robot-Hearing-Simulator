@@ -80,47 +80,31 @@ class RobotHearingSim:
             min = float(min_s)
             max = float(max_s)
         else:
-            print("d b")
             max = float(inner_str)
 
-        print("d")
-        print(rand.random())
         r_num = rand.random()
-        print("d {0}".format(r_num))
         length = max - min
-        print("d {0}".format(length))
 
         return min + round((r_num * length), 2)
         
     def check_value(val, rand):
-        print("c")
         if type(val) is str:
-            print("c str")
             return RobotHearingSim.parse_random_number(val, rand)
         else:
-            print("c num")
             return val
 
 
     def run_from_json_config(sim_config, robot_config, filename):
-        print('b')
         simConfig = sim_config['simulation_config']
-        print('b')
         roboConfig = robot_config['robot_config']
-        print('b')
         rand = random.Random()
         rand.seed(simConfig['seed'])
-        print('b')
 
         rt60 = RobotHearingSim.check_value(simConfig['rt60'], rand)
-        print('b')
         sampling_rate = int(simConfig['sample_rate'])
-        print('b')
         room_dim = [simConfig['room_dimensions']['x'], simConfig['room_dimensions']['y'], simConfig['room_dimensions']['z']]
-        print('b')
         room_dim = [RobotHearingSim.check_value(x, rand) for x in room_dim] # Check for random numbers
         print("room_dim: {0}".format(room_dim))
-        print('b')
 
 
         source_positions = []
@@ -138,17 +122,11 @@ class RobotHearingSim:
                 source_positions += (posArray)
             # Calculate other source setups
 
-        print("e")
         mics = []
-        print("e")
         for mic in roboConfig['microphones']:
-            print("e")
             pos = [mic['local_pos']['x'], mic['local_pos']['y'], mic['local_pos']['z']]
-            print("e")
             rot = [mic['local_rot']['x'], mic['local_rot']['y'], mic['local_rot']['z']]
-            print("e")
             microphone = roboconf.RobotMicrophone(pos, rot, 'cardioid', mic['id'])
-            print("e")
             mics.append(microphone)
 
         # Do motors
@@ -157,28 +135,21 @@ class RobotHearingSim:
         robopos = [simConfig['robot_pos']['x'], simConfig['robot_pos']['y'], simConfig['robot_pos']['z']]
         roborot = [0.0,0.0,0.0] #[simConfig['robot_rot']['x'], simConfig['robot_rot']['y'], simConfig['robot_rot']['z']]
         all_robot_pos = [robopos] * len(source_positions)
-        print("fuck me")
-        all_pos = [[RobotHearingSim.check_value(val, rand) for val in pos] for pos in all_robot_pos]
-        print(all_pos)
+        all_pos = [[RobotHearingSim.check_value(val, rand) for val in pos] for pos in all_robot_pos] # Checking random values
         robot = roboconf.Robot(all_pos[0], roborot, mics, motors, roboConfig['skin_width'])
-        print("f")
 
         # Reading the data from the source file
         [data, fs] = sf.read(simConfig['source_config']['input_utterance']['path'], always_2d=True)
-        print("f")
         data =  data[:,0]
-        print("f")
 
         unique_num = uuid.uuid4()
 
         ## Multithreaded
         config = (data, room_dim, rt60, fs, robot, unique_num)
         os.mkdir('temp_data/{0}'.format(unique_num)) # Create folder for temp data
-        print("f")
 
         Parallel(n_jobs=int(1))(delayed(RobotHearingSim.run_sim)(all_pos[i], source_positions[i], i, config) for i in range(len(source_positions)))
 
-        print("f")
         # Zip up new files, and delete old ones.
         zip_name = 'static/dl/{0}'.format(filename)
         directory_name = 'temp_data/{0}'.format(unique_num)
