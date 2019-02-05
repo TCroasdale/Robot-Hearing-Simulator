@@ -98,7 +98,7 @@ function set_selection_input(id, i, val){
 
 // Functions for reading the inputs
 // returns JSON objects
-function read_vec3_input(id, type="POS", fallback={ "x": "0.0", "y": "0.0", "z": "0.0"}){
+function read_vec3_input(id, type="POS", fallback={ "x": 0.0, "y": 0.0, "z": 0.0}){
   style = V3Styles(type)
 
   input = fallback//{ "x": "0.0", "y": "0.0", "z": "0.0"}
@@ -113,7 +113,7 @@ function read_num_input(id, fallback=0.0){
   if($("#{0}-val".format(id))[0].disabled){
      return fallback
   }
-  return $("#{0}-val".format(id))[0].value
+  return Number($("#{0}-val".format(id))[0].value)
 }
 
 V3Styles = function(style){

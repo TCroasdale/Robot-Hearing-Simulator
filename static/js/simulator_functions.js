@@ -1,17 +1,17 @@
-
 function fetchEditorState(){
   if(ace.edit("editor").getValue() == ""){
     // Return a default config if editor is empty
     return {
+      "variables": {},
       "simulation_config": {
-       "robot_pos": { "x": "2.5", "y": "2.5", "z": "2.5" },
-       "room_dimensions": {"x": "5","y": "5","z": "5"},
-       "rt60": "0.4","sample_rate": "16000",
+       "robot_pos": { "x": 0, "y": -2, "z": 0 },
+       "room_dimensions": {"x": 5,"y": 5,"z": 5},
+       "rt60": 0.4,"sample_rate": 16000,
        "source_config": {
-         "simulation_setups": [{"style": "single", "origin": { "x": "0.0", "y": "0.0", "z": "0.0" }}],
-         "background_noise": { "uid": "-1" }, "input_utterance": { "uid": "-1" }
+         "simulation_setups": [{"style": "single", "origin": { "x": 0.0, "y": 0.0, "z": 0.0 }}],
+         "background_noise": { "uid": -1 }, "input_utterance": { "uid": -1 }
         },
-         "robot_config": { "uid": "-1" }
+         "robot_config": { "uid": -1 }
       }
     }
   }else{
@@ -25,12 +25,22 @@ $(document).ready(function() {
   var editor = ace.edit("editor");
   editor.setTheme("ace/theme/monokai");
   editor.session.setMode("ace/mode/javascript");
+  editor.setOptions({
+    maxLines: Infinity
+  });
   var EditSession = require("ace/edit_session").EditSession;
 
 
+  // ===== Setting up 3D Viewer =====
+  room = sceneView.createRoom(1, 1, 1, 0xeeeeee, 0x222222)
+  robot = sceneView.createSphere(0.5, 0x3f7faa, false)
+  sources = [[sceneView.createSphere(0.25, 0xff0000, false)]]
+
+
+  // ===== Config Upload Handler =====
   $('#fileupload').click(function(){
     var fd = new FormData();
-    fd.append('file', $('#fileselect')[0].files[0] );
+    fd.push('file', $('#fileselect')[0].files[0] );
     $.ajax({
       url: '/upload_config',
       data: fd,
@@ -54,25 +64,25 @@ $(document).ready(function() {
     fData = new FormData();
     uttupload = $('#utterancefile')
     if(!uttupload[0].disabled){
-      fData.append('utterance', uttupload[0].files[0])
+      fData.push('utterance', uttupload[0].files[0])
     }else{
-      fData.append('utterance_id', $('#utterance-select')[0].value)
+      fData.push('utterance_id', $('#utterance-select')[0].value)
     }
 
     bgupload = $('#bgnoise')
     if(!bgupload[0].disabled){
-      fData.append('bgnoise', bgupload[0].files[0])
+      fData.push('bgnoise', bgupload[0].files[0])
     }
     else{
-      fData.append('bgnoise_id', $('#bgnoise-select')[0].value)
+      fData.push('bgnoise_id', $('#bgnoise-select')[0].value)
     }
 
-    fData.append('robot_id', $('#robot-select')[0].value)
+    fData.push('robot_id', $('#robot-select')[0].value)
 
     compile_code()
     //THIS MIGHT CAUSE AN ERROR, WAS ORIGINALLY editor.getValue()
     var config = JSON.stringify(fetchEditorState())
-    fData.append('config', config)
+    fData.push('config', config)
 
     //Upload form data
     $.ajax({
@@ -138,13 +148,16 @@ $(document).ready(function() {
     }, 'del-source': function(){
       $('#{0}'.format(id)).remove()
     }})
+    $('#src-conf-{0} input'.format(i)).change(function(){
+      update3DView(compile_code())
+    })
 
     i += 1
   })
   $('#add-src').click()
   $('#src-conf-0-del').remove()
 
-  create_vector3_input($('#robo-pos'), "Position", "POS", 2.5, 0.25,)
+  create_vector3_input($('#robo-pos'), "Robot Position", "POS", 0, 0.25,)
   create_vector3_input($('#room-dim'), "Room Dimensions", "DIM", 5.0, 0.25)
   create_number_input($('#rt-60'), 'RT 60', 0.4, 0.1, "", true)
   create_number_input($('#sample-rate'), 'Sample Rate', 16000, 100, "", true)
@@ -154,16 +167,22 @@ $(document).ready(function() {
   editor.on('change', function(obj){
     try{
       update_UI(fetchEditorState())
+      update3DView(fetchEditorState())
     }
     catch{
       console.log("invalid json,")
     }
   })
 
+  $('input').change(function(){
+    update3DView(compile_code())
+  })
+
   $('#code-tab').click(function(e){
     var newSesh = new EditSession(JSON.stringify(compile_code(), null, " "))
     newSesh.setMode("ace/mode/javascript");
     editor.setSession(newSesh)
+    update3DView(fetchEditorState())
   })
 })
 
@@ -180,7 +199,23 @@ function update_UI(conf){
   for(i = 0; i < sim_setups.length; i++){
     console.log("updating sim setup")
     if(i >= $('#src-setups')[0].children.length){
-      create_src_panel($('#src-setups'), 'src-conf', i)
+      let id = 'src-conf-{0}'.format(i)
+      appendTemplate($('#src-setups'), 'source-block', {'id': id},
+      {'sel-change': function(){
+        val = $('#{0}-sel option:selected'.format(id))[0].value
+        $('#{0}-pyramid'.format(id)).hide()
+        $('#{0}-box'.format(id)).hide()
+        $('#{0}-sphere'.format(id)).hide()
+        $('#{0}-single'.format(id)).hide()
+
+        $('#{0}-{1}'.format(id, val)).show()
+      }, 'del-source': function(){
+        $('#{0}'.format(id)).remove()
+      }})
+      $('#src-conf-{0} input'.format(i)).change(function(){
+        update3DView(compile_code())
+      })
+  
     }
 
     var style = sim_setups[i]['style']
@@ -239,7 +274,7 @@ function compile_code(){
     if(style == "box"){
       var dim = read_vec3_input('src-conf-{0}-box-dim'.format(i), "DIM")
       var div = read_vec3_input('src-conf-{0}-box-div'.format(i), "DIM")
-      var or = read_vec3_input('src-conf-{0}-box-pos'.format(i), "POS", old_setup['origin'])
+      var or = read_vec3_input('src-conf-{0}-box-pos'.format(i), "POS", old_cfg['origin'])
       src_setup = {"style": style, "origin": or, "dimensions": dim, "divisions": div}
       sim_setups.push(src_setup)
     }
@@ -248,7 +283,7 @@ function compile_code(){
       var div = read_num_input('src-conf-{0}-pyramid-divs'.format(i))
       var len = read_num_input('src-conf-{0}-pyramid-len'.format(i))
       var ang = read_num_input('src-conf-{0}-pyramid-ang'.format(i))
-      var pos = read_vec3_input('src-conf-{0}-pyramid-pos'.format(i), "POS", old_setup['origin'])
+      var pos = read_vec3_input('src-conf-{0}-pyramid-pos'.format(i), "POS", old_cfg['origin'])
       src_setup = {"style": style, "origin": pos, "layers": lay, "divisions": div, "angle_from_normal": ang, "length": len}
       sim_setups.push(src_setup)
     }
@@ -256,12 +291,12 @@ function compile_code(){
       var rin = read_num_input('src-conf-{0}-sphere-rings'.format(i))
       var seg = read_num_input('src-conf-{0}-sphere-segs'.format(i))
       var rad = read_num_input('src-conf-{0}-sphere-rad'.format(i))
-      var pos = read_vec3_input('src-conf-{0}-sphere-pos'.format(i), "POS", old_setup['origin'])
+      var pos = read_vec3_input('src-conf-{0}-sphere-pos'.format(i), "POS", old_cfg['origin'])
       src_setup = {"style": style, "origin": pos, "rings": rin, "segments": seg, "radius": rad}
       sim_setups.push(src_setup)
     }
     else if(style == "single"){
-      var pos = read_vec3_input('src-conf-{0}-single-pos'.format(i), "POS", old_setup['origin'])
+      var pos = read_vec3_input('src-conf-{0}-single-pos'.format(i), "POS", old_cfg['origin'])
       src_setup = {"style": style, "origin": pos}
       sim_setups.push(src_setup)
     }
@@ -269,11 +304,165 @@ function compile_code(){
   sim_config["source_config"] = {"simulation_setups": sim_setups}
 
   code = {}
-  sim_config['robot_config'] = {"uid": "-1"} //Add the robot config field in for later.
-  sim_config['source_config']['background_noise'] = {"uid": "-1"}
-  sim_config['source_config']['input_utterance'] = {"uid": "-1"}
+  sim_config['robot_config'] = {"uid": -1} //Add the robot config field in for later.
+  sim_config['source_config']['background_noise'] = {"uid": -1}
+  sim_config['source_config']['input_utterance'] = {"uid": -1}
   //Add the sim_config to the code
   code["simulation_config"] = sim_config
 
   return code
+}
+
+function update3DView(config){
+  console.log("Updating your view.")
+  room.scale.x = config['simulation_config']['room_dimensions']['x']
+  room.scale.y = config['simulation_config']['room_dimensions']['y']
+  room.scale.z = config['simulation_config']['room_dimensions']['z']
+
+
+  robot.position.x = config['simulation_config']['robot_pos']['x']
+  robot.position.y = config['simulation_config']['robot_pos']['y']
+  robot.position.z = config['simulation_config']['robot_pos']['z']
+
+  source_setups = config['simulation_config']['source_config']['simulation_setups']
+  // Delete all source spheres
+  for(var i in sources){
+    for(var j in sources[i]){
+      sceneView.scene.remove(sources[i][j])
+    }
+  }
+  sources = []
+  for(var i in source_setups){
+    setup = source_setups[i]
+    console.log(setup)
+    if(setup['style'] === "single"){
+      sources.push([sceneView.createSphere(0.25, 0xff0000, false, true)])
+      sources[i][0].position.x = setup['origin']['x']
+      sources[i][0].position.y = setup['origin']['y']
+      sources[i][0].position.z = setup['origin']['z']
+    }
+    else if(setup['style'] === 'box'){
+      source_pos_arr = generate_cube_array(setup)
+      sources.push([])
+      for(var k in source_pos_arr){
+        sources[i].push(sceneView.createSphere(0.25, 0xff0000, false, true))
+        sources[i][k].position.x = source_pos_arr[k]['x']
+        sources[i][k].position.y = source_pos_arr[k]['y']
+        sources[i][k].position.z = source_pos_arr[k]['z']
+      }
+    }
+    else if(setup['style'] === 'sphere'){
+      source_pos_arr = generate_sphere_array(setup)
+      sources.push([])
+      for(var k in source_pos_arr){
+        sources[i].push(sceneView.createSphere(0.25, 0xff0000, false, true))
+        sources[i][k].position.x = source_pos_arr[k]['x']
+        sources[i][k].position.y = source_pos_arr[k]['y']
+        sources[i][k].position.z = source_pos_arr[k]['z']
+      }
+    }
+    else if(setup['style'] === 'pyramid'){
+      source_pos_arr = generate_pyramid_array(setup)
+      sources.push([])
+      for(var k in source_pos_arr){
+        sources[i].push(sceneView.createSphere(0.25, 0xff0000, false, true))
+        sources[i][k].position.x = source_pos_arr[k]['x']
+        sources[i][k].position.y = source_pos_arr[k]['y']
+        sources[i][k].position.z = source_pos_arr[k]['z']
+      }
+    }
+    
+  }
+
+}
+
+
+function generate_cube_array(setup_options){
+  allPositions = []
+  dim = [setup['dimensions']['x'], setup['dimensions']['y'], setup['dimensions']['z']]
+  midpoint = [setup['origin']['x'], setup['origin']['y'], setup['origin']['z']]
+
+  x_divs = Number(setup['divisions']['x'])
+  x_space = (dim[0]/(x_divs-1))
+  y_divs = Number(setup['divisions']['y'])
+  y_space = (dim[1]/(y_divs-1))
+  z_divs = Number(setup['divisions']['z'])
+  z_space = (dim[2]/(z_divs-1))
+  for(var x = 0; x < x_divs; x++){
+      x_pos = midpoint[0] + (x * x_space) - dim[0]/2
+      if(x_divs === 1) x_pos = midpoint[0]
+      for(var y = 0; y < y_divs; y++){
+          y_pos = midpoint[1] + (y * y_space) - dim[1]/2
+          if(y_divs === 1) y_pos = midpoint[1]
+          for(var z = 0; z < z_divs; z++){
+              z_pos = midpoint[2] + (z * z_space) - dim[2]/2
+              if(z_divs === 1) z_pos = midpoint[2]
+              allPositions.push({'x': x_pos, 'y': y_pos, 'z': z_pos})
+          }
+      }
+  }
+  return allPositions
+}
+
+function generate_sphere_array(setup_options){
+  allPositions = []
+  origin = [Number(setup['origin']['x']), Number(setup['origin']['y']), Number(setup['origin']['z'])]
+  r = Number(setup['radius'])
+
+  //#Top and bottom ring
+  top_point = {'x': origin[0],'y':  origin[1]+r,'z':  origin[2]}
+  bottom = {'x': origin[0],'y':  origin[1]-r,'z':  origin[2]}
+  allPositions.push(top_point)
+  allPositions.push(bottom)
+
+  for(var ring = 1; ring < setup['rings']-1; ring++){
+      // # print("ring: {0}".format(ring+1))
+      for(var seg = 0; seg <= setup['segments']; seg++){
+          // print("seg{0}".format(seg))
+          theta = (360/(setup['segments'])) * (Math.PI / 180)
+          phi = (180/(setup['rings']-1)) * (Math.PI / 180)
+
+          y = r * Math.cos(phi * ring)
+          x = r * Math.sin(theta * seg) * Math.sin(phi * ring)
+          z = r * Math.cos(theta * seg) * Math.sin(phi * ring)
+
+          allPositions.push({'x': x+origin[0],'y': y+origin[1],'z':z+origin[2]})
+      }
+  }
+  return allPositions
+}
+
+function generate_pyramid_array(setup_options){
+  allPositions = []
+  origin = [Number(setup['origin']['x']), Number(setup['origin']['y']), Number(setup['origin']['z'])]
+  theta = Number(setup['angle_from_normal']) * (Math.PI / 180)
+  phi = (90* (Math.PI / 180)) - theta
+
+  divisions = Number(setup['divisions'])
+
+  //#Top and bottom ring
+  point = [origin[0], origin[1], origin[2]]
+  allPositions.push(point)
+
+  for(var layer = 0; layer < Number(setup['layers']); layer++){
+    h = layer/Number(setup['layers']) * Number(setup['length'])
+    d = h * Math.sin(theta)
+    
+    allPositions.push({'x': d+origin[0], 'y': origin[1]-h, 'z': d+origin[2]})
+    allPositions.push({'x': d+origin[0], 'y': origin[1]-h, 'z': -d+origin[2]})
+    allPositions.push({'x': -d+origin[0], 'y': origin[1]-h, 'z': d+origin[2]})
+    allPositions.push({'x': -d+origin[0], 'y': origin[1]-h, 'z': -d+origin[2]})
+    for(var div = 0; div < divisions-1; div++){
+      pos = div / (divisions-1)
+      d1 = -d + (pos*d*2)
+
+      allPositions.push({'x': d+origin[0], 'y': origin[1]-h, 'z': d1+origin[2]})
+      allPositions.push({'x': -d+origin[0], 'y': origin[1]-h, 'z': d1+origin[2]})
+      allPositions.push({'x': d1+origin[0], 'y': origin[1]-h, 'z': d+origin[2]})
+      allPositions.push({'x': d1+origin[0], 'y': origin[1]-h, 'z': -d+origin[2]})
+      
+    }
+  }
+  console.log(allPositions)
+  return allPositions
 }

@@ -1,4 +1,4 @@
-class SceneView{
+class SceneView{ 
   constructor(canvasID){
     this.scene = new THREE.Scene();
 
@@ -8,8 +8,12 @@ class SceneView{
 
     parent = $('#'+canvasID)
 
-    this.camera = new THREE.PerspectiveCamera(75, parent.width()/parent.height(), 0.1, 100);
-		this.renderer.setSize(parent.width(), parent.height());
+
+    var size = this.getShortestSide(parent.width(), parent.height())
+
+    //FOV, Aspect Ratio, Near, Far
+    this.camera = new THREE.PerspectiveCamera(75, 1.0, 0.1, 100);
+		this.renderer.setSize(size, size);
 		$('#'+canvasID)[0].appendChild( this.renderer.domElement );
 
 		this.zoomLevel = 15
@@ -21,6 +25,15 @@ class SceneView{
     this.scene.add(axesHelper);
 
 		this.animate();
+  }
+
+  getShortestSide(width, height){
+    if( width <= height){
+      return width
+    }
+    else{
+      return height
+    }
   }
 
   setAnimating(state){
@@ -98,11 +111,12 @@ class SceneView{
     var cube = new THREE.Mesh( geometry, material );
 
     var edges = new THREE.EdgesGeometry(new THREE.BoxGeometry( width-0.01, height-0.01, depth-0.01 ));
-    var line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial( { color: lineColour, linewidth: 5 } ));
+    var line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial( { color: lineColour, linewidth: 10 } ));
     this.scene.add( line );
 
+    line.parent = cube
     this.scene.add( cube );
-    return [cube, line]
+    return cube
   }
 
   createBox(width, height, depth, colour=0x00ff00){
@@ -113,8 +127,14 @@ class SceneView{
     return cube
   }
 
-  createSphere(radius, colour=0x00ff00, inverted=false){
-    var geometry = new THREE.SphereGeometry( radius, 16, 12 );
+  createSphere(radius, colour=0x00ff00, inverted=false, low_res=false){
+    var rings = 16
+    var segments = 12
+    if(low_res){
+      rings = 4
+      segments = 3
+    }
+    var geometry = new THREE.SphereGeometry( radius, rings, segments );
 		var material = new THREE.MeshBasicMaterial( { color: colour } );
     if(inverted){
       material.side = THREE.BackSide
@@ -138,5 +158,4 @@ $(document).ready(function(){
   $('#3d-zoom-out').click(function(){ sceneView.zoomOut() })
   $('#3d-stop-anim').click(function(){ sceneView.setAnimating(false) })
   $('#3d-start-anim').click(function(){ sceneView.setAnimating(true) })
-
 })
