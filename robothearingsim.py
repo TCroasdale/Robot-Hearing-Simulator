@@ -41,7 +41,7 @@ class RobotHearingSim:
     # example conf = (data, room_dim, rt60, 16000, unique_name)
     def run_sim(robot_pos, src_pos, i, conf):
         robot = conf[4] # Setting position of the robot
-        robot.set_pos(robot_pos[0], robot_pos[1], robot_pos[2])
+        robot.set_world_pos(robot_pos)
 
         print("\n--Generation {0}\n----\t Robot Position:\t{1}\n----\tSource Position:\t{2}\n".format(i, robot.transform.get_world_pos(), src_pos))
         # Advanced Method

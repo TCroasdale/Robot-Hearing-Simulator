@@ -26,11 +26,6 @@ class Transform(object):
         self.y_pos += s[0]
         self.z_pos += s[0]
 
-    def set_position(self, x, y, z):
-        print("setting pos")
-        self.x_pos = x
-        self.y_pos = y
-        self.z_pos = z
 
     def rotate(self, q):
         self.orientation[0] + q[0]
@@ -46,20 +41,22 @@ class Transform(object):
         if self.orientation[2] < 0: self.orientation[2] = 360
 
     def set_world_pos(self, vec):
-        if self.parent == None: # Only the root transform can move
+        print(vec)
+        if self.parent is None: # Only the root transform can move
             self.x_pos = vec[0]
             self.y_pos = vec[1]
             self.z_pos = vec[2]
 
 
     def get_world_pos(self):
-        print("FUCK ME")
+        print("FUCK ME {0}".format(self))
         if self.parent == None:
             return [self.x_pos, self.y_pos, self.z_pos]
         else:
             return [self.parent.get_world_pos()[0] + self.x_pos,
                     self.parent.get_world_pos()[1] + self.y_pos,
                     self.parent.get_world_pos()[2] + self.z_pos]
+
 
     def get_world_rot(self):
         if self.parent == None:
@@ -118,9 +115,8 @@ class Robot(object):
         for mic in robo_mics: self.attach_transform(mic.transform)
         for mot in robo_motors: self.attach_transform(mot.transform)
 
-    def set_pos(self, x, y, z):
-        print("120")
-        self.transform.set_position(x, y, z)
+    def set_pos(self, pos):
+        self.transform.set_world_pos(pos)
 
     def attach_transform(self, transform):
         transform.parent = self.transform
