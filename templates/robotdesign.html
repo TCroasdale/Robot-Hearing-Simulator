@@ -1,16 +1,31 @@
 {% extends "layout.html" %}
 {% block title %}Robot Designer{% endblock %}
 {% block head %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/101/three.min.js" type="text/javascript"></script>
+
 <link rel="stylesheet" href="{{ url_for('static', filename='css/editor.css') }}" media="screen">
+<script src="{{ url_for('static', filename='js/3DViewer.js') }}" type="text/javascript" defer></script>
 <script src="{{ url_for('static', filename='js/construct_ui.js') }}" type="text/javascript" defer></script>
 <script src="{{ url_for('static', filename='js/designer_functions.js') }}" type="text/javascript" defer></script>
+
 {% endblock %}
 {% block content %}
     <h1>Robot Designer</h1>
     <div class="row">
       <div id="3js-container" class="col-md-7">
-          <canvas>
-          </canvas>
+        <div id="3d-controls" class="input-group" role="toolbar">
+          <div class="input-group-prepend">
+            <p class="input-group-text">Actions</p>
+          </div>
+          <div id="3d-zoom-in" class="form-control btn btn-light"><fas-icon icon-name="search-plus"></fas-icon></div>
+          <div id="3d-zoom-out" class="form-control btn btn-light"><fas-icon icon-name="search-minus"></fas-icon></div>
+          <div id="3d-stop-anim" class="form-control btn btn-light"><fas-icon icon-name="stop-circle"></fas-icon></div>
+          <div id="3d-start-anim" class="form-control btn btn-light"><fas-icon icon-name="play-circle"></fas-icon></div>
+          <div id="3d-cam-left" class="form-control btn btn-light"><fas-icon icon-name="chevron-left"></fas-icon></div>
+          <div id="3d-cam-up" class="form-control btn btn-light"><fas-icon icon-name="chevron-up"></fas-icon></div>
+          <div id="3d-cam-down"class="form-control btn btn-light"><fas-icon icon-name="chevron-down"></fas-icon></div>
+          <div id="3d-cam-right" class="form-control btn btn-light"><fas-icon icon-name="chevron-right"></fas-icon></div>
+        </div>
       </div>
       <div id="interface-container" class="bg-gray py-1 col-md-5">
         <ul class="nav nav-tabs border-bottom-0">
@@ -57,7 +72,7 @@
           <div class="tab-pane" id="code">
             <div id="editor"></div>
             <div class="btn-group mr-2" role="group" id="upload_controls">
-              <div class="input-group-prepend"> 
+              <div class="input-group-prepend">
                 <p class="text-info input-group-text">Configuration file.</p>
               </div>
               <label for="fileselect" class="form-control btn btn-secondary" id="cfg-file-lbl"><fas-icon icon-name="upload"></fas-icon> Browse...</label>
@@ -116,7 +131,7 @@
       <hr>
       <div id="{id}-sound-container">
         <div class="input-group mr-2" role="group">
-          <div class="input-group-prepend"> 
+          <div class="input-group-prepend">
             <p class="text-info input-group-text">Motor sound</p>
           </div>
           <label for="{id}-mot-sound" class="form-control btn btn-secondary" id="{id}-mot-sound-lbl"><fas-icon icon-name="upload"></fas-icon> Browse...</label>

@@ -22,6 +22,31 @@ $(document).ready(function() {
     });
   })
 
+  sceneView.createSphere(0.5, 0x3f7faa, true)
+  sceneView.createRoom(5, 5, 5, 0xeeeeee, 0x222222)
+
+  mic = sceneView.createCone(0.2, 0.2)
+  mic.position.x = 0.3
+  mic.position.z = 0.1
+  mic.rotation.z = 0.0174533 * -90
+  mic.rotation.y = 0.0174533 * 90
+
+  mic2 = sceneView.createCone(0.2, 0.2)
+  mic2.position.x = -0.3
+  mic2.position.z = 0.1
+  mic2.rotation.z = 0.0174533 * -90
+  mic2.rotation.y = 0.0174533 * 90
+
+  cube = sceneView.createSphere(0.1, 0x44ee44)
+  cube.position.x = 0.3
+  cube.position.y = -0.1
+  cube.position.z = -0.1
+
+  cube2 = sceneView.createSphere(0.1, 0x44ee44)
+  cube2.position.x = -0.3
+  cube2.position.y = -0.1
+  cube2.position.z = -0.1
+
   $('#save-robot').click(function(){
     $('#uploadpopup').modal({backdrop: 'static', keyboard: false})
 
@@ -46,7 +71,7 @@ $(document).ready(function() {
     }
 
     fData.append("id_map", JSON.stringify(id_to_sound_map))
-    
+
     compile_code()
     var config = editor.getValue()
     fData.append('robot-config', config)
@@ -58,7 +83,7 @@ $(document).ready(function() {
       url: 'designer/save',
       type: 'POST',
       data: fData,
-      
+
       success: function(data){
         console.log(data.success)
         $('#uploadpopup').modal("hide")

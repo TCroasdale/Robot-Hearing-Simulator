@@ -8,16 +8,16 @@ function fetchEditorState(){
        "room_dimensions": {"x": "5","y": "5","z": "5"},
        "rt60": "0.4","sample_rate": "16000",
        "source_config": {
-         "simulation_setups": [{"style": "single", "origin": { "x": "0.0", "y": "0.0", "z": "0.0" }}], 
+         "simulation_setups": [{"style": "single", "origin": { "x": "0.0", "y": "0.0", "z": "0.0" }}],
          "background_noise": { "uid": "-1" }, "input_utterance": { "uid": "-1" }
-        }, 
+        },
          "robot_config": { "uid": "-1" }
       }
     }
   }else{
     return JSON.parse(ace.edit("editor").getValue())
   }
-} 
+}
 
 $(document).ready(function() {
   $('#uploadpopup').modal("hide")
@@ -26,6 +26,7 @@ $(document).ready(function() {
   editor.setTheme("ace/theme/monokai");
   editor.session.setMode("ace/mode/javascript");
   var EditSession = require("ace/edit_session").EditSession;
+
 
   $('#fileupload').click(function(){
     var fd = new FormData();
@@ -52,7 +53,7 @@ $(document).ready(function() {
     //Add utterance and bgnoise to formdata
     fData = new FormData();
     uttupload = $('#utterancefile')
-    if(!uttupload[0].disabled){ 
+    if(!uttupload[0].disabled){
       fData.append('utterance', uttupload[0].files[0])
     }else{
       fData.append('utterance_id', $('#utterance-select')[0].value)
@@ -67,7 +68,7 @@ $(document).ready(function() {
     }
 
     fData.append('robot_id', $('#robot-select')[0].value)
-    
+
     compile_code()
     //THIS MIGHT CAUSE AN ERROR, WAS ORIGINALLY editor.getValue()
     var config = JSON.stringify(fetchEditorState())
@@ -78,7 +79,7 @@ $(document).ready(function() {
       url: 'simulator/run_simulation',
       type: 'POST',
       data: fData,
-      
+
       success: function(data){
         console.log(data)
         if(data.success == false){
@@ -148,7 +149,7 @@ $(document).ready(function() {
   create_number_input($('#rt-60'), 'RT 60', 0.4, 0.1, "", true)
   create_number_input($('#sample-rate'), 'Sample Rate', 16000, 100, "", true)
 
-     
+
 
   editor.on('change', function(obj){
     try{
@@ -219,9 +220,9 @@ function update_UI(conf){
 
 // Compiles the code to the correct format and adds objects that should be there.
 function compile_code(){
-  
+
   old_cfg = fetchEditorState()
-  
+
   console.log("Compiling Code..")
   var robopos = read_vec3_input('robo-pos', "POS", old_cfg['simulation_config']['robot_pos'])
   var roomdim = read_vec3_input('room-dim', "DIM", old_cfg['simulation_config']['room_dimensions'])
