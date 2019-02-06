@@ -67,7 +67,8 @@
       ],
       "background_noise": {
        "uid": -1,
-       "path": "../test_data/data.wav"
+       "path": "../test_data/data.wav",
+       "volume": 0.75
       },
       "input_utterance": {
        "uid": -1,

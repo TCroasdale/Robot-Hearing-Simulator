@@ -16,16 +16,20 @@
      "source_config": {
       "simulation_setups": [
        {
-        "style": "single",
+        "style": "sphere",
         "origin": {
          "x": 0,
-         "y": 2,
+         "y": 0,
          "z": 0
         },
+        "rings": 3,
+        "segments": 4,
+        "radius": 2.5
        }
       ],
       "background_noise": {
-       "uid": -1
+       "uid": -1,
+       "volume": 0.5
       },
       "input_utterance": {
        "uid": -1

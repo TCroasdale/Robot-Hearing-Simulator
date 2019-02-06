@@ -270,6 +270,8 @@ if __name__ == '__main__': #Main Entry point
     parser = argparse.ArgumentParser() # Parsing program arguments
     parser.add_argument('-c', help='The config file', default='../configexample.json')
     parser.add_argument('-r', help='The robot config', default='../config_robot.json')
+    parser.add_argument('-u', help='The robot config', default='../test_data/data.wav')
+    parser.add_argument('-bg', help='The robot config', default='../test_data/bg-noise.wav')
 
     args = parser.parse_args()
 
@@ -278,10 +280,13 @@ if __name__ == '__main__': #Main Entry point
     sim_config_json=open(args.c).read()
     sim_config = json.loads(sim_config_json)
 
+    sim_config['simulation_config']['source_config']['input_utterance']['path'] = args.u
+    sim_config['simulation_config']['source_config']['background_noise']['path'] = args.bg
+
     robot_config_json=open(args.r).read()
     robot_config = json.loads(robot_config_json)
 
-    RobotHearingSim.run_from_json_config(sim_config, robot_config, "test")
+    RobotHearingSim.run_from_json_config(sim_config, robot_config, "test") 
 
     box = RobotHearingSim.parse_box_source_setup({"style": "box","origin": {"x": 0,"y": 0,"z": 0},"dimensions": {"x": 5,"y": 5,"z": 5}, "divisions": {"x": 3,"y": 3,"z": 3}})
     sphere = RobotHearingSim.parse_sphere_source_setup({"style": "sphere","origin": {"x": 0,"y": 0,"z": 0}, "rings": 8,"segments": 12,"radius": 2})

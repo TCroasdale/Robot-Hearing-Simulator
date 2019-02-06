@@ -134,7 +134,7 @@ class WebServer:
                 os.remove(sim.pathToConfig)
                 os.remove(sim.pathToZip)
             except:
-                print("Cannot delete simulation files, they're not here!")
+                print("Cannot delete simulation files!")
 
             self.db.delete_simulation(request.form['sim_id'])
 
@@ -147,7 +147,7 @@ class WebServer:
             try:
                 os.remove(sound.pathToFile)
             except:
-                print("Cannot delete sound file, it's not here!")
+                print("Cannot delete sound file!")
 
             self.db.delete_sound(request.form['sound_id'])
 
@@ -160,7 +160,7 @@ class WebServer:
             try:
                 os.remove(robot.pathToConfig)
             except:
-                print("Cannot delete robot file, it's not here!")
+                print("Cannot delete robot file!")
 
             self.db.delete_robot(request.form['robot_id'])
 
@@ -213,8 +213,6 @@ class WebServer:
             if 'userID' not in session: return jsonify({"success": "false"})
 
             strdict = json.loads(request.form['config'])
-            print(request.form)
-            print(request.files)
 
             if 'utterance' in request.files:
                 utt = processSoundUpload(request.files['utterance'], session['userID'])
@@ -300,9 +298,8 @@ class WebServer:
             #Load config and mot_id to i map
             conf = json.loads(request.form['robot-config'])
             id_map = json.loads(request.form['id_map'])
+            
             # Update the config with new id values
-            print(conf)
-            print(id_map)
             conf = insertSoundPaths(conf, sounds, id_map)
 
             # Write the config to a file
