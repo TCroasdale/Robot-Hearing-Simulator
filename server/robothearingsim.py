@@ -10,8 +10,7 @@
 
 import argparse
 import soundfile as sf
-from rir_simulator import roomsimove_single
-from rir_simulator import olafilt
+from rir_simulator import roomsimove_single, olafilt
 import robotconfig as roboconf
 import numpy as np
 import shutil as zipper
@@ -113,6 +112,9 @@ class RobotHearingSim:
             elif source_setup['style'] == 'sphere':
                 posArray = RobotHearingSim.parse_sphere_source_setup(source_setup)
                 source_positions += (posArray)
+            elif source_setup['style'] == 'pyramid':
+                posArray = RobotHearingSim.parse_pyramid_source_setup(source_setup)
+                source_positions += (posArray)
             # Calculate other source setups
 
         mics = []
@@ -185,34 +187,57 @@ class RobotHearingSim:
         allPositions = []
 
         origin = [setup['origin']['x'], setup['origin']['y'], setup['origin']['z']]
-        r = setup['radius']
+        r = float(setup['radius'])
 
         #Top and bottom ring
-        top = [origin[0], origin[1]+setup['radius'], origin[2]]
-        bottom = [origin[0], origin[1]-setup['radius'], origin[2]]
+        top = [origin[0], origin[1]+r, origin[2]]
+        bottom = [origin[0], origin[1]-r, origin[2]]
         allPositions.append(top)
         allPositions.append(bottom)
 
-        for ring in range(int(setup['rings'])-2):
-            # print("ring: {0}".format(ring+1))
+        for ring in range(1, int(setup['rings'])-1):
             for seg in range(int(setup['segments'])):
-                # print("seg{0}".format(seg))
-                theta = math.radians((360.0 / setup['segments']) * seg)
-                phi = math.radians((180.0 / setup['rings']) * ring+1)
-                x = r * math.cos(theta) * math.sin(phi)
-                y = r * math.sin(theta) * math.cos(phi)
-                z = r * math.cos(phi)
+                theta = math.radians((360.0 / setup['segments']))
+                phi = math.radians((180.0 / setup['rings']-1))
+
+                y = r * math.cos(phi * ring)
+                x = r * math.sin(theta * seg) * math.sin(phi * ring)
+                z = r * math.cos(theta * seg) * math.sin(phi * ring)
 
                 allPositions.append([x+origin[0], y+origin[1], z+origin[2]])
-
-        print(allPositions)
+ 
         return allPositions
 
-    def parse_cone_source_setup(setup):
+    def parse_pyramid_source_setup(setup):
         allPositions = []
+        origin = [float(setup['origin']['x']), float(setup['origin']['y']), float(setup['origin']['z'])]
+        theta = math.radians(float(setup['angle_from_normal']))
+
+        divisions = int(setup['divisions'])
+
+        point = [origin[0], origin[1], origin[2]]
+        allPositions.append(point)
+
+        for layer in range(1, int(setup['layers'])):
+            # Create the corner vertex for eacg layer
+            h = layer/int(setup['layers']) * float(setup['length'])
+            d = h * math.sin(theta)
+
+            allPositions.append([d+origin[0], origin[1]-h, d+origin[2]])
+            allPositions.append([d+origin[0], origin[1]-h, -d+origin[2]])
+            allPositions.append([-d+origin[0], origin[1]-h, d+origin[2]])
+            allPositions.append([-d+origin[0], origin[1]-h, -d+origin[2]])
+            for div in range(divisions-1):
+                # Add each division to each side.
+                pos = div / (divisions-1)
+                d1 = -d + (pos*d*2)
+
+                allPositions.append([d+origin[0], origin[1]-h, d1+origin[2]])
+                allPositions.append([-d+origin[0], origin[1]-h, d1+origin[2]])
+                allPositions.append([d1+origin[0], origin[1]-h, d+origin[2]])
+                allPositions.append([d1+origin[0], origin[1]-h, -d+origin[2]])
 
         return allPositions
-
 
 
 # Test Harness for this system
@@ -231,9 +256,11 @@ if __name__ == '__main__': #Main Entry point
     robot_config_json=open(args.r).read()
     robot_config = json.loads(robot_config_json)
 
-    # RobotHearingSim.run_from_json_config(sim_config, robot_config, "test")
+    RobotHearingSim.run_from_json_config(sim_config, robot_config, "test")
 
     box = RobotHearingSim.parse_box_source_setup({"style": "box","origin": {"x": 0,"y": 0,"z": 0},"dimensions": {"x": 5,"y": 5,"z": 5}, "divisions": {"x": 3,"y": 3,"z": 3}})
-    for coord in box: print(coord)
+    sphere = RobotHearingSim.parse_sphere_source_setup({"style": "sphere","origin": {"x": 0,"y": 0,"z": 0}, "rings": 8,"segments": 12,"radius": 2})
+    pyramid = RobotHearingSim.parse_pyramid_source_setup({"style":"pyramid","origin": {"x": 0,"y": 0.0, "z": 0}, "layers": 4,"divisions": 2,"angle_from_normal": 30,"length": 5})
+    # for coord in pyramid: print(coord)
 
     print("Execution took {0} seconds".format(time.time() - start_time))

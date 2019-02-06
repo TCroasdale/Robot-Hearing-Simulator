@@ -1,39 +1,81 @@
 {
- "simulation_config": {
-  "seed": 3,
-  "robot_pos": {
-   "x": 2.5,
-   "y": 0,
-   "z": 2.5
-  },
-  "room_dimensions": {
-   "x": 20,
-   "y": 5,
-   "z": 20
-  },
-  "rt60": 0.4,
-  "sample_rate": 16000,
-  "source_config": {
-   "simulation_setups": [
-    {
-     "style": "single",
-     "origin": {
-      "x": 9.5,
-      "y": 0,
-      "z": 9.5
+    "simulation_config": {
+     "seed": 42069,
+     "robot_pos": {
+      "x": 0,
+      "y": -3,
+      "z": 0
+     },
+     "room_dimensions": {
+      "x": 20,
+      "y": 7,
+      "z": 20
+     },
+     "rt60": 0.4,
+     "sample_rate": 16000,
+     "source_config": {
+      "simulation_setups": [
+       {
+        "style": "pyramid",
+        "origin": {
+         "x": 5,
+         "y": 2,
+         "z": 0
+        },
+        "layers": 5,
+        "divisions": 4,
+        "angle_from_normal": 40,
+        "length": 6
+       },
+       {
+        "style": "box",
+        "origin": {
+         "x": -6,
+         "y": 0.75,
+         "z": 6.5
+        },
+        "dimensions": {
+         "x": 5,
+         "y": 5,
+         "z": 5
+        },
+        "divisions": {
+         "x": 5,
+         "y": 5,
+         "z": 5
+        }
+       },
+       {
+        "style": "single",
+        "origin": {
+         "x": 0,
+         "y": 1,
+         "z": 0
+        }
+       },
+       {
+        "style": "sphere",
+        "origin": {
+         "x": -4,
+         "y": 0,
+         "z": -5.25
+        },
+        "rings": 8,
+        "segments": 12,
+        "radius": 2.5
+       }
+      ],
+      "background_noise": {
+       "uid": -1,
+       "path": "../test_data/data.wav"
+      },
+      "input_utterance": {
+       "uid": -1,
+       "path": "../test_data/data.wav"
+      }
+     },
+     "robot_config": {
+      "uid": -1
      }
     }
-   ],
-   "background_noise": {
-    "uid": -1
-   },
-   "input_utterance": {
-    "uid": -1,
-    "path": "../test_data/data.wav"
    }
-  },
-  "robot_config": {
-   "uid": -1
-  }
- }
-}
