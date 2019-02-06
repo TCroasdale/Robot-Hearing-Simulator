@@ -1,9 +1,9 @@
-class SceneView{ 
+class SceneView{
   constructor(canvasID){
     this.scene = new THREE.Scene();
 
 		this.renderer = new THREE.WebGLRenderer({antialias: true});
-    this.renderer.setClearColor(0x3355aa, 0.5)
+    this.renderer.setClearColor(0x35355be, 0.5)
     this.renderer.antialias = true
 
     parent = $('#'+canvasID)
@@ -82,6 +82,13 @@ class SceneView{
     this.camera.position.x = this.cameraFocus[0]
     this.camera.position.y = this.cameraFocus[1]
     this.camera.position.z = this.cameraFocus[2]
+  }
+
+  setCameraFocus(x, y, z){
+    this.cameraFocus[0] = x
+    this.cameraFocus[y] = y
+    this.cameraFocus[z] = z
+    this.centerCamera()
   }
 
   animate(){

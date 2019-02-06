@@ -22,6 +22,7 @@ import random
 from joblib import Parallel, delayed
 import time
 from config import *
+import json
 
 class RobotHearingSim:
     #Converts a string to a true/false boolean, used to process bool arguments
@@ -41,7 +42,7 @@ class RobotHearingSim:
     # example conf = (data, room_dim, rt60, 16000, unique_name)
     def run_sim(robot_pos, src_pos, i, conf):
         robot = conf[4] # Setting position of the robot
-        robot.set_world_pos(robot_pos)
+        robot.transform.set_world_pos(robot_pos)
 
         print("\n--Generation {0}\n----\t Robot Position:\t{1}\n----\tSource Position:\t{2}\n".format(i, robot.transform.get_world_pos(), src_pos))
         # Advanced Method
@@ -56,7 +57,7 @@ class RobotHearingSim:
         # Using list comprehension to create a list of all mics
         mics = [roomsimove_single.Microphone(mic.transform.get_world_pos(), mic.id,  \
                 orientation=mic.transform.get_world_rot(), direction=mic.style) \
-                for mic in conf[4].microphones]
+                for mic in robot.microphones]
 
         sim_rir = roomsimove_single.RoomSim(sample_rate, room, mics, RT60=rt60)
         rir = sim_rir.create_rir(src_pos)
@@ -86,7 +87,7 @@ class RobotHearingSim:
         length = max - min
 
         return min + round((r_num * length), 2)
-        
+
     def check_value(val, rand):
         if type(val) is str:
             return RobotHearingSim.parse_random_number(val, rand)
@@ -233,62 +234,19 @@ class RobotHearingSim:
 # Generates 30 utterances
 if __name__ == '__main__': #Main Entry point
     parser = argparse.ArgumentParser() # Parsing program arguments
-    parser.add_argument('-i', help='The input utterance', default='test_data/data.wav')
-    parser.add_argument('-o', help='The output files', default='test_data/data.zip')
-    parser.add_argument('-g', help='Number of Generations', default='10')
-    parser.add_argument('-t', help='Number of Threads', default='1')
-    parser.add_argument('-rx', help='Room Width', default='5')
-    parser.add_argument('-ry', help='Room Length', default='5')
-    parser.add_argument('-rz', help='Room Height', default='5')
-    parser.add_argument('-DEBUG', help='Show output', default='TRUE')
-    parser.add_argument('-TIMED', help='Time the generation', default='FALSE')
+    parser.add_argument('-c', help='The config file', default='configexample.json')
+    parser.add_argument('-r', help='The robot config', default='config_robot.json')
+
     args = parser.parse_args()
 
-    show_output = RobotHearingSim.arg_to_bool(args.DEBUG)
-    timed = RobotHearingSim.arg_to_bool(args.TIMED)
-
     start_time = time.time()
-    if timed:
-        print("Starting Timer") if show_output else 0
 
-    rt60 = 0.4 # in seconds
-    room_dim = [float(args.rx), float(args.ry), float(args.rz)] # in meters
-    sampling_rate = 16000
+    sim_config_json=open(args.c).read()
+    sim_config = json.loads(sim_config_json)
 
-    mic1 = roboconf.RobotMicrophone([0.25, 0.25, 0.5], [0.0, 0.0, 45.0], 'cardioid', 0)
-    mic2 = roboconf.RobotMicrophone([-0.25, 0.25, 0.5], [0.0, 0.0, -45.0],  'cardioid', 1)
-    mot1 = roboconf.RobotMotor([0.3, 0, 0], None, 0)
-    mot2 = roboconf.RobotMotor([0.3, 0, 0], None, 1)
+    robot_config_json=open(args.r).read()
+    robot_config = json.loads(robot_config_json)
 
-    MIRo = roboconf.Robot([0, 0, 0], [30.0, 0.0, 90.0], [mic1, mic2], [mot1, mot2], 0.5)
+    RobotHearingSim.run_from_json_config(sim_config, robot_config, "test")
 
-    # Generating a list of random mic and source positions
-    number_generations = int(args.g)
-    all_robot_pos = np.asarray([np.random.uniform(MIRo.skin_width, room_dim[0]-MIRo.skin_width, size=number_generations),
-                np.random.uniform(MIRo.skin_width, room_dim[1]-MIRo.skin_width, size=number_generations),
-                np.random.uniform(MIRo.skin_width, room_dim[2]-MIRo.skin_width, size=number_generations)])
-
-    all_source_pos = np.asarray([np.random.uniform(0.1, room_dim[0]-0.1, size=number_generations),
-                np.random.uniform(0.1, room_dim[1]-0.1, size=number_generations),
-                np.random.uniform(0.1, room_dim[2]-0.1, size=number_generations)])
-
-    # Reading the data from the source file
-    [data, fs] = sf.read(args.i, always_2d=True)
-    data =  data[:,0]
-
-    print("Starting work") if show_output else 0
-
-    ## Multithreaded
-    config = (data, room_dim, rt60, fs, MIRo)
-    Parallel(n_jobs=int(args.t))(delayed(RobotHearingSim.run_sim)(all_robot_pos[:, i], all_source_pos[:, i], i, config) for i in range(number_generations))
-
-    # Zip up new files, and delete old ones.
-    zip_name = args.o
-    directory_name = 'temp_data'
-    print("Zipping output to: {0}".format(zip_name)) if show_output else 0
-    zipper.make_archive(zip_name, 'zip', directory_name)
-    print("Deleting temporary files") if show_output else 0
-    for i in range(number_generations):
-        os.remove('temp_data/data_gen_{0}.wav'.format(i))
-
-    print("Execution took {0} seconds".format(time.time() - start_time)) if timed else 0
+    print("Execution took {0} seconds".format(time.time() - start_time))

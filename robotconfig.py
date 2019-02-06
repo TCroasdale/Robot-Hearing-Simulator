@@ -41,7 +41,6 @@ class Transform(object):
         if self.orientation[2] < 0: self.orientation[2] = 360
 
     def set_world_pos(self, vec):
-        print(vec)
         if self.parent is None: # Only the root transform can move
             self.x_pos = vec[0]
             self.y_pos = vec[1]
@@ -49,7 +48,6 @@ class Transform(object):
 
 
     def get_world_pos(self):
-        print("FUCK ME {0}".format(self))
         if self.parent == None:
             return [self.x_pos, self.y_pos, self.z_pos]
         else:

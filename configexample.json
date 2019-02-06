@@ -1,93 +1,39 @@
 {
-  "simulation_config": {
-   "robot_config": {
-    "uid": "-1"
-   },
-   "robot_pos": {
-    "x": "2.5",
-    "y": "2.5",
-    "z": "2.5"
-   },
-   "robot_rot": {
-    "x": "5.0",
-    "y": "5.0",
-    "z": "5.0"
-   },
-   "room_dimensions": {
-    "x": "5.0",
-    "y": "5.0",
-    "z": "5.0"
-   },
-   "rt60": "0.4",
-   "sample_rate": "16000",
-   "source_config": {
-    "background_noise": {
-     "uid": "-1"
-    },
-    "input_utterance": {
-     "uid": "-1"
-    },
-    "simulation_setups": [
-      {
-      "origin": {
-       "x": "2.5",
-       "y": "2.5",
-       "z": "2.5"
-      },
-      "style": "single"
-     },
-     {
-      "dimensions": {
-       "x": "4.0",
-       "y": "4.0",
-       "z": "4.0"
-      },
-      "divisions": {
-       "x": "4",
-       "y": "4",
-       "z": "4"
-      },
-      "orientation": {
-       "x": "2.5",
-       "y": "2.5",
-       "z": "2.5"
-      },
-      "origin": {
-       "x": "2.5",
-       "y": "2.5",
-       "z": "2.5"
-      },
-      "style": "box"
-     },
-     {
-      "layers": "3",
-      "angle_from_normal": "30",
-      "divisions": "5",
-      "length": "5",
-      "orientation": {
-       "x": "2.5",
-       "y": "2.5",
-       "z": "2.5"
-      },
-      "origin": {
-       "x": "2.5",
-       "y": "2.5",
-       "z": "2.5"
-      },
-      "style": "pyramid"
-     },
-     {
-      "rings": "4",
-      "segments": "8",
-      "origin": {
-       "x": "2.5",
-       "y": "2.5",
-       "z": "2.5"
-      },
-      "radius": "3.0",
-      "style": "sphere"
+ "simulation_config": {
+  "seed": 3,
+  "robot_pos": {
+   "x": 2.5,
+   "y": 2.5,
+   "z": 2.5
+  },
+  "room_dimensions": {
+   "x": 20,
+   "y": 5,
+   "z": 20
+  },
+  "rt60": 0.4,
+  "sample_rate": 16000,
+  "source_config": {
+   "simulation_setups": [
+    {
+     "style": "single",
+     "origin": {
+      "x": 19,
+      "y": 2.5,
+      "z": 19
      }
-    ]
+    }
+   ],
+   "background_noise": {
+    "uid": -1
+   },
+   "input_utterance": {
+    "uid": -1,
+    "path": "test_data/data.wav"
    }
+  },
+  "robot_config": {
+   "uid": -1
   }
+ }
 }

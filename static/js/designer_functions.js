@@ -1,3 +1,80 @@
+function fetchEditorState(){
+  if(ace.edit("editor").getValue() == ""){
+    // Return a default config if editor is empty
+    return {
+     "robot_config": {
+      "skin_width": 0.25,
+      "microphones": [{"id": 0,
+        "local_pos": { "x": 0, "y": 0, "z": 0},
+        "local_rot": {"x": 0,"y": 0,"z": 0},
+        "mic_style": {"uid": -1}}],
+      "motors": [{"id": 0,
+        "local_pos": {"x": 0,"y": 0,"z": 0},
+        "sound": {"uid": -1}}]
+     }
+    }
+
+  }else{
+    return JSON.parse(ace.edit("editor").getValue())
+  }
+}
+
+function addMotorPanel(){
+  num_children= $('#mot-setups')[0].children.length
+  child = $('#mot-setups')[0].children[num_children-1]
+  var i = 0
+  if(num_children > 0) i = Number(child.id.match(/\d+/)[0]) + 1
+  let id = 'mot-conf-{0}'.format(i)
+  appendTemplate($('#mot-setups'), 'motor-block', {'id': id, 'num': i},
+  {'del-motor': function(){ //Function to remove a motor
+    $('#{0}'.format(id)).remove()
+  }, 'sel-change': function(){ //Function to disable file upload if needed
+    var index = this.selectedIndex
+    id = this.id.replace('-sound-select', '')
+    if(index == 0){
+      $("#{0}-mot-sound".format(id))[0].disabled = false
+      $("#{0}-mot-sound-lbl".format(id)).removeClass("disabled")
+    }else{
+      $("#{0}-mot-sound".format(id))[0].disabled = true
+      $("#{0}-mot-sound-lbl".format(id)).addClass("disabled")
+    }
+  }})
+  // ===== Add Update functions =====
+  $('#{0} input'.format(id)).change(function(){
+    update3DView(compile_code())
+  })
+  $('#{0}-del'.format(id)).click(function(){
+    update3DView(compile_code())
+  })
+
+  update3DView(compile_code())
+
+  return id
+}
+
+
+function addMicPanel(){
+  num_children= $('#mic-setups')[0].children.length
+  child = $('#mic-setups')[0].children[num_children-1]
+  var i = 0
+  if(num_children > 0) i = Number(child.id.match(/\d+/)[0]) + 1
+  let id = 'mic-conf-{0}'.format(i)
+  appendTemplate($('#mic-setups'), 'mic-block', {'id': id, 'num': i},
+  {'del-mic': function(){
+    $('#{0}'.format(id)).remove()
+  }})
+  // ===== Add Update functions =====
+  $('#{0} input'.format(id)).change(function(){
+    update3DView(compile_code())
+  })
+  $('#{0}-del'.format(id)).click(function(){
+    update3DView(compile_code())
+  })
+
+  update3DView(compile_code())
+  return id
+}
+
 $(document).ready(function() {
   $('#uploadpopup').modal("hide")
 
@@ -22,30 +99,13 @@ $(document).ready(function() {
     });
   })
 
-  sceneView.createSphere(0.5, 0x3f7faa, true)
+  // ===== Setting up 3D Viewer =====
   sceneView.createRoom(5, 5, 5, 0xeeeeee, 0x222222)
+  robot = sceneView.createSphere(1.0, 0x3f7faa, true)
+  mics = [sceneView.createCone(0.2, 0.2)]
+  motors = [sceneView.createSphere(0.1, 0x44ee44)]
 
-  mic = sceneView.createCone(0.2, 0.2)
-  mic.position.x = 0.3
-  mic.position.z = 0.1
-  mic.rotation.z = 0.0174533 * -90
-  mic.rotation.y = 0.0174533 * 90
 
-  mic2 = sceneView.createCone(0.2, 0.2)
-  mic2.position.x = -0.3
-  mic2.position.z = 0.1
-  mic2.rotation.z = 0.0174533 * -90
-  mic2.rotation.y = 0.0174533 * 90
-
-  cube = sceneView.createSphere(0.1, 0x44ee44)
-  cube.position.x = 0.3
-  cube.position.y = -0.1
-  cube.position.z = -0.1
-
-  cube2 = sceneView.createSphere(0.1, 0x44ee44)
-  cube2.position.x = -0.3
-  cube2.position.y = -0.1
-  cube2.position.z = -0.1
 
   $('#save-robot').click(function(){
     $('#uploadpopup').modal({backdrop: 'static', keyboard: false})
@@ -98,47 +158,30 @@ $(document).ready(function() {
   })
 
   //Creating the UI
-  i=0
   $('#add-mic').click(function(){
-    let id = 'mic-conf-{0}'.format(i)
-    appendTemplate($('#mic-setups'), 'mic-block', {'id': 'mic-conf-{0}'.format(i), 'num': i},
-    {'del-mic': function(){
-      $('#{0}'.format(id)).remove()
-    }})
-
-    i += 1
+    addMicPanel()
   })
   $('#add-mic').click()
   $('#mic-conf-0-del').remove()
-  j=0
+
   $('#add-mot').click(function(){
-    let id = 'mot-conf-{0}'.format(j)
-    appendTemplate($('#mot-setups'), 'motor-block', {'id': 'mot-conf-{0}'.format(j), 'num': j},
-    {'del-motor': function(){ //Function to remove a motor
-      $('#{0}'.format(id)).remove()
-    }, 'sel-change': function(){ //Function to disable file upload if needed
-      var index = this.selectedIndex
-      id = this.id.replace('-sound-select', '')
-      if(index == 0){
-        $("#{0}-mot-sound".format(id))[0].disabled = false
-        $("#{0}-mot-sound-lbl".format(id)).removeClass("disabled")
-      }else{
-        $("#{0}-mot-sound".format(id))[0].disabled = true
-        $("#{0}-mot-sound-lbl".format(id)).addClass("disabled")
-      }
-    }})
-    j += 1
+    addMotorPanel()
   })
   $('#add-mot').click()
   $('#mot-conf-0-del').remove()
 
   editor.on('change', function(obj){
     try{
-      update_UI(JSON.parse(editor.getValue()))
+      update_UI(fetchEditorState())
+      update3DView(fetchEditorState())
     }
     catch{
-      console.log("invalid json,")
+      console.log("invalid json")
     }
+  })
+
+  $('input').change(function(){
+    update3DView(compile_code())
   })
 
   $('#code-tab').click(function(e){
@@ -151,42 +194,26 @@ $(document).ready(function() {
 
 function update_UI(conf){
 
-  set_number_input('skin_width', conf['robot_config']['skin_width'])
+  set_number_input('skin-width', conf['robot_config']['skin_width'])
 
   var mic_setups = conf['robot_config']["microphones"]
-  for(i = 0; i < mic_setups.length; i++){
-    if(i >= $('#mic-setups')[0].children.length){
-      create_src_panel($('#mic-setups'), 'mic-conf', i)
-      // appendPanel($('#mic-setups'), 'mic-block')
-    }
-    set_number_input('mic-conf-id-{0}'.format(i), mic_setups[i]['id'])
-    set_vec3_input('mic-conf-pos-{0}'.format(i), mic_setups[i]['local_pos'])
-    set_vec3_input('mic-conf-rot-{0}'.format(i), mic_setups[i]['local_rot'])
+  $('#mic-setups').empty()
+  for(var i = 0; i < mic_setups.length; i++){
+    id = addMicPanel()
+    set_number_input('{0}-id'.format(id), mic_setups[i]['id'])
+    set_vec3_input('{0}-pos'.format(id), mic_setups[i]['local_pos'])
+    set_vec3_input('{0}-rot'.format(id), mic_setups[i]['local_rot'], "ROT")
 
   }
   var mot_setups = conf['robot_config']["motors"]
+  $('#mot-setups').empty()
   for(i = 0; i < mot_setups.length; i++){
-    if(i >= $('#mot-setups')[0].children.length){
-      create_src_panel($('#mot-setups'), 'mot-conf', i)
-    }
-    set_number_input('mot-conf-id-{0}'.format(i), mot_setups[i]['id'])
-    set_vec3_input('mot-conf-pos-{0}'.format(i), mot_setups[i]['local_pos'])
+    id = addMotorPanel()
+    set_number_input('{0}-id'.format(id), mot_setups[i]['id'])
+    set_vec3_input('{0}-pos'.format(id), mot_setups[i]['local_pos'])
 
   }
 
-  //Cleaning up spare panels
-  if($('#mic-setups')[0].children.length > mic_setups.length){
-    for(i = mic_setups.length; i < $('#mic-setups')[0].children.length; i++){
-      console.log("removing: {0}".format('mic-conf-{0}'.format(i)))
-      remove_element('mic-conf-{0}'.format(i))
-    }
-  }
-  if($('#mot-setups')[0].children.length > mot_setups.length){
-    for(i = mot_setups.length; i < $('#mot-setups')[0].children.length; i++){
-      console.log("removing: {0}".format('mot-conf-{0}'.format(i)))
-      remove_element('mot-conf-{0}'.format(i))
-    }
-  }
 }
 
 function compile_code(){
@@ -195,25 +222,71 @@ function compile_code(){
   var skin_width = read_num_input('skin-width')
 
   num_mics = $('#mic-setups')[0].children.length
+
   mic_setups = []
   for(i = 0; i < num_mics; i++){
-    var id = read_num_input('mic-conf-{0}-id'.format(i))
-    var pos = read_vec3_input('mic-conf-{0}-pos'.format(i))
-    var rot = read_vec3_input('mic-conf-{0}-rot'.format(i), "ROT")
+    var id = $('#mic-setups')[0].children[i].id
+    var mic_id = read_num_input('{0}-id'.format(id))
+    var pos = read_vec3_input('{0}-pos'.format(id))
+    var rot = read_vec3_input('{0}-rot'.format(id), "ROT")
     //READ MIC STYLE
-    mic = {"id": id, "local_pos": pos, "local_rot": rot, "mic_style": {"uid": "-1"}}
+    mic = {"id": mic_id, "local_pos": pos, "local_rot": rot, "mic_style": {"uid": -1}}
     mic_setups.push(mic)
   }
+  $('#mic-conf-0-del').remove()
+
   num_mots = $('#mot-setups')[0].children.length
   mot_setups = []
   for(i = 0; i < num_mots; i++){
-    var id = read_num_input('mot-conf-{0}-id'.format(i))
-    var pos = read_vec3_input('mot-conf-{0}-pos'.format(i))
-    mot = {"id": id, "local_pos": pos, "sound": {"uid": "-1"}}
+    var id = $('#mot-setups')[0].children[i].id
+    var mot_id = read_num_input('{0}-id'.format(id))
+    var pos = read_vec3_input('{0}-pos'.format(id))
+    mot = {"id": mot_id, "local_pos": pos, "sound": {"uid": -1}}
     //READ SOUND SRC
     mot_setups.push(mot)
   }
-  code['robot_config'] = {'skin_width': skin_width, "microphones": mic_setups, "motors": mot_setups}
+  $('#mot-conf-0-del').remove()
 
+  code['robot_config'] = {'skin_width': skin_width, "microphones": mic_setups, "motors": mot_setups}
   return code
+}
+
+
+function update3DView(config){
+  console.log("Updating your view.")
+
+  robot.scale.x = Number(config['robot_config']['skin_width'])
+  robot.scale.y = Number(config['robot_config']['skin_width'])
+  robot.scale.z = Number(config['robot_config']['skin_width'])
+
+  motor_confs = config['robot_config']['motors']
+  for(var i in motors){
+    sceneView.scene.remove(motors[i])
+  }
+  motors = []
+  for(var i in motor_confs){
+    conf = motor_confs[i]
+    motors.push(sceneView.createSphere(0.1, 0x44ee44))
+    motors[i].position.x = Number(conf['local_pos']['x'])
+    motors[i].position.y = Number(conf['local_pos']['y'])
+    motors[i].position.z = Number(conf['local_pos']['z'])
+  }
+
+  mic_confs = config['robot_config']['microphones']
+  for(var i in mics){
+    sceneView.scene.remove(mics[i])
+  }
+  mics = []
+  for(var i in mic_confs){
+    conf = mic_confs[i]
+    mics.push(sceneView.createCone(0.2, 0.2))
+    mics[i].position.x = Number(conf['local_pos']['x'])
+    mics[i].position.y = Number(conf['local_pos']['y'])
+    mics[i].position.z = Number(conf['local_pos']['z'])
+
+    mics[i].rotation.x = Number(conf['local_rot']['x'])* (Math.PI / 180)
+    mics[i].rotation.y = Number(conf['local_rot']['y'])* (Math.PI / 180)
+    mics[i].rotation.z = Number(conf['local_rot']['z'])* (Math.PI / 180)
+  }
+
 }

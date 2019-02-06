@@ -1,55 +1,63 @@
 {
-  "robot_config": {
-   "microphones": [
-    {
-     "id": "-1",
-     "local_pos": {
-      "x": "0.5",
-      "y": "0.5",
-      "z": "0.5"
-     },
-     "local_rot": {
-      "x": "5.0",
-      "y": "5.0",
-      "z": "5.0"
-     },
-     "mic_style": {
-      "path": "path/to/micresponse",
-      "uid": "-1"
-     }
+ "robot_config": {
+  "skin_width": 0.5,
+  "microphones": [
+   {
+    "id": 0,
+    "local_pos": {
+     "x": 0.15,
+     "y": 0.25,
+     "z": 0.15
     },
-    {
-     "id": "-1",
-     "local_pos": {
-      "x": "-0.5",
-      "y": "0.5",
-      "z": "0.5"
-     },
-     "local_rot": {
-      "x": "5.0",
-      "y": "5.0",
-      "z": "5.0"
-     },
-     "mic_style": {
-      "path": "path/to/micresponse",
-      "uid": "-1"
-     }
+    "local_rot": {
+     "x": -90,
+     "y": 0,
+     "z": 0
+    },
+    "mic_style": {
+     "uid": -1
     }
-   ],
-   "motors": [
-    {
-     "id": "-1",
-     "local_pos": {
-      "x": "5.0",
-      "y": "5.0",
-      "z": "5.0"
-     },
-     "sound": {
-      "path": "path/to/utterance",
-      "uid": "-1"
-     }
+   },
+   {
+    "id": 1,
+    "local_pos": {
+     "x": -0.15,
+     "y": 0.25,
+     "z": 0.15
+    },
+    "local_rot": {
+     "x": -90,
+     "y": 0,
+     "z": 0
+    },
+    "mic_style": {
+     "uid": -1
     }
-   ],
-   "skin_width": "0.25"
-  }
+   }
+  ],
+  "motors": [
+   {
+    "id": 0,
+    "local_pos": {
+     "x": -0.2,
+     "y": -0.1,
+     "z": -0.05
+    },
+    "sound": {
+     "uid": -1
+    }
+   },
+   {
+    "id": 1,
+    "local_pos": {
+     "x": 0.2,
+     "y": -0.1,
+     "z": -0.05
+    },
+    "sound": {
+     "uid": -1
+    }
+   }
+  ]
+ }
 }
