@@ -37,3 +37,20 @@ class Utilities:
                     os.remove(sim.pathToZip)
                 except:
                     print("Cannot delete simulation file, they're not here!")
+    
+
+    def resample_sound(sound, target_rate, current_rate):
+        rate_diff = int(round(current_rate / target_rate))
+        print(rate_diff)
+        return sound[0::rate_diff]
+
+    def resize_sound(sound, target_length):
+        if len(sound) > target_length:
+            return sound[:target_length]
+        elif len(sound) < target_length:
+            return sound.append(sound[:(target_length - len(sound))])
+        else:
+            return sound
+
+    def amplify_sound(sound, amp):
+        return [s * amp for s in sound]

@@ -9,22 +9,71 @@
 
 from rir_simulator import roomsimove_single
 
+class Vector3(object):
+    def __init__(self, x, y, z):
+        self.x = x
+        self.y = y
+        self.z = z
+
+    def to_array(self):
+        return [self.x, self.y, self.z]
+
+    def __add__(self, other):
+        x = self.x + other.x
+        y = self.y + other.y
+        z = self.z + other.z
+        return Vector3(x, y, z)
+
+    def __sub__(self, other):
+        x = self.x - other.x
+        y = self.y - other.y
+        z = self.z - other.z
+        return Vector3(x, y, z)
+
+    def __truediv__(self, other):
+        if isinstance(other, float) or isinstance(other, int):
+            x = self.x / other
+            y = self.y / other
+            z = self.z / other
+            return Vector3(x, y, z)
+        else:
+            print("Cannot divide vector by type {0}".format(type(other))) 
+            return Vector3(0, 0, 0)
+
+    def __str__(self):
+        return "({0}, {1}, {2})".format(self.x, self.y, self.z)
+
+    def __iter__(self):
+        self.iter_value = 0
+        return self
+
+    def __next__(self):
+        if self.iter_value > 2:
+            raise StopIteration
+        else:
+            if self.iter_value == 0:
+                self.iter_value += 1
+                return self.x
+            if self.iter_value == 1:
+                self.iter_value += 1
+                return self.y
+            if self.iter_value == 2:
+                self.iter_value += 1
+                return self.z
+
+
 class Transform(object):
     '''
         Representing the position and orientation of an object
     '''
     def __init__(self, localpos, orientation, parent):
-        self.x_pos = localpos[0]
-        self.y_pos = localpos[1]
-        self.z_pos = localpos[2]
+        self.position = localpos
 
         self.orientation = orientation
         self.parent = parent
 
     def translate(self, s):
-        self.x_pos += s[0]
-        self.y_pos += s[0]
-        self.z_pos += s[0]
+        self.position += s
 
 
     def rotate(self, q):
@@ -42,18 +91,15 @@ class Transform(object):
 
     def set_world_pos(self, vec):
         if self.parent is None: # Only the root transform can move
-            self.x_pos = vec[0]
-            self.y_pos = vec[1]
-            self.z_pos = vec[2]
+            self.position = vec
 
 
     def get_world_pos(self):
         if self.parent == None:
-            return [self.x_pos, self.y_pos, self.z_pos]
+            return self.position
         else:
-            return [self.parent.get_world_pos()[0] + self.x_pos,
-                    self.parent.get_world_pos()[1] + self.y_pos,
-                    self.parent.get_world_pos()[2] + self.z_pos]
+            return self.parent.get_world_pos() + self.position
+                    
 
 
     def get_world_rot(self):
@@ -125,15 +171,15 @@ class Robot(object):
 
 if __name__ == '__main__': #Main Entry point
     # Creating a test robot
-    mic1 = RobotMicrophone([0.25, 0.25, 0.5], [0.0, 0.0, 45.0], None, 0)
-    mic2 = RobotMicrophone([-0.25, 0.25, 0.5], [0.0, 0.0, -45.0],  None, 1)
+    mic1 = RobotMicrophone(Vector3(0.25, 0.25, 0.5), [0.0, 0.0, 45.0], None, 0)
+    mic2 = RobotMicrophone(Vector3(-0.25, 0.25, 0.5), [0.0, 0.0, -45.0],  None, 1)
     mics = [mic1, mic2]
 
-    mot1 = RobotMotor([0.3, 0, 0], None, 0)
-    mot2 = RobotMotor([0.3, 0, 0], None, 1)
+    mot1 = RobotMotor(Vector3(0.3,0,0), None, 0)
+    mot2 = RobotMotor(Vector3(-0.3,0,0), None, 1)
     motors = [mot1, mot2]
 
-    MIRo = Robot([0, 0, 0], [30.0, 0.0, 90.0], mics, motors)
+    MIRo = Robot(Vector3(0,0,0), [30.0, 0.0, 90.0], mics, motors)
     print(MIRo)
     print("===== Mics =====")
     for mic in MIRo.microphones: print(mic)

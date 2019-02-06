@@ -9,7 +9,7 @@ function fetchEditorState(){
        "rt60": 0.4,"sample_rate": 16000,
        "source_config": {
          "simulation_setups": [{"style": "single", "origin": { "x": 0.0, "y": 0.0, "z": 0.0 }}],
-         "background_noise": { "uid": -1 }, "input_utterance": { "uid": -1 }
+         "background_noise": { "uid": -1 }, "input_utterance": { "uid": -1, "volume": 1.0 }
         },
          "robot_config": { "uid": -1 }
       }
