@@ -25,13 +25,6 @@ from config import *
 import json
 
 class RobotHearingSim:
-    #Converts a string to a true/false boolean, used to process bool arguments
-    def arg_to_bool(arg):
-        if arg.lower() in ('yes', 'true', 't', 'y'):
-            return True
-        else:
-            return False
-
     # Runs one simulation
     # conf[0] is the sound data
     # conf[1] is the room dimensions
@@ -41,8 +34,13 @@ class RobotHearingSim:
     # conf[5] is the unique name to use
     # example conf = (data, room_dim, rt60, 16000, unique_name)
     def run_sim(robot_pos, src_pos, i, conf):
+        offset = [conf[1][0] / 2, conf[1][1] / 2, conf[1][2] / 2, ]
+
         robot = conf[4] # Setting position of the robot
-        robot.transform.set_world_pos(robot_pos)
+        r_w_p = [robot_pos[0] + offset[0], robot_pos[1]+offset[1], robot_pos[2]+offset[2]]
+        robot.transform.set_world_pos(r_w_p)
+
+        src_pos = [src_pos[0] + offset[0], src_pos[1]+offset[1], src_pos[2]+offset[2]]
 
         print("\n--Generation {0}\n----\t Robot Position:\t{1}\n----\tSource Position:\t{2}\n".format(i, robot.transform.get_world_pos(), src_pos))
         # Advanced Method
@@ -71,17 +69,11 @@ class RobotHearingSim:
         data_rev = np.array(data_rev) #put the data together
         sf.write('temp_data/{0}/data_gen_{1}.{2}'.format(conf[5], i, SIM_FILE_EXT), data_rev.T, sample_rate) #Write new file into a folder called temp_data
 
-    def parse_random_number(r_str, rand):
-        inner_str = r_str[r_str.find("{")+1:r_str.find("}")].strip()
-        index = inner_str.find(";")
+    def get_random_number(r_dict, rand):
+
         min = max = 0
-        if index > 0:
-            min_s = inner_str[:index].strip()
-            max_s = inner_str[index+1:].strip()
-            min = float(min_s)
-            max = float(max_s)
-        else:
-            max = float(inner_str)
+        min = float(r_dict['min'])
+        max = float(r_dict['max'])
 
         r_num = rand.random()
         length = max - min
@@ -89,7 +81,7 @@ class RobotHearingSim:
         return min + round((r_num * length), 2)
 
     def check_value(val, rand):
-        if type(val) is str:
+        if type(val) is dict:
             return RobotHearingSim.parse_random_number(val, rand)
         else:
             return val
@@ -127,7 +119,7 @@ class RobotHearingSim:
         for mic in roboConfig['microphones']:
             pos = [mic['local_pos']['x'], mic['local_pos']['y'], mic['local_pos']['z']]
             rot = [mic['local_rot']['x'], mic['local_rot']['y'], mic['local_rot']['z']]
-            microphone = roboconf.RobotMicrophone(pos, rot, 'cardioid', mic['id'])
+            microphone = roboconf.RobotMicrophone(pos, rot, mic['mic_style']['path'], mic['id'])
             mics.append(microphone)
 
         # Do motors
@@ -147,6 +139,7 @@ class RobotHearingSim:
 
         ## Multithreaded
         config = (data, room_dim, rt60, fs, robot, unique_num)
+        # os.mkdir('temp_data')
         os.mkdir('temp_data/{0}'.format(unique_num)) # Create folder for temp data
 
         Parallel(n_jobs=int(1))(delayed(RobotHearingSim.run_sim)(all_pos[i], source_positions[i], i, config) for i in range(len(source_positions)))
@@ -164,36 +157,28 @@ class RobotHearingSim:
 
 
     def parse_box_source_setup(setup):
-        allPositions = []
-        dim = [setup['dimensions']['x'], setup['dimensions']['y'], setup['dimensions']['z']]
-        midpoint = [setup['origin']['x'],
-                    setup['origin']['y'],
-                    setup['origin']['z']]
+      allPositions = []
+      dim = [setup['dimensions']['x'], setup['dimensions']['y'], setup['dimensions']['z']]
+      midpoint = [setup['origin']['x'], setup['origin']['y'], setup['origin']['z']]
 
-        #Append the 8 corners
-        allPositions.append([midpoint[0] - (dim[0]/2), midpoint[1] - (dim[1]/2), midpoint[2] - (dim[2]/2)])
-        allPositions.append([midpoint[0] - (dim[0]/2), midpoint[1] - (dim[1]/2), midpoint[2] + (dim[2]/2)])
-        allPositions.append([midpoint[0] + (dim[0]/2), midpoint[1] - (dim[1]/2), midpoint[2] - (dim[2]/2)])
-        allPositions.append([midpoint[0] + (dim[0]/2), midpoint[1] - (dim[1]/2), midpoint[2] + (dim[2]/2)])
+      x_divs = int(setup['divisions']['x'])
+      x_space = (dim[0]/(x_divs-1))
+      y_divs = int(setup['divisions']['y'])
+      y_space = (dim[1]/(y_divs-1))
+      z_divs = int(setup['divisions']['z'])
+      z_space = (dim[2]/(z_divs-1))
+      for x in range(x_divs):
+          x_pos = midpoint[0] + (x * x_space) - dim[0]/2
+          if x_divs == 1: x_pos = midpoint[0]
+          for y in range(y_divs):
+              y_pos = midpoint[1] + (y * y_space) - dim[1]/2
+              if y_divs == 1: y_pos = midpoint[1]
+              for z in range(z_divs):
+                  z_pos = midpoint[2] + (z * z_space) - dim[2]/2
+                  if z_divs == 1: z_pos = midpoint[2]
+                  allPositions.append([x_pos, y_pos, z_pos])
 
-        allPositions.append([midpoint[0] - (dim[0]/2), midpoint[1] + (dim[1]/2), midpoint[2] - (dim[2]/2)])
-        allPositions.append([midpoint[0] - (dim[0]/2), midpoint[1] + (dim[1]/2), midpoint[2] + (dim[2]/2)])
-        allPositions.append([midpoint[0] + (dim[0]/2), midpoint[1] + (dim[1]/2), midpoint[2] - (dim[2]/2)])
-        allPositions.append([midpoint[0] + (dim[0]/2), midpoint[1] + (dim[1]/2), midpoint[2] + (dim[2]/2)])
-
-        x_divs = int(setup['divisions']['x'])
-        y_divs = int(setup['divisions']['y'])
-        z_divs = int(setup['divisions']['z'])
-        for x in range(x_divs):
-            x_pos = midpoint[0] + x * ((dim[0]/x_divs)-dim[0])
-            for y in range(y_divs):
-                y_pos = midpoint[1] + y * ((dim[1]/y_divs)-dim[1])
-                for z in range(z_divs):
-                    z_pos = midpoint[2] + z * ((dim[2]/z_divs)-dim[2])
-                    allPositions.append([x_pos, y_pos, z_pos])
-
-        print(allPositions)
-        return allPositions
+      return allPositions
 
 
     def parse_sphere_source_setup(setup):
@@ -230,12 +215,11 @@ class RobotHearingSim:
 
 
 
-# Simulates one mic in a 5x5x5 room wit h both the source and mic positions randomised
-# Generates 30 utterances
+# Test Harness for this system
 if __name__ == '__main__': #Main Entry point
     parser = argparse.ArgumentParser() # Parsing program arguments
-    parser.add_argument('-c', help='The config file', default='configexample.json')
-    parser.add_argument('-r', help='The robot config', default='config_robot.json')
+    parser.add_argument('-c', help='The config file', default='../configexample.json')
+    parser.add_argument('-r', help='The robot config', default='../config_robot.json')
 
     args = parser.parse_args()
 
@@ -247,6 +231,9 @@ if __name__ == '__main__': #Main Entry point
     robot_config_json=open(args.r).read()
     robot_config = json.loads(robot_config_json)
 
-    RobotHearingSim.run_from_json_config(sim_config, robot_config, "test")
+    # RobotHearingSim.run_from_json_config(sim_config, robot_config, "test")
+
+    box = RobotHearingSim.parse_box_source_setup({"style": "box","origin": {"x": 0,"y": 0,"z": 0},"dimensions": {"x": 5,"y": 5,"z": 5}, "divisions": {"x": 3,"y": 3,"z": 3}})
+    for coord in box: print(coord)
 
     print("Execution took {0} seconds".format(time.time() - start_time))

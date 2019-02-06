@@ -51,13 +51,13 @@ class DB_Manager_SQLite(DB_Manager):
 
 
     def run_query(self, q, a):
-        with sql.connect("Database/database.db") as con:
+        with sql.connect(self.dbLocation) as con:
             cur = con.cursor()
             cur.execute(q , a)
             con.commit()
 
     def get_one(self, q, a, type=None):
-        with sql.connect("Database/database.db") as con:
+        with sql.connect(self.dbLocation) as con:
             cur = con.cursor()
 
             cur.execute(q, a)
@@ -69,7 +69,7 @@ class DB_Manager_SQLite(DB_Manager):
 
 
     def get_all(self, q, a, type=None):
-        with sql.connect("Database/database.db") as con:
+        with sql.connect(self.dbLocation) as con:
             cur = con.cursor()
 
             cur.execute(q, a)
@@ -80,7 +80,7 @@ class DB_Manager_SQLite(DB_Manager):
                 return type.from_DB_ls(cur.fetchall())
 
     def insert_microphone(self, mic):
-        with sql.connect("Database/database.db") as con:
+        with sql.connect(self.dbLocation) as con:
             cur = con.cursor()
 
             cur.execute("INSERT INTO microphones (name, pathToFile) VALUES (?,?,?)",(mic.name, mic.pathToFile, mic.userID))
@@ -91,7 +91,7 @@ class DB_Manager_SQLite(DB_Manager):
 
 
     def insert_simulation(self, sim):
-        with sql.connect("Database/database.db") as con:
+        with sql.connect(self.dbLocation) as con:
             cur = con.cursor()
 
             cur.execute("INSERT INTO simulations (pathToConfig, dateCreated, state, seed, userID, visibility) \
@@ -102,7 +102,7 @@ class DB_Manager_SQLite(DB_Manager):
             return Simulation.from_DB(cur.fetchone())
 
     def insert_robot(self, robo):
-        with sql.connect("Database/database.db") as con:
+        with sql.connect(self.dbLocation) as con:
             cur = con.cursor()
 
             cur.execute("INSERT INTO robots (name, pathToConfig, userID, visibility) \
@@ -113,28 +113,28 @@ class DB_Manager_SQLite(DB_Manager):
             return Robot.from_DB(cur.fetchone())
 
     def get_simulation(self, id):
-        with sql.connect("Database/database.db") as con:
+        with sql.connect(self.dbLocation) as con:
             cur = con.cursor()
 
             cur.execute("SELECT * FROM simulations WHERE id=?", [id])
             return Simulation.from_DB(cur.fetchone())
 
     def get_sound(self, id):
-        with sql.connect("Database/database.db") as con:
+        with sql.connect(self.dbLocation) as con:
             cur = con.cursor()
 
             cur.execute("SELECT * FROM sounds WHERE id=?", [id])
             return Sound.from_DB(cur.fetchone())
 
     def get_microphone(self, id):
-        with sql.connect("Database/database.db") as con:
+        with sql.connect(self.dbLocation) as con:
             cur = con.cursor()
 
             cur.execute("SELECT * FROM microphones WHERE id=?", [id])
             return Microphone.from_DB(cur.fetchone())
 
     def get_robot(self, id):
-        with sql.connect("Database/database.db") as con:
+        with sql.connect(self.dbLocation) as con:
             cur = con.cursor()
 
             cur.execute("SELECT * FROM robots WHERE id=?", [id])
@@ -142,17 +142,17 @@ class DB_Manager_SQLite(DB_Manager):
 
 
     def delete_simulation(self, id):
-        with sql.connect("Database/database.db") as con:
+        with sql.connect(self.dbLocation) as con:
             cur = con.cursor()
             cur.execute("DELETE FROM simulations WHERE id=?", [id])
 
     def delete_sound(self, id):
-        with sql.connect("Database/database.db") as con:
+        with sql.connect(self.dbLocation) as con:
             cur = con.cursor()
             cur.execute("DELETE FROM sounds WHERE id=?", [id])
 
     def delete_robot(self, id):
-        with sql.connect("Database/database.db") as con:
+        with sql.connect(self.dbLocation) as con:
             cur = con.cursor()
             cur.execute("DELETE FROM robots WHERE id=?", [id])
 

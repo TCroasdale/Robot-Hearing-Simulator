@@ -3,7 +3,7 @@
   "seed": 3,
   "robot_pos": {
    "x": 2.5,
-   "y": 2.5,
+   "y": 0,
    "z": 2.5
   },
   "room_dimensions": {
@@ -18,9 +18,9 @@
     {
      "style": "single",
      "origin": {
-      "x": 19,
-      "y": 2.5,
-      "z": 19
+      "x": 9.5,
+      "y": 0,
+      "z": 9.5
      }
     }
    ],
@@ -29,7 +29,7 @@
    },
    "input_utterance": {
     "uid": -1,
-    "path": "test_data/data.wav"
+    "path": "../test_data/data.wav"
    }
   },
   "robot_config": {

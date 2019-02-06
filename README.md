@@ -14,7 +14,7 @@
 - Run `pip install -r requirements.txt`
 
 ### Setup Config.py
-- Create Config.py file
+- Create Config.py file in /server folder
 - Needs fields
     - ``` SECRET_KEY ``` A string used for secrecy.
     - ``` DATABASE ``` Can be 'SQLite', or in the future 'MongoDB'.
@@ -22,6 +22,5 @@
     - ``` FILE_EXPIRY_DAYS ``` The number of days to keep generated files on the server for.
 
 #### To Run Webserver
-- Run `celery -A servertasks worker --loglevel=info` 
-- Run `python server.py`
-
+- Run Celery `cd server && celery -A servertasks worker --loglevel=info && cd ../`
+- Run WebServer `python server`

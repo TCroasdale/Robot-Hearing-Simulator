@@ -1,6 +1,6 @@
 *.zip
 *.wav
-uploads/*
+server/uploads/*
 */__pycache__/*
 
 config.py

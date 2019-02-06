@@ -15,7 +15,8 @@
      "z": 0
     },
     "mic_style": {
-     "uid": -1
+     "uid": -1,
+     "path": "../cardioid"
     }
    },
    {
@@ -31,7 +32,8 @@
      "z": 0
     },
     "mic_style": {
-     "uid": -1
+     "uid": -1,
+     "path": "../cardioid"
     }
    }
   ],

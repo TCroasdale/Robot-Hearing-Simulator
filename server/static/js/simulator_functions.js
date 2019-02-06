@@ -90,33 +90,34 @@ $(document).ready(function() {
   })
 
 
-
+  // ===== Run Button Handler =====
   $('#run_conf').click(function(){
     $('#uploadpopup').modal({backdrop: 'static', keyboard: false})
 
     //Add utterance and bgnoise to formdata
     fData = new FormData();
     uttupload = $('#utterancefile')
+    console.log(fData);
     if(!uttupload[0].disabled){
-      fData.push('utterance', uttupload[0].files[0])
+      fData.append('utterance', uttupload[0].files[0])
     }else{
-      fData.push('utterance_id', $('#utterance-select')[0].value)
+      fData.append('utterance_id', $('#utterance-select')[0].value)
     }
 
     bgupload = $('#bgnoise')
     if(!bgupload[0].disabled){
-      fData.push('bgnoise', bgupload[0].files[0])
+      fData.append('bgnoise', bgupload[0].files[0])
     }
     else{
-      fData.push('bgnoise_id', $('#bgnoise-select')[0].value)
+      fData.append('bgnoise_id', $('#bgnoise-select')[0].value)
     }
 
-    fData.push('robot_id', $('#robot-select')[0].value)
+    fData.append('robot_id', $('#robot-select')[0].value)
 
     compile_code()
     //THIS MIGHT CAUSE AN ERROR, WAS ORIGINALLY editor.getValue()
     var config = JSON.stringify(fetchEditorState())
-    fData.push('config', config)
+    fData.append('config', config)
 
     //Upload form data
     $.ajax({
