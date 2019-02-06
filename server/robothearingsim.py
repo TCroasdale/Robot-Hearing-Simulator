@@ -19,7 +19,6 @@ import uuid
 import math
 import random
 from utilities import Utilities as util
-from joblib import Parallel, delayed
 import time
 from config import *
 import json
@@ -49,20 +48,15 @@ class RobotHearingSim:
 
         print("\n--Generation {0}\n----\t Robot Position:\t{1}\n----\tSource Position:\t{2}\n".format(i, robot.transform.get_world_pos(), source_position))
         
-        room_dim = conf.room_dim
-        rt60 = conf.rt60
-        sample_rate = conf.sample_rate
-
-
-        absorption = roomsimove_single.rt60_to_absorption(room_dim.to_array(), rt60)
-        room = roomsimove_single.Room(room_dim.to_array(), abs_coeff=absorption)
+        absorption = roomsimove_single.rt60_to_absorption(conf.room_dim.to_array(), conf.rt60)
+        room = roomsimove_single.Room(conf.room_dim.to_array(), abs_coeff=absorption)
 
         # Using list comprehension to create a list of all mics
         mics = [roomsimove_single.Microphone(mic.transform.get_world_pos().to_array(), mic.id,  \
                 orientation=mic.transform.get_world_rot(), direction=mic.style) \
                 for mic in robot.microphones]
 
-        sim_rir = roomsimove_single.RoomSim(sample_rate, room, mics, RT60=rt60)
+        sim_rir = roomsimove_single.RoomSim(conf.sample_rate, room, mics, RT60=conf.rt60)
         rir = sim_rir.create_rir(source_position.to_array())
 
         data = conf.sound_data
@@ -72,12 +66,12 @@ class RobotHearingSim:
             data_rev += [data_simmed]
 
         data_rev_array = np.array(data_rev) #put the data together
-        sf.write('temp_data/{0}/{3}_{1}.{2}'.format(conf.unique_name, i, SIM_FILE_EXT, file_prefix), data_rev_array.T, sample_rate) #Write new file into a folder called temp_data
+        sf.write('temp_data/{0}/{3}_{1}.{2}'.format(conf.unique_name, i, SIM_FILE_EXT, file_prefix), data_rev_array.T, conf.sample_rate) #Write new file into a folder called temp_data
 
         # Write file with Background-noise
         if conf.bg_noise is not None:
             data_with_noise = np.add(data_rev_array, np.array(conf.bg_noise))
-            sf.write('temp_data/{0}/{3}_with_noise_{1}.{2}'.format(conf.unique_name, i, SIM_FILE_EXT, file_prefix), data_with_noise.T, sample_rate) #Write new file into a folder called temp_data
+            sf.write('temp_data/{0}/{3}_with_noise_{1}.{2}'.format(conf.unique_name, i, SIM_FILE_EXT, file_prefix), data_with_noise.T, conf.sample_rate) #Write new file into a folder called temp_data
 
     def get_random_number(r_dict, rand):
 
@@ -153,22 +147,23 @@ class RobotHearingSim:
 
         unique_num = uuid.uuid4()
 
-        ## Multithreaded
         config = SimulationConfig(data, room_dim, rt60, fs, robot, unique_num)
 
         # If a BG noise has been specified, add that to the config after processing it.
-        if 'path' in simConfig['source_config']['background_noise']:
+        use_bg_noise = 'path' in simConfig['source_config']['background_noise']
+        if use_bg_noise:
             [bg_data, bg_fs] = sf.read(simConfig['source_config']['background_noise']['path'], always_2d=True)
             bg_data = bg_data[:,0] # Converts to mono
+            # Then convert to the correct shape and amplify/quiten it
             bg_data = util.resample_sound(bg_data, fs, bg_fs)
             bg_data = util.resize_sound(bg_data, len(data))
             bg_data = util.amplify_sound(bg_data, simConfig['source_config']['background_noise']['volume'])
             config.bg_noise = bg_data
 
-        # os.mkdir('temp_data')
         os.mkdir('temp_data/{0}'.format(unique_num)) # Create folder for temp data
 
-        Parallel(n_jobs=int(4))(delayed(RobotHearingSim.run_sim)(all_pos[i], source_positions[i], i, config, "data") for i in range(len(source_positions)))
+        # Parallel(n_jobs=int(4))(delayed(RobotHearingSim.run_sim)(all_pos[i], source_positions[i], i, config, "data") for i in range(len(source_positions)))
+        for i in range(len(source_positions)): RobotHearingSim.run_sim(all_pos[i], source_positions[i], i, config, "data") 
 
         # Zip up new files, and delete old ones.
         zip_name = 'static/dl/{0}'.format(filename)
@@ -176,8 +171,9 @@ class RobotHearingSim:
         zipper.make_archive(zip_name, 'zip', directory_name)
         for i in range(len(source_positions)):
             os.remove('temp_data/{0}/{3}_{1}.{2}'.format(unique_num, i, SIM_FILE_EXT, "data"))
-            if 'path' in simConfig['source_config']['background_noise']:
+            if use_bg_noise:
                 os.remove('temp_data/{0}/{3}_{1}.{2}'.format(unique_num, i, SIM_FILE_EXT, "data_with_noise"))
+
         os.rmdir('temp_data/{0}'.format(unique_num))
         return zip_name + ".zip"
 

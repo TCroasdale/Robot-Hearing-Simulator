@@ -3,7 +3,6 @@
 
 # Dependancies
 - PySoundFile
-- Joblib
 - Flask
 - Room Impulse Response Generator, https://github.com/sunits/rir_simulator_python
 - celery

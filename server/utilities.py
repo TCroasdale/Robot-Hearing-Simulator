@@ -41,7 +41,6 @@ class Utilities:
 
     def resample_sound(sound, target_rate, current_rate):
         rate_diff = int(round(current_rate / target_rate))
-        print(rate_diff)
         return sound[0::rate_diff]
 
     def resize_sound(sound, target_length):
