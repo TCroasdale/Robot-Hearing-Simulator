@@ -9,7 +9,7 @@ function fetchEditorState(){
        "rt60": 0.4,"sample_rate": 16000,
        "source_config": {
          "simulation_setups": [{"style": "single", "origin": { "x": 0.0, "y": 0.0, "z": 0.0 }}],
-         "background_noise": { "uid": -1 }, "input_utterance": { "uid": -1 }
+         "background_noise": { "uid": -1 }, "input_utterance": { "uid": -1, "volume": 1.0 }
         },
          "robot_config": { "uid": -1 }
       }
@@ -436,12 +436,12 @@ function generate_pyramid_array(setup_options){
   divisions = Number(setup['divisions'])
 
   // Top Point
-  point = [origin[0], origin[1], origin[2]]
+  point = {'x': origin[0], 'y': origin[1], 'z': origin[2]}
   allPositions.push(point)
 
-  for(var layer = 0; layer < Number(setup['layers']); layer++){
+  for(var layer = 1; layer <= Number(setup['layers']); layer++){
     // Create the corner vertex for eacg layer
-    h = layer/Number(setup['layers']) * Number(setup['length'])
+    h = (layer)/Number(setup['layers']) * Number(setup['length'])
     d = h * Math.sin(theta)
 
     allPositions.push({'x': d+origin[0], 'y': origin[1]-h, 'z': d+origin[2]})
@@ -459,6 +459,9 @@ function generate_pyramid_array(setup_options){
       allPositions.push({'x': d1+origin[0], 'y': origin[1]-h, 'z': -d+origin[2]})
 
     }
+  }
+  for(i in allPositions){
+    console.log(allPositions)
   }
   return allPositions
 }
