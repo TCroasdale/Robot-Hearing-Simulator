@@ -240,7 +240,7 @@ class WebServer:
 
             # Save the JSON config to a file
             unique_name = uuid.uuid4()
-            filename = "uploads/simulation_configs/{0}.json".format(unique_name)
+            filename = "server/uploads/simulation_configs/{0}.json".format(unique_name)
             # print("putting sim file in: {0}".format(filename))
             with open(filename, 'w') as f:
                 json.dump(strdict, f, sort_keys=False, indent=4, ensure_ascii = False)
@@ -254,7 +254,7 @@ class WebServer:
             robot_conf_dict = json.loads(robot_conf)
 
 
-            runSimulation.delay(self.db, strdict, robot_conf_dict, unique_name, sim.id)
+            runSimulation.delay(strdict, robot_conf_dict, unique_name, sim.id)
 
             return jsonify({"success": "true"})
 
@@ -264,9 +264,9 @@ class WebServer:
             if file.filename == '':
                 # print("no file selected in uploads!")
                 return None
-            if file and allowed_file(file.filename):
+            if file and WebServer.allowed_file(file.filename):
                 unique_name = uuid.uuid4()
-                file.save('uploads/sounds/{0}.wav'.format(unique_name))
+                file.save('server/uploads/sounds/{0}.wav'.format(unique_name))
 
                 sound = self.db.insert_sound(Sound(file.filename, 'uploads/sounds/{0}.wav'.format(unique_name), user_id))
                 return sound
@@ -275,6 +275,7 @@ class WebServer:
 
         def insertSoundPaths(conf, sounds, motid_to_id):
             motors = conf['robot_config']['motors']
+            mics = conf['robot_config']['microphones']
             for motor in motors:
                 if motor['id'] in motid_to_id:
                     snd_id = '{0}'.format(motid_to_id[motor['id']])
@@ -282,6 +283,9 @@ class WebServer:
                         motor['sound']['uid'] = sounds[snd_id].id
                     else: # else Must be a direct sound id
                         motor['sound']['uid'] = self.db.get_sound(snd_id).id
+
+            for mic in mics:
+                mic['mic_style']['path'] = "../cardioid"
             return conf
 
         @self.app.route('/designer/save', methods=['POST'])
@@ -298,13 +302,13 @@ class WebServer:
             #Load config and mot_id to i map
             conf = json.loads(request.form['robot-config'])
             id_map = json.loads(request.form['id_map'])
-            
+
             # Update the config with new id values
             conf = insertSoundPaths(conf, sounds, id_map)
 
             # Write the config to a file
             unique_name = uuid.uuid4()
-            filename = "uploads/robot_configs/{0}.json".format(unique_name)
+            filename = "server/uploads/robot_configs/{0}.json".format(unique_name)
 
             with open(filename, 'w') as f:
                 json.dump(conf, f, sort_keys=False, indent=4, ensure_ascii = False)

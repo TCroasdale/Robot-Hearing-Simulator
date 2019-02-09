@@ -86,26 +86,27 @@
               <label for="bgnoise" class="input-group-text btn btn-secondary" id="bgnoise-lbl"><fas-icon icon-name="upload"></fas-icon> Browse...</label>
               <input type="file" name="bgnoise" class="form-control" id="bgnoise" size="1">
               <select id="bgnoise-select" class="form-control">
-                  <option value="-1">Upload other file.</option>
-                  {% for sound in sounds: %}
-                  <option value="{{sound.id}}">{{ sound.name }}</option>
-                  {% endfor %}
+                <option value="-2">No Background Noise.</option>
+                <option value="-1">Upload other file.</option>
+                {% for sound in sounds: %}
+                <option value="{{sound.id}}">{{ sound.name }}</option>
+                {% endfor %}
               </select>
             </div>
             <hr>
               <div class="input-group mr-2 my-2" role="group" class="robot-select-controls">
                 <div class="input-group-prepend">
-                    <p class="text-info input-group-text">Robot</p>
-                  </div>
-              {% if robots: %}
-              <select id="robot-select" class="form-control">
+                  <p class="text-info input-group-text">Robot</p>
+                </div>
+                {% if robots: %}
+                <select id="robot-select" class="form-control">
                   {% for robot in robots: %}
                   <option value="{{robot.id}}">{{ robot.name }}</option>
                   {% endfor %}
-              </select>
-              {% else %}
-              <a href="/robotdesign"><p class="input-group-text btn btn-info px-5">Click to create a robot!</p></a>
-              {% endif %}
+                </select>
+                {% else %}
+                <a href="/robotdesign"><p class="input-group-text btn btn-info px-5">Click to create a robot!</p></a>
+                {% endif %}
             </div>
         </form>
       </div>

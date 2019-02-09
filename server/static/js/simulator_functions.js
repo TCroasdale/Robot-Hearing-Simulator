@@ -92,7 +92,14 @@ $(document).ready(function() {
 
   // ===== Run Button Handler =====
   $('#run_conf').click(function(){
+    var newSesh = new EditSession(JSON.stringify(compile_code(), null, " "))
+    newSesh.setMode("ace/mode/javascript");
+    editor.setSession(newSesh)
+
+    var config = fetchEditorState()
+    if(!verify(config)) return;
     $('#uploadpopup').modal({backdrop: 'static', keyboard: false})
+
 
     //Add utterance and bgnoise to formdata
     fData = new FormData();
@@ -114,10 +121,8 @@ $(document).ready(function() {
 
     fData.append('robot_id', $('#robot-select')[0].value)
 
-    compile_code()
     //THIS MIGHT CAUSE AN ERROR, WAS ORIGINALLY editor.getValue()
-    var config = JSON.stringify(fetchEditorState())
-    fData.append('config', config)
+    fData.append('config', JSON.stringify(config))
 
     //Upload form data
     $.ajax({
@@ -141,9 +146,9 @@ $(document).ready(function() {
   })
 
   $('#utterance-select').change(function(){
-    var index = $('#utterance-select')[0].selectedIndex
+    var index = Number($('#utterance-select')[0].value)
     console.log(index)
-    if(index == 0){
+    if(index == -1){
       $("#utterancefile")[0].disabled = false
       $("#utterancefile-lbl").removeClass("disabled")
     }else{
@@ -154,9 +159,9 @@ $(document).ready(function() {
 
 
   $('#bgnoise-select').change(function(){
-    var index = $('#bgnoise-select')[0].selectedIndex
+    var index = Number($('#bgnoise-select')[0].value)
     console.log(index)
-    if(index == 0){
+    if(index == -1){
       $("#bgnoise")[0].disabled = false
       $("#bgnoise-lbl").removeClass("disabled")
     }else{
@@ -204,6 +209,55 @@ $(document).ready(function() {
     update3DView(fetchEditorState())
   })
 })
+
+
+function verify(config){
+  if(Number($('#bgnoise-select')[0].value) == -1){
+    if($('#bgnoise')[0].files.length < 1){
+      failVerify("Please select a background noise file.", 'bgnoise-select')
+      return false
+    }
+  }
+
+  if(Number($('#utterance-select')[0].value) == -1){
+    if($('#utterancefile')[0].files.length < 1){
+      return failVerify("Please select an utterance sound file.", 'utterance-select')
+    }
+  }
+
+  room_dim = config['simulation_config']['room_dimensions']
+  console.log(room_dim)
+  if(room_dim['x'] <= 0 || room_dim['y'] <= 0 || room_dim['z'] <= 0){
+    return failVerify("Invalid room size", 'room-dim')
+  }
+
+  if(config['simulation_config']['rt60'] <= 0){
+    return failVerify("Invalid RT-60 Value.", 'rt-60')
+  }
+
+  if(pointOutsideRoom(config['simulation_config']['robot_pos'], room_dim)){
+    return failVerify("Robot positioned outside the room.", 'robot-pos')
+  }
+}
+
+function pointOutsideRoom(point, roomDim){
+  if(point['x'] < -roomDim['x'] / 2 || point['y'] < -roomDim['y'] / 2 || point['z'] < -roomDim['z'] / 2){
+    return true
+  }
+  else if(point['x'] > roomDim['x'] / 2 || point['y'] > roomDim['y'] / 2 || point['z'] > roomDim['z'] / 2){
+    return true
+  }
+  return false
+}
+
+function failVerify(message, id){
+  alert(message)
+  $('#{0}'.format(id)).focus()
+  $('html, body').animate({
+      scrollTop: ($('#{0}'.format(id)).offset().top)
+  },500);
+  return false
+}
 
 function update_UI(conf){
   console.log("reflecting changes in the ui")

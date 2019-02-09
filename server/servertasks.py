@@ -4,6 +4,7 @@ from database.db_manager import User, Simulation, Sound, Robot
 from database.db_manager_sqlite import DB_Manager_SQLite
 from celery import Celery
 from datetime import datetime as dt
+from config import *
 
 celeryApp = Celery('servertasks', broker='pyamqp://guest@localhost//')
 
@@ -11,7 +12,12 @@ def endTask(taskID):
     celeryApp.control.revoke(taskID, terminate=True)
 
 @celeryApp.task(bind=True)
-def runSimulation(self, db, simconfig, roboconfig, filename, simid):
+def runSimulation(self, simconfig, roboconfig, filename, simid):
+    if DATABASE == "SQLite":
+        db = DB_Manager_SQLite(SQLite_DB_Location)
+    else:
+        db = DB_Manager()
+
     sim_config = util.objectifyJson(simconfig)
     robo_config = util.objectifyJson(roboconfig)
     downloadPath = "{0}.zip".format(filename)
@@ -26,5 +32,3 @@ def runSimulation(self, db, simconfig, roboconfig, filename, simid):
 
     except Exception as e:
         db.run_query("UPDATE simulations SET state = ? WHERE id = ?" , ("errored", simid))
-
-
