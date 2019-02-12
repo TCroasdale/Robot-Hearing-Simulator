@@ -9,7 +9,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 if __name__ == "__main__":
 
     if DATABASE == "SQLite":
-        db = DB_Manager_SQLite("server/{0}".format(SQLite_DB_Location))
+        db = DB_Manager_SQLite("server/{0}".format(SQLITE_DB_LOCATION))
     else:
         db = DB_Manager()
 

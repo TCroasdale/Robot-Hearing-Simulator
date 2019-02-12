@@ -226,7 +226,6 @@ function verify(config){
   }
 
   room_dim = config['simulation_config']['room_dimensions']
-  console.log(room_dim)
   if(room_dim['x'] <= 0 || room_dim['y'] <= 0 || room_dim['z'] <= 0){
     return failVerify("Invalid room size", 'room-dim')
   }
@@ -238,6 +237,12 @@ function verify(config){
   if(pointOutsideRoom(config['simulation_config']['robot_pos'], room_dim)){
     return failVerify("Robot positioned outside the room.", 'robot-pos')
   }
+
+  console.log($('#no-robot-link').length > 0)
+  if($('#no-robot-link').length > 0){
+    return failVerify("There is no robot available to use.", 'no-robot-link')
+  }
+  return true
 }
 
 function pointOutsideRoom(point, roomDim){
@@ -513,9 +518,6 @@ function generate_pyramid_array(setup_options){
       allPositions.push({'x': d1+origin[0], 'y': origin[1]-h, 'z': -d+origin[2]})
 
     }
-  }
-  for(i in allPositions){
-    console.log(allPositions)
   }
   return allPositions
 }

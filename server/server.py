@@ -189,13 +189,14 @@ class WebServer:
             else:
                 raise BadSoundIDException
 
-            # attach the bgnoise path
-            bgnoiseid = dict['simulation_config']['source_config']['background_noise']['uid']
-            bgnoise = self.db.get_one("SELECT * FROM sounds WHERE id=?", [bgnoiseid], type=Sound)
-            if bgnoise is not None and (bgnoise.userID == session['userID'] or bgnoise.visibility > 0):
-                dict['simulation_config']['source_config']['background_noise']['path'] = bgnoise.pathToFile
-            else:
-                raise BadSoundIDException
+            # attach the bgnoise path if it exists
+            if 'background_noise' in dict['simulation_config']['source_config']:
+                bgnoiseid = dict['simulation_config']['source_config']['background_noise']['uid']
+                bgnoise = self.db.get_one("SELECT * FROM sounds WHERE id=?", [bgnoiseid], type=Sound)
+                if bgnoise is not None and (bgnoise.userID == session['userID'] or bgnoise.visibility > 0):
+                    dict['simulation_config']['source_config']['background_noise']['path'] = bgnoise.pathToFile
+                else:
+                    raise BadSoundIDException
 
             # Attach the robot config path
             robotid = dict['simulation_config']['robot_config']['uid']
@@ -219,11 +220,17 @@ class WebServer:
                 strdict['simulation_config']['source_config']['input_utterance']['uid'] = utt.id
             else:
                 strdict['simulation_config']['source_config']['input_utterance']['uid'] = request.form['utterance_id']
+
+
             if 'bgnoise' in request.files:
                 bgnoise = processSoundUpload(request.files['bgnoise'], session['userID'])
                 strdict['simulation_config']['source_config']['background_noise']['uid'] = bgnoise.id
             else:
-                strdict['simulation_config']['source_config']['background_noise']['uid'] = request.form['bgnoise_id']
+                if int(request.form['bgnoise_id']) < 0:
+                    # Remove the background_noise entry if bg noise has not been provided
+                    strdict['simulation_config']['source_config'].pop('background_noise', None)
+                else:
+                    strdict['simulation_config']['source_config']['background_noise']['uid'] = request.form['bgnoise_id']
 
             strdict['simulation_config']['robot_config']['uid'] = request.form['robot_id']
             seed = str(uuid.uuid4())
@@ -234,9 +241,9 @@ class WebServer:
             try:
                 (strdict, robotPath) = insert_config_paths(strdict)
             except BadSoundIDException:
-                return jsonify({"success": "false", "reason": "bad sound id"})
+                return jsonify({"success": "false", "reason": "Bad sound id"})
             except BadRobotIDException:
-                return jsonify({"success": "false", "reason": "bad robot id"})
+                return jsonify({"success": "false", "reason": "Bad robot id"})
 
             # Save the JSON config to a file
             unique_name = uuid.uuid4()
