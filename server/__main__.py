@@ -15,9 +15,9 @@ if __name__ == "__main__":
 
     server = WebServer(db)
 
+    # Checks every 24 hours for files which should be removed
     scheduler = BackgroundScheduler()
     scheduler.add_job(Utilities.cleanup_old_files, 'interval', hours=24, kwargs={'db': db})
-    # scheduler.add_job(server.cleanup_old_files, 'interval', seconds=20)
     scheduler.start()
 
     server.start()

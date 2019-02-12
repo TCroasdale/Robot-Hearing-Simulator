@@ -1,4 +1,4 @@
-function fetchEditorState(){
+function fetchEditorState(link=false){
   if(ace.edit("editor").getValue() == ""){
     // Return a default config if editor is empty
     return {
@@ -15,8 +15,30 @@ function fetchEditorState(){
       }
     }
   }else{
-    return JSON.parse(ace.edit("editor").getValue())
+    editorText = ace.edit("editor").getValue()
+    editorState = JSON.parse(editorText)
+    if(link)
+      editorState = linkVars(editorState)
+    return editorState
   }
+}
+
+function linkVars(conf){
+  string_conf = JSON.stringify(conf, null, 0)
+
+  $.each(conf.variables, function(i, v){
+    // The three accepted variable methods
+    string_conf = string_conf.replace(new RegExp('{"value":"{0}"}'.format(i), 'g'), v);
+    string_conf = string_conf.replace(new RegExp("{'value':'{0}'}".format(i), 'g'), v);
+
+    string_conf = string_conf.replace(new RegExp('{"val":"{0}"}'.format(i), 'g'), v);
+    string_conf = string_conf.replace(new RegExp("{'val':'{0}'}".format(i), 'g'), v);
+    
+    string_conf = string_conf.replace(new RegExp('{"var":"{0}"}'.format(i), 'g'), v);
+    string_conf = string_conf.replace(new RegExp("{'var':'{0}'}".format(i), 'g'), v);
+  })
+
+  return JSON.parse(string_conf)
 }
 
 function addSrcPanel(){
@@ -41,16 +63,16 @@ function addSrcPanel(){
 
   // ===== Add Update functions =====
   $('#{0} input'.format(id)).change(function(){
-    update3DView(compile_code())
+    update3DView(compile_ui())
   })
   $('#{0}-sel'.format(id)).change(function(){
-    update3DView(compile_code())
+    update3DView(compile_ui())
   })
   $('#{0}-del'.format(id)).click(function(){
-    update3DView(compile_code())
+    update3DView(compile_ui())
   })
 
-  update3DView(compile_code())
+  update3DView(compile_ui())
 }
 
 $(document).ready(function() {
@@ -59,9 +81,6 @@ $(document).ready(function() {
   var editor = ace.edit("editor");
   editor.setTheme("ace/theme/monokai");
   editor.session.setMode("ace/mode/javascript");
-  editor.setOptions({
-    maxLines: Infinity
-  });
   var EditSession = require("ace/edit_session").EditSession;
 
 
@@ -92,7 +111,7 @@ $(document).ready(function() {
 
   // ===== Run Button Handler =====
   $('#run_conf').click(function(){
-    var newSesh = new EditSession(JSON.stringify(compile_code(), null, " "))
+    var newSesh = new EditSession(JSON.stringify(compile_ui(), null, " "))
     newSesh.setMode("ace/mode/javascript");
     editor.setSession(newSesh)
 
@@ -191,22 +210,22 @@ $(document).ready(function() {
   editor.on('change', function(obj){
     try{
       update_UI(fetchEditorState())
-      update3DView(fetchEditorState())
+      update3DView(fetchEditorState(link=true))
     }
     catch{
-      console.log("invalid json,")
+      console.log("Invalid json")
     }
   })
 
   $('input').change(function(){
-    update3DView(compile_code())
+    update3DView(compile_ui())
   })
 
   $('#code-tab').click(function(e){
-    var newSesh = new EditSession(JSON.stringify(compile_code(), null, " "))
+    var newSesh = new EditSession(JSON.stringify(compile_ui(), null, " "))
     newSesh.setMode("ace/mode/javascript");
     editor.setSession(newSesh)
-    update3DView(fetchEditorState())
+    update3DView(fetchEditorState(link=true))
   })
 })
 
@@ -315,7 +334,7 @@ function update_UI(conf){
 
 
 // Compiles the code to the correct format and adds objects that should be there.
-function compile_code(){
+function compile_ui(){
 
   old_cfg = fetchEditorState()
 
@@ -334,31 +353,31 @@ function compile_code(){
     var style = $('#{0}-sel'.format(id))[0].value
     old_setup = old_cfg['simulation_config']['source_config']['simulation_setups'][i]
     if(style == "box"){
-      var dim = read_vec3_input('{0}-box-dim'.format(id), "DIM")
-      var div = read_vec3_input('{0}-box-div'.format(id), "DIM")
-      var or = read_vec3_input('{0}-box-pos'.format(id), "POS", old_cfg['origin'])
+      var dim = read_vec3_input('{0}-box-dim'.format(id), "DIM", old_setup['dimensions'])
+      var div = read_vec3_input('{0}-box-div'.format(id), "DIM", old_setup['divisions'])
+      var or = read_vec3_input('{0}-box-pos'.format(id), "POS", old_setup['origin'])
       src_setup = {"style": style, "origin": or, "dimensions": dim, "divisions": div}
       sim_setups.push(src_setup)
     }
     else if(style == "pyramid"){
-      var lay = read_num_input('{0}-pyramid-lays'.format(id))
-      var div = read_num_input('{0}-pyramid-divs'.format(id))
-      var len = read_num_input('{0}-pyramid-len'.format(id))
-      var ang = read_num_input('{0}-pyramid-ang'.format(id))
-      var pos = read_vec3_input('{0}-pyramid-pos'.format(id), "POS", old_cfg['origin'])
+      var lay = read_num_input('{0}-pyramid-lays'.format(id), old_setup['layers'])
+      var div = read_num_input('{0}-pyramid-divs'.format(id), old_setup['divisions'])
+      var len = read_num_input('{0}-pyramid-len'.format(id), old_setup['length'])
+      var ang = read_num_input('{0}-pyramid-ang'.format(id), old_setup['angle_from_normal'])
+      var pos = read_vec3_input('{0}-pyramid-pos'.format(id), "POS", old_setup['origin'])
       src_setup = {"style": style, "origin": pos, "layers": lay, "divisions": div, "angle_from_normal": ang, "length": len}
       sim_setups.push(src_setup)
     }
     else if(style == "sphere"){
-      var rin = read_num_input('{0}-sphere-rings'.format(id))
-      var seg = read_num_input('{0}-sphere-segs'.format(id))
-      var rad = read_num_input('{0}-sphere-rad'.format(id))
-      var pos = read_vec3_input('{0}-sphere-pos'.format(id), "POS", old_cfg['origin'])
+      var rin = read_num_input('{0}-sphere-rings'.format(id), old_setup['rings'])
+      var seg = read_num_input('{0}-sphere-segs'.format(id), old_setup['segments'])
+      var rad = read_num_input('{0}-sphere-rad'.format(id), old_setup['radius'])
+      var pos = read_vec3_input('{0}-sphere-pos'.format(id), "POS", old_setup['origin'])
       src_setup = {"style": style, "origin": pos, "rings": rin, "segments": seg, "radius": rad}
       sim_setups.push(src_setup)
     }
     else if(style == "single"){
-      var pos = read_vec3_input('{0}-single-pos'.format(id), "POS", old_cfg['origin'])
+      var pos = read_vec3_input('{0}-single-pos'.format(id), "POS", old_setup['origin'])
       src_setup = {"style": style, "origin": pos}
       sim_setups.push(src_setup)
     }
@@ -371,6 +390,7 @@ function compile_code(){
   sim_config['source_config']['input_utterance'] = {"uid": -1}
   //Add the sim_config to the code
   code["simulation_config"] = sim_config
+  code["variables"] = old_cfg['variables']
 
   return code
 }

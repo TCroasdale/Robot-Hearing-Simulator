@@ -39,10 +39,17 @@ class Utilities:
                     print("Cannot delete simulation file, they're not here!")
     
 
+    # Set sound from it's sample rate to the target rate
     def resample_sound(sound, target_rate, current_rate):
-        rate_diff = int(round(current_rate / target_rate))
-        return sound[0::rate_diff]
+        if current_rate > target_rate:
+            rate_diff = int(round(current_rate / target_rate))
+            return sound[0::rate_diff]
+        else:
+            rate_diff = int(round(target_rate / current_rate))
+            a =  np.repeat(sound, rate_diff) 
+            return a
 
+    # Clips the sound array, to the target length
     def resize_sound(sound, target_length):
         if len(sound) > target_length:
             return sound[:target_length]
@@ -51,5 +58,6 @@ class Utilities:
         else:
             return sound
 
+    # Multiplies every value in the sound array by value amp
     def amplify_sound(sound, amp):
         return [s * amp for s in sound]
