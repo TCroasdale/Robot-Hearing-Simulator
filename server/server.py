@@ -20,6 +20,7 @@ from servertasks import *
 from database.db_manager import User, Simulation, Sound, Robot
 from database.db_manager_sqlite import DB_Manager_SQLite
 from config import *
+from utilities import Utilities as util
 
 ALLOWED_EXTENSIONS = set(['wav'])
 
@@ -214,6 +215,12 @@ class WebServer:
             if 'userID' not in session: return jsonify({"success": "false"})
 
             strdict = json.loads(request.form['config'])
+
+            # Link variables
+            print(strdict)
+            strdict['simulation_config'] = util.link_vars(strdict['simulation_config'], strdict['variables'])
+            print(strdict)
+            
 
             if 'utterance' in request.files:
                 utt = processSoundUpload(request.files['utterance'], session['userID'])
