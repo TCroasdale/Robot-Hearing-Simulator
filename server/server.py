@@ -22,7 +22,7 @@ from database.db_manager_sqlite import DB_Manager_SQLite
 from config import *
 from utilities import Utilities as util
 
-ALLOWED_EXTENSIONS = set(['wav'])
+ALLOWED_EXTENSIONS = set(['wav' 'txt'])
 
 class WebServer:
     def __init__(self, database):
@@ -41,7 +41,10 @@ class WebServer:
 
     #Returns true if filename has an allowed extension
     def allowed_file(filename):
-        return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+        return get_file_ext(filename) in ALLOWED_EXTENSIONS
+
+    def get_file_ext(filename):
+        return '.' in filename and filename.rsplit('.', 1)[1].lower()
 
     def set_routes(self):
         @self.app.route("/")
@@ -217,10 +220,8 @@ class WebServer:
             strdict = json.loads(request.form['config'])
 
             # Link variables
-            print(strdict)
             strdict['simulation_config'] = util.link_vars(strdict['simulation_config'], strdict['variables'])
-            print(strdict)
-            
+
 
             if 'utterance' in request.files:
                 utt = processSoundUpload(request.files['utterance'], session['userID'])
@@ -254,7 +255,7 @@ class WebServer:
 
             # Save the JSON config to a file
             unique_name = uuid.uuid4()
-            filename = "server/uploads/simulation_configs/{0}.json".format(unique_name)
+            filename = UPLOAD_DIR + "simulation_configs/{0}.json".format(unique_name)
             # print("putting sim file in: {0}".format(filename))
             with open(filename, 'w') as f:
                 json.dump(strdict, f, sort_keys=False, indent=4, ensure_ascii = False)
@@ -273,18 +274,26 @@ class WebServer:
             return jsonify({"success": "true"})
 
 
-        def processSoundUpload(file, user_id):
+        def processFileUpload(file, user_id):
             # if user does not select file, browser also submit a empty part without filename
             if file.filename == '':
                 # print("no file selected in uploads!")
                 return None
             if file and WebServer.allowed_file(file.filename):
                 unique_name = uuid.uuid4()
-                file.save('server/uploads/sounds/{0}.wav'.format(unique_name))
 
-                sound = self.db.insert_sound(Sound(file.filename, 'uploads/sounds/{0}.wav'.format(unique_name), user_id))
-                return sound
-            return None
+                if get_file_ext(file.filename) == 'wav':
+                    savename = UPLOAD_DIR + 'sounds/{0}.wav'.format(unique_name)
+                    file.save(savename)
+                    sound = self.db.insert_sound(Sound(file.filename, savename, user_id))
+                    return sound
+                else: # Must be a txt/mic response file
+                    savename = UPLOAD_DIR + 'mic_responses/{0}.txt'.format(unique_name)
+                    file.save(savename)
+                    mic = self.db.insert_microphone(Microphone(file.filename, savename, user_id))
+                    return mic
+            else:
+                return None
 
 
         def insertSoundPaths(conf, sounds, motid_to_id):
@@ -310,19 +319,24 @@ class WebServer:
             sounds = {}
             for id in request.files:
                 f = request.files[id]
-                sound = processSoundUpload(f, session['userID'])
-                sounds[str(id)] = sound
+                file_obj = processFileUpload(f, session['userID'])
+                if file_obj == None:
+                    return jsonify({"success": "false", "reason": "invalid file"})
+                elif isinstance(file_obj, Sound):
+                    sounds[str(id)] = file_obj
+
 
             #Load config and mot_id to i map
             conf = json.loads(request.form['robot-config'])
-            id_map = json.loads(request.form['id_map'])
+            mot_id_map = json.loads(request.form['mot_id_map'])
+            mic_id_map = json.loads(request.form['mic_id_map'])
 
             # Update the config with new id values
             conf = insertSoundPaths(conf, sounds, id_map)
 
             # Write the config to a file
             unique_name = uuid.uuid4()
-            filename = "server/uploads/robot_configs/{0}.json".format(unique_name)
+            filename = UPLOAD_DIR + 'robot_configs/{0}.json'.format(unique_name)
 
             with open(filename, 'w') as f:
                 json.dump(conf, f, sort_keys=False, indent=4, ensure_ascii = False)
@@ -337,8 +351,9 @@ class WebServer:
             if 'userID' not in session: return redirect('/login?ref=robotdesign')
 
             sounds = self.db.get_user_sounds(session['userID'])
+            mics = self.db.get_user_mics(session['userID'])
 
-            return render_template('robotdesign.html', user=self.db.get_user(id=session['userID']), sounds=sounds)
+            return render_template('robotdesign.html', user=self.db.get_user(id=session['userID']), sounds=sounds, mic_responses=mics)
 
         @self.app.route('/upload_config', methods=['POST'])
         def review_config():
@@ -363,7 +378,7 @@ class WebServer:
         @self.app.route("/uploads/sounds/<name>")
         def serveSound(name = None):
             # //filename = os.path.join(self.app.root_path, 'uploads' ,'sounds', name)
-            return send_file("uploads/sounds/{0}".format(name), as_attachment=True)
+            return send_file("server/uploads/sounds/{0}".format(name), as_attachment=True)
 
 
 class BadRobotIDException(Exception):

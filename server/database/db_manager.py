@@ -92,6 +92,8 @@ class DB_Manager:
     def get_user_robots(self, id): pass
 
     def get_user_sounds(self, id): pass
+    
+    def get_user_mics(self, id): pass
 
     def run_query(self, q, a): pass
 

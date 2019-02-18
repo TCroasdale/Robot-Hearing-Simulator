@@ -1,4 +1,4 @@
-from .db_manager import DB_Manager, User, Simulation, Sound, Robot
+from .db_manager import *
 import sqlite3 as sql
 
 class DB_Manager_SQLite(DB_Manager):
@@ -48,6 +48,16 @@ class DB_Manager_SQLite(DB_Manager):
             allsounds = cur.fetchall()
             sounds = Sound.from_DB_ls(allsounds)
         return sounds
+
+    def get_user_mics(self, id):
+        sounds = []
+        with sql.connect(self.dbLocation) as con:
+            cur = con.cursor()
+            cur.execute("SELECT * FROM microphones WHERE userID=?", [id])
+            allmics = cur.fetchall()
+            mics = Microphone.from_DB_ls(allmics)
+        return mics
+
 
 
     def run_query(self, q, a):

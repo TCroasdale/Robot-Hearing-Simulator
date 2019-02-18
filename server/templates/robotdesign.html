@@ -113,9 +113,25 @@
       <number-input label="ID" id="{id}-id" value="{num}" step="1.0"></number-input>
       <vec3-input label="Origin" id="{id}-pos" value="0" step="0.25" label-style="POS"></vec3-input>
       <vec3-input label="Rotation" id="{id}-rot" value="0" step="30" label-style="ROT"></vec3-input>
+      <hr>
+      <div id="{id}-file-container">
+        <div class="input-group mr-2" role="group">
+          <div class="input-group-prepend">
+            <p class="text-info input-group-text">Mic Response</p>
+          </div>
+          <label for="{id}-mic-response" class="form-control btn btn-secondary" id="{id}-mic-response-lbl"><fas-icon icon-name="upload"></fas-icon> Browse...</label>
+          <input type="file" name="{id}-mic-response" class="form-control" id="{id}-mic-response" size="1">
+          <select id="{id}-response-select" class="form-control" ev-change="sel-change">
+              <option value="-1">Upload other file.</option>
+              {% for mic in mic_responses: %}
+              <option value="{{mic.id}}">{{ mic.name }}</option>
+              {% endfor %}
+          </select>
+        </div>
+      </div>
     </div>
   </div>
-</template> <!-- Template for a mic panel -->
+</template> <!-- Template for a motor panel -->
 <template id="motor-block">
   <div id="{id}" class="my-1" >
     <div class="row input-group mx-0" id="{id}-tr">

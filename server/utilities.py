@@ -25,22 +25,16 @@ class Utilities:
                     0 # Do Nothing
         return json
 
+
     def link_vars(data, vars):
-        print(vars)
         for k, v in data.items():
-            print("key: {0}, v: {1}".format(k, v))
             if (k == "value" or k == "var" or k == "val") and (v in vars):
-                print("Linking variable")
                 return vars[v]
             elif isinstance(v, dict):
-                print("Recursing into {0}".format(k))
                 data[k] = Utilities.link_vars(data[k], vars)
             elif isinstance(v, list):
                 for i in range(len(v)):
                     data[k][i] = Utilities.link_vars(data[k][i], vars)
-            else:
-                print("Skipping: {0}, is object".format(k))
-        print("Done with this dict")
         return data
 
 

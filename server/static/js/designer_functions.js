@@ -62,7 +62,20 @@ function addMicPanel(){
   appendTemplate($('#mic-setups'), 'mic-block', {'id': id, 'num': i},
   {'del-mic': function(){
     $('#{0}'.format(id)).remove()
-  }})
+  }, 
+  'sel-change': function(){ //Function to disable file upload if needed
+    var index = this.selectedIndex
+    id = this.id.replace('-sound-select', '')
+    if(index == 0){
+      $("#{0}-mic-response".format(id))[0].disabled = false
+      $("#{0}-mic-response-lbl".format(id)).removeClass("disabled")
+    }else{
+      $("#{0}-mic-response".format(id))[0].disabled = true
+      $("#{0}-mic-response-lbl".format(id)).addClass("disabled")
+    }
+  }
+  })
+
   // ===== Add Update functions =====
   $('#{0} input'.format(id)).change(function(){
     update3DView(compile_code())
@@ -130,7 +143,7 @@ $(document).ready(function() {
       }
     }
 
-    fData.append("id_map", JSON.stringify(id_to_sound_map))
+    fData.append("mot_id_map", JSON.stringify(id_to_sound_map))
 
     compile_code()
     var config = editor.getValue()
