@@ -17,12 +17,12 @@ import uuid
 from datetime import datetime as dt
 from datetime import timedelta
 from servertasks import *
-from database.db_manager import User, Simulation, Sound, Robot
+from database.db_manager import *
 from database.db_manager_sqlite import DB_Manager_SQLite
 from config import *
 from utilities import Utilities as util
 
-ALLOWED_EXTENSIONS = set(['wav' 'txt'])
+ALLOWED_EXTENSIONS = set(['wav', 'txt'])
 
 class WebServer:
     def __init__(self, database):
@@ -41,7 +41,8 @@ class WebServer:
 
     #Returns true if filename has an allowed extension
     def allowed_file(filename):
-        return get_file_ext(filename) in ALLOWED_EXTENSIONS
+
+        return WebServer.get_file_ext(filename) in ALLOWED_EXTENSIONS
 
     def get_file_ext(filename):
         return '.' in filename and filename.rsplit('.', 1)[1].lower()
@@ -282,7 +283,7 @@ class WebServer:
             if file and WebServer.allowed_file(file.filename):
                 unique_name = uuid.uuid4()
 
-                if get_file_ext(file.filename) == 'wav':
+                if WebServer.get_file_ext(file.filename) == 'wav':
                     savename = UPLOAD_DIR + 'sounds/{0}.wav'.format(unique_name)
                     file.save(savename)
                     sound = self.db.insert_sound(Sound(file.filename, savename, user_id))
@@ -296,43 +297,62 @@ class WebServer:
                 return None
 
 
-        def insertSoundPaths(conf, sounds, motid_to_id):
+        # Conf = the robot config_robot
+        # files = the dictionary or sound and file paths
+        def insertFilePaths(conf, files, mot_id_map, mic_id_map):
             motors = conf['robot_config']['motors']
             mics = conf['robot_config']['microphones']
             for motor in motors:
-                if motor['id'] in motid_to_id:
-                    snd_id = '{0}'.format(motid_to_id[motor['id']])
-                    if snd_id in sounds:
-                        motor['sound']['uid'] = sounds[snd_id].id
-                    else: # else Must be a direct sound id
-                        motor['sound']['uid'] = self.db.get_sound(snd_id).id
+                if str(motor['id']) in mot_id_map:
+                    snd_id = str(mot_id_map[str(motor['id'])])
+                    if snd_id in files['sounds']:
+                        motor['sound']['uid'] = files['sounds'][snd_id].id
+                        motor['sound']['path'] = files['sounds'][snd_id].pathToFile
+                    else: # else Must be a pre existing sound
+                        sound_obj =  self.db.get_sound(snd_id)
+                        motor['sound']['uid'] = sound_obj.id
+                        motor['sound']['path'] = sound_obj.pathToFile
 
             for mic in mics:
-                mic['mic_style']['path'] = "../cardioid"
+                if str(mic['id']) in mic_id_map:
+                    res_id = str(mic_id_map[str(mic['id'])])
+                    if res_id in files['responses']:
+                        mic['mic_style']['uid'] = files['responses'][res_id].id
+                        mic['mic_style']['path'] = files['responses'][res_id].pathToFile
+                    else: # else Must be a pre existing response
+                        mic_obj = self.db.get_microphone(res_id)
+                        mic['mic_style']['uid'] = mic_obj.id
+                        mic['mic_style']['path'] = mic_obj.pathToFile
+
             return conf
 
         @self.app.route('/designer/save', methods=['POST'])
         def save_robot_config():
             if 'userID' not in session: return jsonify({"success": "false"})
+            print(request.form)
+            print(request.files)
 
             # Process Sounds
-            sounds = {}
+            files = {'sounds': {}, 'responses': {}}
             for id in request.files:
                 f = request.files[id]
                 file_obj = processFileUpload(f, session['userID'])
                 if file_obj == None:
                     return jsonify({"success": "false", "reason": "invalid file"})
                 elif isinstance(file_obj, Sound):
-                    sounds[str(id)] = file_obj
+                    files['sounds'][str(id)] = file_obj
+                else:
+                    files['responses'][str(id)] = file_obj
+
 
 
             #Load config and mot_id to i map
-            conf = json.loads(request.form['robot-config'])
-            mot_id_map = json.loads(request.form['mot_id_map'])
-            mic_id_map = json.loads(request.form['mic_id_map'])
+            conf = json.loads(request.form['robot-config']) # robot config
+            mot_id_map = json.loads(request.form['mot_id_map']) # map of motor id to motor sound file/id
+            mic_id_map = json.loads(request.form['mic_id_map']) # map of mic id to mic response file/id
 
             # Update the config with new id values
-            conf = insertSoundPaths(conf, sounds, id_map)
+            conf = insertFilePaths(conf, files, mot_id_map, mic_id_map)
 
             # Write the config to a file
             unique_name = uuid.uuid4()

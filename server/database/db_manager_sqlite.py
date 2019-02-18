@@ -93,10 +93,10 @@ class DB_Manager_SQLite(DB_Manager):
         with sql.connect(self.dbLocation) as con:
             cur = con.cursor()
 
-            cur.execute("INSERT INTO microphones (name, pathToFile) VALUES (?,?,?)",(mic.name, mic.pathToFile, mic.userID))
+            cur.execute("INSERT INTO microphones (name, pathToFile, userID) VALUES (?,?,?)",(mic.name, mic.pathToFile, mic.userID))
             rowid = cur.lastrowid
             con.commit()
-            cur.execute("SELECT * FROM microphone WHERE id=?", [rowid])
+            cur.execute("SELECT * FROM microphones WHERE id=?", [rowid])
             return Microphone.from_DB(cur.fetchone())
 
 

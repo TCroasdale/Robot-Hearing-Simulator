@@ -41,13 +41,13 @@ function addMotorPanel(){
   }})
   // ===== Add Update functions =====
   $('#{0} input'.format(id)).change(function(){
-    update3DView(compile_code())
+    update3DView(compile_ui())
   })
   $('#{0}-del'.format(id)).click(function(){
-    update3DView(compile_code())
+    update3DView(compile_ui())
   })
 
-  update3DView(compile_code())
+  update3DView(compile_ui())
 
   return id
 }
@@ -62,10 +62,10 @@ function addMicPanel(){
   appendTemplate($('#mic-setups'), 'mic-block', {'id': id, 'num': i},
   {'del-mic': function(){
     $('#{0}'.format(id)).remove()
-  }, 
+  },
   'sel-change': function(){ //Function to disable file upload if needed
     var index = this.selectedIndex
-    id = this.id.replace('-sound-select', '')
+    id = this.id.replace('-response-select', '')
     if(index == 0){
       $("#{0}-mic-response".format(id))[0].disabled = false
       $("#{0}-mic-response-lbl".format(id)).removeClass("disabled")
@@ -78,17 +78,18 @@ function addMicPanel(){
 
   // ===== Add Update functions =====
   $('#{0} input'.format(id)).change(function(){
-    update3DView(compile_code())
+    update3DView(compile_ui())
   })
   $('#{0}-del'.format(id)).click(function(){
-    update3DView(compile_code())
+    update3DView(compile_ui())
   })
 
-  update3DView(compile_code())
+  update3DView(compile_ui())
   return id
 }
 
 $(document).ready(function() {
+
   $('#uploadpopup').modal("hide")
 
   var editor = ace.edit("editor");
@@ -121,11 +122,18 @@ $(document).ready(function() {
 
 
   $('#save-robot').click(function(){
+    var newSesh = new EditSession(JSON.stringify(compile_ui(), null, " "))
+    newSesh.setMode("ace/mode/javascript");
+    editor.setSession(newSesh)
+
+    var config = fetchEditorState()
+    if(!verify(config)) return;
     $('#uploadpopup').modal({backdrop: 'static', keyboard: false})
 
     //Find all sounds and add them to the file
     fData = new FormData();
-    id_to_sound_map = {} // Map from motor id to i value
+    id_to_sound_map = {} // Map from motor id to sound id, or filename
+    id_to_response_map = {}
 
     //Needs to exit on invalid sound files
     num_mots = $('#mot-setups')[0].children.length
@@ -133,21 +141,37 @@ $(document).ready(function() {
       var child = $('#mot-setups')[0].children[i]
 
       soundupload = $('#{0}-mot-sound'.format(child.id))
-      if(!soundupload.disabled){ //If an existing sound is selected
-        fData.append('{0}'.format(i), soundupload[0].files[0])
+      var mot_id = read_num_input('{0}-id'.format(child.id))
+      if(Number($('#{0}-sound-select'.format(child.id))[0].value) == -1){ //If an existing sound is selected
+        fData.append(soundupload[0].files[0].name, soundupload[0].files[0])
 
-        var mot_id = read_num_input('{0}-id'.format(child.id))
-        id_to_sound_map[mot_id] = i
+        id_to_sound_map[mot_id] = soundupload[0].files[0].name
       }else{
+
         id_to_sound_map[mot_id] = $('#{0}-sound-select'.format(child.id))[0].value
       }
     }
 
-    fData.append("mot_id_map", JSON.stringify(id_to_sound_map))
+    num_mics = $('#mic-setups')[0].children.length
+    for(var i=0; i<num_mics; i++){
+      var child = $('#mic-setups')[0].children[i]
 
-    compile_code()
-    var config = editor.getValue()
-    fData.append('robot-config', config)
+      fileupload = $('#{0}-mic-response'.format(child.id))
+      var mic_id  = read_num_input('{0}-id'.format(child.id))
+      if(Number($('#{0}-response-select'.format(child.id))[0].value) == -1){ //If an existing sound is selected
+        fData.append(fileupload[0].files[0].name, fileupload[0].files[0])
+
+        id_to_response_map[mic_id] = fileupload[0].files[0].name
+      }else{
+
+        id_to_response_map[mic_id] = $('#{0}-response-select'.format(child.id))[0].value
+      }
+    }
+
+    fData.append("mot_id_map", JSON.stringify(id_to_sound_map))
+    fData.append("mic_id_map", JSON.stringify(id_to_response_map))
+
+    fData.append('robot-config', JSON.stringify(config))
 
     fData.append('robot_name', $('#robot-name')[0].value)
 
@@ -158,7 +182,7 @@ $(document).ready(function() {
       data: fData,
 
       success: function(data){
-        console.log(data.success)
+        alert(data.success + "; " + data.reason)
         $('#uploadpopup').modal("hide")
       },
       cache: false,
@@ -194,11 +218,11 @@ $(document).ready(function() {
   })
 
   $('input').change(function(){
-    update3DView(compile_code())
+    update3DView(compile_ui())
   })
 
   $('#code-tab').click(function(e){
-    var newSesh = new EditSession(JSON.stringify(compile_code(), null, " "))
+    var newSesh = new EditSession(JSON.stringify(compile_ui(), null, " "))
     newSesh.setMode("ace/mode/javascript");
     editor.setSession(newSesh)
   })
@@ -229,7 +253,54 @@ function update_UI(conf){
 
 }
 
-function compile_code(){
+function verify(config){
+
+  // Checking that the motor sound files are attached
+  num_mots = $('#mot-setups')[0].children.length
+  for(var i=0; i<num_mots; i++){
+    var child = $('#mot-setups')[0].children[i]
+    soundupload = $('#{0}-mot-sound'.format(child.id))
+    if(Number($('#{0}-sound-select'.format(child.id))[0].value) == -1){
+      if(soundupload[0].files.length < 1){
+        return failVerify("Please select a motor sound file.", '{0}-sound-select'.format(child.id))
+      }
+      else if(soundupload[0].files[0].size > 20000000){ // 20mb limit
+        return failVerify("Sound file is greater than 20mb.", '{0}-sound-select'.format(child.id))
+      }
+    }
+  }
+
+  num_mots = $('#mic-setups')[0].children.length
+  for(var i=0; i<num_mots; i++){
+    var child = $('#mic-setups')[0].children[i]
+    fileupload = $('#{0}-mic-response'.format(child.id))
+    if(Number($('#{0}-response-select'.format(child.id))[0].value) == -1){
+      if(fileupload[0].files.length < 1){
+        return failVerify("Please select a microphone response file.", '{0}-response-select'.format(child.id))
+      }
+      else if(fileupload[0].files[0].size > 20000000){ // 20mb limit
+        return failVerify("Response file is greater than 20mb.", '{0}-sound-select'.format(child.id))
+      }
+    }
+  }
+
+  if($('#robot-name')[0].value === ""){
+    return failVerify("Please enter a name for your robot.", "robot-name")
+  }
+
+  return true
+}
+
+function failVerify(message, id){
+  alert(message)
+  $('#{0}'.format(id)).focus()
+  $('html, body').animate({
+      scrollTop: ($('#{0}'.format(id)).offset().top)
+  },500);
+  return false
+}
+
+function compile_ui(){
   console.log("Compiling robot to code..")
   code = {}
   var skin_width = read_num_input('skin-width')
