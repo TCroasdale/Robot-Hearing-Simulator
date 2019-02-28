@@ -9,23 +9,67 @@ class SceneView{
     parent = $('#'+canvasID)
 
 
-    var size = this.getShortestSide(parent.width(), parent.height())
+    this.size = this.getShortestSide(parent.width(), parent.height())
 
     //FOV, Aspect Ratio, Near, Far
     this.camera = new THREE.PerspectiveCamera(75, 1.0, 0.1, 100);
-		this.renderer.setSize(size, size);
+		this.renderer.setSize(this.size, this.size);
+    this.camera.updateProjectionMatrix()
 		$('#'+canvasID)[0].appendChild( this.renderer.domElement );
 
 		this.zoomLevel = 15
     this.animating = true
     this.cameraFocus = [0,0,0]
 
+    this.raycaster = new THREE.Raycaster()
+    this.mouse = new THREE.Vector2()
+    window.addEventListener('mousemove', this.onMouseMove, false)
 
     var axesHelper = new THREE.AxesHelper(3);
-    this.scene.add(axesHelper);
+    // this.scene.add(axesHelper);
+
+    this.selected = null
 
 		this.animate();
   }
+
+
+
+  onMouseMove( event ) {
+  	// calculate mouse position in normalized device coordinates
+  	// (-1 to +1) for both components
+    // console.log((event.clientX / window.innerWidth)*2-1, -(event.clientY / window.innerHeight)*2+1);
+  	sceneView.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  	sceneView.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    // sceneView.raycastToObjects([])
+
+  }
+
+  raycastToObjects(objs){
+    // console.log(this.mouse);
+  	this.raycaster.setFromCamera(this.mouse, this.camera);
+
+    // calculate objects intersecting the picking ray
+    // console.log(objs);
+    // console.log(this.scene.children);
+
+    // for (var i in objs){
+    //   objs[i].updateMatrixWorld()
+    // }
+
+    console.log(this.scene.children);
+    console.log(objs);
+    var intersects = this.raycaster.intersectObjects(objs, true);
+    console.log(intersects);
+    var intersection = ( intersects.length ) > 0 ? intersects[ 0 ] : null;
+
+    console.log(intersection);
+    if(intersection !== null) {
+      intersection.object.material.color.set( 0x00ff00 );
+    }
+
+  }
+
 
   getShortestSide(width, height){
     if( width <= height){
@@ -98,6 +142,7 @@ class SceneView{
       this.centerCamera()
       this.camera.rotation.y += 0.005
       this.camera.translateZ(this.zoomLevel)
+      this.camera.updateProjectionMatrix()
     }
 
     this.renderer.render( this.scene, this.camera );
@@ -148,7 +193,7 @@ class SceneView{
     }
 
 		var sphere = new THREE.Mesh( geometry, material );
-		this.scene.add( sphere );
+		this.scene.add(sphere);
     return sphere
   }
 }

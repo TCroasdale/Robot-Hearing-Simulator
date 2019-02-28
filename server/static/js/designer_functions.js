@@ -1,5 +1,5 @@
 function fetchEditorState(){
-  if(ace.edit("editor").getValue() == ""){
+  if(ace.edit("editor").getValue() === ""){
     // Return a default config if editor is empty
     return {
      "robot_config": {
@@ -89,7 +89,6 @@ function addMicPanel(){
 }
 
 $(document).ready(function() {
-
   $('#uploadpopup').modal("hide")
 
   var editor = ace.edit("editor");
@@ -119,6 +118,10 @@ $(document).ready(function() {
   mics = [sceneView.createCone(0.2, 0.2)]
   motors = [sceneView.createSphere(0.1, 0x44ee44)]
 
+
+  // Update UI with default values
+  update_UI(fetchEditorState())
+  update3DView(fetchEditorState())
 
 
   $('#save-robot').click(function(){
@@ -175,6 +178,11 @@ $(document).ready(function() {
 
     fData.append('robot_name', $('#robot-name')[0].value)
 
+    urlParams = new URLSearchParams(window.location.search)
+    if(urlParams.has('robot')){
+      fData.append('robot_to_update', urlParams.get('robot'))
+    }
+
     //Upload form data
     $.ajax({
       url: 'designer/save',
@@ -198,14 +206,17 @@ $(document).ready(function() {
   $('#add-mic').click(function(){
     addMicPanel()
   })
-  $('#add-mic').click()
-  $('#mic-conf-0-del').remove()
+
 
   $('#add-mot').click(function(){
     addMotorPanel()
   })
-  $('#add-mot').click()
-  $('#mot-conf-0-del').remove()
+  if(editor.getValue() === ""){
+    $('#add-mic').click()
+    $('#mic-conf-0-del').remove()
+    $('#add-mot').click()
+    $('#mot-conf-0-del').remove()
+  }
 
   editor.on('change', function(obj){
     try{
@@ -230,6 +241,7 @@ $(document).ready(function() {
 })
 
 function update_UI(conf){
+  console.log(conf);
 
   set_number_input('skin-width', conf['robot_config']['skin_width'])
 

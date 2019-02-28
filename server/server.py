@@ -329,8 +329,6 @@ class WebServer:
         @self.app.route('/designer/save', methods=['POST'])
         def save_robot_config():
             if 'userID' not in session: return jsonify({"success": "false"})
-            print(request.form)
-            print(request.files)
 
             # Process Sounds
             files = {'sounds': {}, 'responses': {}}
@@ -344,8 +342,6 @@ class WebServer:
                 else:
                     files['responses'][str(id)] = file_obj
 
-
-
             #Load config and mot_id to i map
             conf = json.loads(request.form['robot-config']) # robot config
             mot_id_map = json.loads(request.form['mot_id_map']) # map of motor id to motor sound file/id
@@ -354,15 +350,26 @@ class WebServer:
             # Update the config with new id values
             conf = insertFilePaths(conf, files, mot_id_map, mic_id_map)
 
-            # Write the config to a file
-            unique_name = uuid.uuid4()
-            filename = UPLOAD_DIR + 'robot_configs/{0}.json'.format(unique_name)
+            if 'robot_to_update' in request.form:
+                robot = self.db.get_robot(request.form['robot_to_update'])
+                if robot.userID == session['userID']:
+                    filename = robot.pathToConfig
 
-            with open(filename, 'w') as f:
-                json.dump(conf, f, sort_keys=False, indent=4, ensure_ascii = False)
+                    with open(filename, 'w') as f:
+                        json.dump(conf, f, sort_keys=False, indent=4, ensure_ascii = False)
 
-            robot = Robot(request.form['robot_name'], filename, session['userID'])
-            robot = self.db.insert_robot(robot)
+
+            else:
+
+                # Write the config to a file
+                unique_name = uuid.uuid4()
+                filename = UPLOAD_DIR + 'robot_configs/{0}.json'.format(unique_name)
+
+                with open(filename, 'w') as f:
+                    json.dump(conf, f, sort_keys=False, indent=4, ensure_ascii = False)
+
+                robot = Robot(request.form['robot_name'], filename, session['userID'])
+                robot = self.db.insert_robot(robot)
 
             return jsonify({"success": "true"})
 
@@ -373,7 +380,21 @@ class WebServer:
             sounds = self.db.get_user_sounds(session['userID'])
             mics = self.db.get_user_mics(session['userID'])
 
-            return render_template('robotdesign.html', user=self.db.get_user(id=session['userID']), sounds=sounds, mic_responses=mics)
+            if 'robot' in request.args:
+                robotID = request.args['robot']
+                robot = self.db.get_robot(robotID)
+                print(robot)
+                print("session id: ", session['userID'])
+                if robot.userID != session['userID']:
+                    robot = None
+                    robot_conf = ""
+                else:
+                    robot_conf = open(robot.pathToConfig).read()
+            else:
+                robot_conf = ""
+                robot = None
+
+            return render_template('robotdesign.html', user=self.db.get_user(id=session['userID']), sounds=sounds, mic_responses=mics, robotconfig=robot_conf, robot=robot)
 
         @self.app.route('/upload_config', methods=['POST'])
         def review_config():

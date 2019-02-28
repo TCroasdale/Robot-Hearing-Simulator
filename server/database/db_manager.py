@@ -53,10 +53,13 @@ class Robot:
 
     def from_DB(data):
         if data is None: return None
-        return Robot(data[1], data[2], data[3], data[0], data[4])
+        return Robot(data[1], data[2], data[4], data[0], data[3])
 
     def from_DB_ls(data_list):
         return [Robot.from_DB(d) for d in data_list]
+
+    def __str__(self):
+        return "id: {0}, name: {1}, pathToConfig: {2}, uID: {3}".format(self.id, self.name, self.pathToConfig, self.userID)
 
 
 class Simulation:
@@ -80,19 +83,19 @@ class Simulation:
         return [Simulation.from_DB(d) for d in data_list]
 
 class DB_Manager:
-    
+
     def __init__(self): pass
 
     def is_email_used(self, email): pass
 
     def get_user(self, email=None, id=None): pass
-    
+
     def get_user_sims(self, id): pass
 
     def get_user_robots(self, id): pass
 
     def get_user_sounds(self, id): pass
-    
+
     def get_user_mics(self, id): pass
 
     def run_query(self, q, a): pass

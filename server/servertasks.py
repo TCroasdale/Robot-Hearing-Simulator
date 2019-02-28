@@ -14,7 +14,7 @@ def endTask(taskID):
 @celeryApp.task(bind=True)
 def runSimulation(self, simconfig, roboconfig, filename, simid):
     if DATABASE == "SQLite":
-        db = DB_Manager_SQLite(SQLite_DB_Location)
+        db = DB_Manager_SQLite(SQLITE_DB_LOCATION)
     else:
         db = DB_Manager()
 

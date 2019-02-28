@@ -1,4 +1,5 @@
 from database.db_manager import Simulation
+import numpy as np
 
 class Utilities:
     def objectifyJson(json):
@@ -50,7 +51,7 @@ class Utilities:
                     os.remove(sim.pathToZip)
                 except:
                     print("Cannot delete simulation file, they're not here!")
-    
+
 
     # Set sound from it's sample rate to the target rate
     def resample_sound(sound, target_rate, current_rate):
@@ -59,7 +60,7 @@ class Utilities:
             return sound[0::rate_diff]
         else:
             rate_diff = int(round(target_rate / current_rate))
-            a =  np.repeat(sound, rate_diff) 
+            a =  np.repeat(sound, rate_diff)
             return a
 
     # Clips the sound array, to the target length

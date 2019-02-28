@@ -1,5 +1,5 @@
 function fetchEditorState(link=false){
-  if(ace.edit("editor").getValue() == ""){
+  if(ace.edit("editor").getValue() === ""){
     // Return a default config if editor is empty
     return {
       "variables": {},
@@ -33,7 +33,7 @@ function linkVars(conf){
 
     string_conf = string_conf.replace(new RegExp('{"val":"{0}"}'.format(i), 'g'), v);
     string_conf = string_conf.replace(new RegExp("{'val':'{0}'}".format(i), 'g'), v);
-    
+
     string_conf = string_conf.replace(new RegExp('{"var":"{0}"}'.format(i), 'g'), v);
     string_conf = string_conf.replace(new RegExp("{'var':'{0}'}".format(i), 'g'), v);
   })
@@ -87,7 +87,13 @@ $(document).ready(function() {
   // ===== Setting up 3D Viewer =====
   room = sceneView.createRoom(1, 1, 1, 0xeeeeee, 0x222222)
   robot = sceneView.createSphere(0.5, 0x3f7faa, false)
-  sources = [[sceneView.createSphere(0.25, 0xff0000, false)]]
+  sources = [[sceneView.createSphere(0.25, 0xff0000, false, true)]]
+
+  $('#3js-container').click(function(){
+    objs = sources.flat()
+
+    sceneView.raycastToObjects(objs)
+  })
 
 
   // ===== Config Upload Handler =====
@@ -399,9 +405,6 @@ function update3DView(config){
   console.log("Updating your view.")
 
   offset = { 'x': 0, 'y': 0, 'z': 0 }
-  // offset['x'] = config['simulation_config']['room_dimensions']['x'] / 2
-  // offset['y'] = config['simulation_config']['room_dimensions']['y'] / 2
-  // offset['z'] = config['simulation_config']['room_dimensions']['z'] / 2
 
   room.scale.x = config['simulation_config']['room_dimensions']['x']
   room.scale.y = config['simulation_config']['room_dimensions']['y']

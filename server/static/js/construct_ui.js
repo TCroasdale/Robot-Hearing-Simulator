@@ -74,7 +74,6 @@ function appendTemplate(parent, panelID, options, events){
 
 
 function set_vec3_input(id, obj, type="POS"){
-  console.log(obj)
   style = V3Styles(type)
 
 
