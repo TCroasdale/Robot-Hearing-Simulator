@@ -3,18 +3,34 @@
 {% block head %}
 {% endblock %}
 {% block content %}
-    <div>
+    <div class="container-fluid my-2">
         <h3>Search Results <fas-icon></fas-icon></h3>
+        <div class="input-group">
+                <div class="input-group-prepend">
+                    <p class="input-group-text">Sort By</p>
+                </div>
+                <select class="input-control">
+                    <option>Likes</option>
+                    <option>Type</option>
+                    <option>Name</option>
+                    <option>Description</option>
+                </select>
+            </div>
     </div>
+    
     <div class="container-fluid">
-        <ul class="list-group">
+        <div class="card-columns">
         {% for item in items: %}
-            <li class="list-group-item">
-                <h3>{{item.name}}</h3>
-                <p>{{item.description}}</p>
-                <button class="btn btn-info"><span class="fas fa-smile"></span>    {{item.likes}}</button>
-            </li>
+            <div class="card text-white bg-dark border-primary my-1 rounded ">
+                <div class="card-header">
+                        <h3>{{item.name}}</h3>
+                </div>
+                <div class="card-body">
+                    <p>{{item.description}}</p>
+                    <button class="btn btn-info"><span class="fas fa-smile"></span>    {{item.likes}}</button>
+                </div>
+            </div>
         {% endfor %}
-        </ul>
+        </div>
     </div>
 {% endblock %}

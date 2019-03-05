@@ -429,9 +429,14 @@ class WebServer:
             else:
                 query = None
 
+            # sortOrder = request.args['orderBy'] if 'orderBy' in request.args else 'Likes'
+
             relevantItems = []
+            
             if query == None:
                 relevantItems = self.db.get_all('SELECT * FROM public_items', [], type=PublicItem)
+            else:
+                relevantItems = self.db.get_all("SELECT * FROM public_items WHERE name LIKE ? OR description LIKE ?" , ['%'+query+'%', '%'+query+'%'], type=PublicItem)
             
             return render_template('search.html', user=self.db.get_user(id=session['userID']), items=relevantItems)
 
