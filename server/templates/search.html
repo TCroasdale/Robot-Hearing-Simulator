@@ -1,0 +1,20 @@
+{% extends "layout.html" %}
+{% block title %}Search{% endblock %}
+{% block head %}
+{% endblock %}
+{% block content %}
+    <div>
+        <h3>Search Results <fas-icon></fas-icon></h3>
+    </div>
+    <div class="container-fluid">
+        <ul class="list-group">
+        {% for item in items: %}
+            <li class="list-group-item">
+                <h3>{{item.name}}</h3>
+                <p>{{item.description}}</p>
+                <button class="btn btn-info"><span class="fas fa-smile"></span>    {{item.likes}}</button>
+            </li>
+        {% endfor %}
+        </ul>
+    </div>
+{% endblock %}

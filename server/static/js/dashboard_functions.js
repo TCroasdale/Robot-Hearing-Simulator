@@ -36,3 +36,10 @@ function playSound(src){
   $("#sound-preview")[0].load()
   $("#sound-preview")[0].oncanplaythrough = $("#sound-preview")[0].play();
 }
+
+function openModal(type, id){
+  $('#publish-modal').modal("show")
+
+  $('#item-type').val(type)
+  $('#item-id').val(id)
+}

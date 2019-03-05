@@ -187,3 +187,14 @@ class DB_Manager_SQLite(DB_Manager):
             con.commit()
             cur.execute("SELECT * FROM sounds WHERE id=?", [rowid])
             return Sound.from_DB(cur.fetchone())
+
+    def insert_public_item(self, item):
+        with sql.connect(self.dbLocation) as con:
+            cur = con.cursor()
+
+            cur.execute("INSERT INTO public_items (name, description, type, itemID, publisherID) VALUES (?,?,?,?,?)",\
+                        (item.name, item.description, item.type, item.itemID, item.publisherID))
+            rowid = cur.lastrowid
+            con.commit()
+            cur.execute("SELECT * FROM public_items WHERE id=?", [rowid])
+            return Sound.from_DB(cur.fetchone())

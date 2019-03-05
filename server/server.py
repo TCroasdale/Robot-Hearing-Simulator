@@ -383,8 +383,7 @@ class WebServer:
             if 'robot' in request.args:
                 robotID = request.args['robot']
                 robot = self.db.get_robot(robotID)
-                print(robot)
-                print("session id: ", session['userID'])
+                
                 if robot.userID != session['userID']:
                     robot = None
                     robot_conf = ""
@@ -421,6 +420,44 @@ class WebServer:
             # //filename = os.path.join(self.app.root_path, 'uploads' ,'sounds', name)
             return send_file("server/uploads/sounds/{0}".format(name), as_attachment=True)
 
+
+        @self.app.route("/search")
+        def search():
+
+            if 'query' in request.args:
+                query = request.args['query']
+            else:
+                query = None
+
+            relevantItems = []
+            if query == None:
+                relevantItems = self.db.get_all('SELECT * FROM public_items', [], type=PublicItem)
+            
+            return render_template('search.html', user=self.db.get_user(id=session['userID']), items=relevantItems)
+
+
+        @self.app.route("/publish", methods=['POST'])
+        def publish():
+            print("A")
+            if 'userID' not in session: return redirect('/login?ref=dashboard')
+            print(request.form)
+            item = None
+            if request.form['type'] == "ROBOT":
+                item = self.db.get_robot(request.form['id'])
+            elif request.form['type'] == "SIM":
+                item = self.db.get_simulation(request.form['id'])
+            print("A")
+
+            if item == None or item.userID != session['userID']:
+                return redirect('/dashboard')
+            print("A")
+
+            publicItem = PublicItem(request.form['name'], request.form['desc'], request.form['type'], request.form['id'], session['userID'])
+            publicItem = self.db.insert_public_item(publicItem)
+
+            print("A")
+
+            return render_template('search.html', user=self.db.get_user(id=session['userID']))
 
 class BadRobotIDException(Exception):
     pass
