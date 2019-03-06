@@ -119,8 +119,12 @@ class WebServer:
             sounds = self.db.get_user_sounds(session['userID'])
             robots = self.db.get_user_robots(session['userID'])
 
+            user_added_items = self.db.get_all('SELECT * FROM user_added_items WHERE userID = ?', [session['userID']], type=UserAddedItem)
+            added_items = [self.db.get_one('SELECT * FROM public_items WHERE id = ?', [x.itemID], type=PublicItem) for x in user_added_items]
+            add_count = {x.id: len(self.db.get_all('SELECT * FROM user_added_items WHERE itemID = ?', [x.id], type=UserAddedItem)) for x in added_items}
+
             return render_template('dashboard.html', user=self.db.get_user(id=session['userID']), \
-                                    simulations=simulations, sounds=sounds, robots=robots)
+                                    simulations=simulations, sounds=sounds, robots=robots, addedItems=added_items, addCount=add_count)
 
         @self.app.route('/simulator', methods=['GET'])
         def simulator():
@@ -423,13 +427,10 @@ class WebServer:
 
         @self.app.route("/search")
         def search():
-
             if 'query' in request.args:
                 query = request.args['query']
             else:
                 query = None
-
-            # sortOrder = request.args['orderBy'] if 'orderBy' in request.args else 'Likes'
 
             relevantItems = []
             
@@ -438,31 +439,71 @@ class WebServer:
             else:
                 relevantItems = self.db.get_all("SELECT * FROM public_items WHERE name LIKE ? OR description LIKE ?" , ['%'+query+'%', '%'+query+'%'], type=PublicItem)
             
-            return render_template('search.html', user=self.db.get_user(id=session['userID']), items=relevantItems)
+            add_count = {x.id: len(self.db.get_all('SELECT * FROM user_added_items WHERE itemID = ?', [x.id], type=UserAddedItem)) for x in relevantItems}
+
+            return render_template('search.html', user=self.db.get_user(id=session['userID']), items=relevantItems, addCount = add_count)
 
 
         @self.app.route("/publish", methods=['POST'])
         def publish():
-            print("A")
-            if 'userID' not in session: return redirect('/login?ref=dashboard')
-            print(request.form)
             item = None
             if request.form['type'] == "ROBOT":
                 item = self.db.get_robot(request.form['id'])
             elif request.form['type'] == "SIM":
                 item = self.db.get_simulation(request.form['id'])
-            print("A")
+            elif request.form['type'] == "SOUND":
+                item = self.db.get_sound(request.form['id'])
 
             if item == None or item.userID != session['userID']:
                 return redirect('/dashboard')
-            print("A")
 
-            publicItem = PublicItem(request.form['name'], request.form['desc'], request.form['type'], request.form['id'], session['userID'])
+            date = str(dt.now().date())
+            publicItem = PublicItem(request.form['name'], request.form['desc'], request.form['type'], request.form['id'], session['userID'], publishDate = date)
             publicItem = self.db.insert_public_item(publicItem)
 
-            print("A")
+            
 
             return render_template('search.html', user=self.db.get_user(id=session['userID']))
+
+        @self.app.route("/toggle_like", methods=["POST"])
+        def toggleLike():
+            if 'userID' not in session: return jsonify({"success": "false"})
+
+            if 'item' not in request.form:
+                return jsonify({"success": "false"})
+
+            existing_like = self.db.get_one("SELECT * FROM user_liked_items WHERE itemID = ? AND userID = ?", [request.form['item'], session['userID']], type=UserLikedItem)
+            
+            if existing_like is None:
+                likedItem = UserLikedItem(session['userID'], request.form['item'])
+                self.db.insert_user_liked_item(likedItem)
+            else:
+                self.db.run_query('DELETE FROM user_liked_items WHERE id = ?', [existing_like.id])
+            
+            allLikes = self.db.get_all('SELECT * FROM user_liked_items WHERE itemID = ?', [request.form['item']], type=UserLikedItem)
+
+            self.db.run_query('UPDATE public_items SET likes = ? WHERE id = ?', [len(allLikes), request.form['item']])
+            return jsonify({"success": "true", "like_count": len(allLikes)})
+
+        @self.app.route("/toggle_add", methods=["POST"])
+        def toggle_add():
+            if 'userID' not in session: return jsonify({"success": "false"})
+
+            if 'item' not in request.form:
+                return jsonify({"success": "false"})
+
+            existing_add = self.db.get_one("SELECT * FROM user_added_items WHERE itemID = ? AND userID = ?", [request.form['item'], session['userID']], type=UserAddedItem)
+            
+            if existing_add is None:
+                addedItem = UserAddedItem(session['userID'], request.form['item'])
+                self.db.insert_user_added_item(addedItem)
+            else:
+                self.db.run_query('DELETE FROM user_added_items WHERE id = ?', [existing_add.id])
+            
+            allAdds = self.db.get_all('SELECT * FROM user_added_items WHERE itemID = ?', [request.form['item']], type=UserAddedItem)
+
+            return jsonify({"success": "true", "add_count": len(allAdds)})
+            
 
 class BadRobotIDException(Exception):
     pass

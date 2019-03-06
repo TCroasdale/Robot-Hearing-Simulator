@@ -30,6 +30,7 @@
                 {% endif %}
                 <button class="btn btn-info form-control disabled"><span class="fas fa-edit"></span></button>
                 <button class="form-control btn btn-info disabled"><span class="fas fa-redo"></span></button>
+                <button type="button" class="form-control btn btn-primary" onclick="openModal('SIM', {{sim.id}})"><span class="fas fa-cloud-upload-alt"></span></button>
                 <button class="form-control btn btn-danger" onclick="deleteSimulation({{ sim.id }})"><span class="fas fa-trash-alt"></span></button>
               </div>
             </li>
@@ -50,6 +51,7 @@
                   <p class="input-group-text">Actions</p>
                 </div>
                 <button class="form-control btn btn-info" onclick="playSound('{{sound.pathToFile}}')"><span class="fas fa-play"></span></button>
+                <button type="button" class="form-control btn btn-primary" onclick="openModal('SOUND', {{sound.id}})"><span class="fas fa-cloud-upload-alt"></span></button>
                 <button class="form-control btn btn-danger" onclick="deleteSound({{sound.id}})"><span class="fas fa-trash-alt"></span></button>
               </div>
             </li>
@@ -77,6 +79,26 @@
           {% endfor %}
         </ul>
       </div>
+    </div>
+    <br>
+    <hr>
+    <h3>Your Added Items.</h3>
+    <div class="card-columns">
+    {% for item in addedItems: %}
+        <div class="card text-white bg-dark border-primary my-1 rounded" id="card-{{ item.id }}">
+            <div class="card-header">
+              <h4>{{item.name}} <span class="badge text-dark rounded bg-info">{{item.type}}</span></h4>
+            </div>
+            <div class="card-body">
+                <p>{{item.description}}</p>
+                <span class="fas fa-smile"></span> <span id="item-{{item.id}}-like-count" class="badge rounded bg-info">{{item.likes}}</span>
+                <span class="fas fa-plus"></span> <span id="item-{{item.id}}-add-count" class="badge rounded bg-info">{{ addCount[item.id] }}</span>
+            </div>
+            <div class="card-footer">
+              <p>Published on {{item.publishDate}}</p>
+          </div>
+        </div>
+    {% endfor %}
     </div>
     <audio id="sound-preview">
       <source src="" type="audio/wav" id="audio-src">
