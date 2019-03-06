@@ -89,11 +89,11 @@ $(document).ready(function() {
   robot = sceneView.createSphere(0.5, 0x3f7faa, false)
   sources = [[sceneView.createSphere(0.25, 0xff0000, false, true)]]
 
-  $('#3js-container').click(function(){
-    objs = sources.flat()
+  // $('#3js-container').click(function(){
+  //   objs = sources.flat()
 
-    sceneView.raycastToObjects(objs)
-  })
+  //   sceneView.raycastToObjects(objs)
+  // })
 
 
   // ===== Config Upload Handler =====

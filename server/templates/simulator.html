@@ -3,6 +3,7 @@
 {% block head %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/101/three.min.js" type="text/javascript"></script>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/editor.css') }}" media="screen">
+<script src="{{ url_for('static', filename='js/search_functions.js') }}" type="text/javascript" defer></script>
 <script src="{{ url_for('static', filename='js/3DViewer.js') }}" type="text/javascript" defer></script>
 <script src="{{ url_for('static', filename='js/construct_ui.js') }}" type="text/javascript" defer></script>
 <script src="{{ url_for('static', filename='js/simulator_functions.js') }}" type="text/javascript" defer></script>
@@ -65,7 +66,7 @@
           </div><!-- code tab -->
         </div><!-- tab content -->
 
-        <form id="sound-uploads-form" class=" bg-white rounded-bottom p-1" enctype="multipart/form-data" method="POST">
+        <div id="sound-uploads-form" class=" bg-white rounded-bottom p-1">
           <hr>
           <div class="input-group mr-2 my-w" role="group" id="utterance-input-controls">
             <div class="input-group-prepend">
@@ -79,6 +80,7 @@
                 <option value="{{sound.id}}">{{ sound.name }}</option>
                 {% endfor %}
             </select>
+            <button onclick="openSearchModal('SOUND')" class="form-control btn btn-info"><fas-icon icon-name="globe-europe"></fas-icon></button>
           </div>
           <hr>
             <div class="input-group mr-2 my-w" role="group" id="bgnoise-input-controls">
@@ -94,6 +96,7 @@
                 <option value="{{sound.id}}">{{ sound.name }}</option>
                 {% endfor %}
               </select>
+              <button onclick="openSearchModal('SOUND')" class="form-control btn btn-info"><fas-icon icon-name="globe-europe"></fas-icon></button>
             </div>
             <hr>
               <div class="input-group mr-2 my-2" role="group" class="robot-select-controls">
@@ -109,8 +112,10 @@
                 {% else %}
                 <a id="no-robot-link" href="/robotdesign"><p class="input-group-text btn btn-info px-5">Click to create a robot!</p></a>
                 {% endif %}
+                <button onclick="openSearchModal('ROBOT')" class="form-control btn btn-info"><fas-icon icon-name="globe-europe"></fas-icon></button>
+                
             </div>
-        </form>
+        </div >
       </div>
     </div>
     <section id="uploadpopup" class="modal fade">
@@ -127,6 +132,35 @@
         </div>
       </section>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.2/ace.js" type="text/javascript"></script>
+    <!-- Modal Search Dialog  -->
+    <div class="modal fade" id="public-search-modal" role="dialog">
+        <div class="modal-dialog">
+        
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4 class="modal-title">Find Public Item</h4>
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+              <form class="form-group" id="quick-search-form">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                      <div class="input-group-text"><span class="fas fa-search"></span></div>
+                    </div>
+                    <input id="modal-search-query" name="query" type="text" class="form-control">
+                  </div>
+              </form>
+              <div class="card deck" id="search-results" style="max-height: 75em; overflow-y: scroll;">
+                
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+          
+        </div>
+      </div>
 {% endblock %}
 {% block templates %}
 <template id="source-block">
@@ -168,4 +202,16 @@
     </div>
   </div>
 </template> <!-- Template for a source panel -->
+<!-- Template for a quick search result -->
+<template id="search-result">
+    <div class="card text-white bg-dark border-primary my-1 rounded" id="card-{id}">
+        <div class="card-header">
+            <h4 id="card-{id}-name"> <span class="badge text-dark rounded bg-info" id="card-{id}-type"></span></h4>
+        </div>
+        <div class="card-body">
+            <p id="card-{id}-desc"></p>
+            <span class="fas fa-smile"></span> <span id="card-{id}-like-count" class="badge rounded bg-info"></span>
+        </div>
+    </div>
+</template>
 {% endblock %}
