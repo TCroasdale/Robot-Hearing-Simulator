@@ -164,7 +164,7 @@
               <option value="{{mic.id}}">{{ mic.name }}</option>
               {% endfor %}
           </select>
-          <button class="form-control btn btn-info"><fas-icon icon-name="globe-europe"></fas-icon></button>
+          <button onclick="openSearchModal('MIC')" class="form-control btn btn-info"><fas-icon icon-name="globe-europe"></fas-icon></button>
         </div>
       </div>
     </div>
@@ -209,7 +209,7 @@
         </div>
         <div class="card-body">
             <p id="card-{id}-desc"></p>
-            <button onclick="addLike({id})"class="btn btn-info"><span class="fas fa-smile"></span> <span id="card-{id}-like-count"></span></button>
+            <span class="fas fa-smile"></span> <span id="card-{id}-like-count" class="badge rounded bg-info"></span>
         </div>
     </div>
 </template>

@@ -118,13 +118,14 @@ class WebServer:
             simulations = self.db.get_user_sims(session['userID'])
             sounds = self.db.get_user_sounds(session['userID'])
             robots = self.db.get_user_robots(session['userID'])
+            microphones = self.db.get_user_mics(session['userID'])
 
             user_added_items = self.db.get_all('SELECT * FROM user_added_items WHERE userID = ?', [session['userID']], type=UserAddedItem)
             added_items = [self.db.get_one('SELECT * FROM public_items WHERE id = ?', [x.itemID], type=PublicItem) for x in user_added_items]
             add_count = {x.id: len(self.db.get_all('SELECT * FROM user_added_items WHERE itemID = ?', [x.id], type=UserAddedItem)) for x in added_items}
 
             return render_template('dashboard.html', user=self.db.get_user(id=session['userID']), \
-                                    simulations=simulations, sounds=sounds, robots=robots, addedItems=added_items, addCount=add_count)
+                                    simulations=simulations, sounds=sounds, robots=robots, microphones=microphones, addedItems=added_items, addCount=add_count)
 
         @self.app.route('/simulator', methods=['GET'])
         def simulator():
@@ -471,6 +472,8 @@ class WebServer:
                 item = self.db.get_simulation(request.form['id'])
             elif request.form['type'] == "SOUND":
                 item = self.db.get_sound(request.form['id'])
+            elif request.form['type'] == "MIC":
+                item = self.db.get_microphone(request.form['id'])
 
             if item == None or item.userID != session['userID']:
                 return redirect('/dashboard')

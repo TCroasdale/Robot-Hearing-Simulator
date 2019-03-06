@@ -6,7 +6,7 @@
     <h1>{{ user.email }}</h1>
     <hr>
     <div class="row">
-      <div id="simulations" class="col-lg-4">
+      <div id="simulations" class="col-lg-5">
         <h3>Simulations</h3>
         <ul id="sim-list" class="list-group">
           {% for sim in simulations: %}
@@ -37,7 +37,7 @@
           {% endfor %}
         </ul>
       </div>
-      <div id="sounds" class="col-lg-4">
+      <div id="sounds" class="col-lg-5">
         <h3>Sounds</h3>
         <ul id="sound-list" class="list-group">
           {% for sound in sounds: %}
@@ -58,7 +58,7 @@
           {% endfor %}
         </ul>
       </div>
-      <div id="robots" class="col-lg-4">
+      <div id="robots" class="col-lg-5">
         <h3>Robots</h3>
         <ul id="robot-list" class="list-group">
           {% for robot in robots: %}
@@ -74,6 +74,27 @@
                 <a href="/robotdesign?robot={{robot.id}}" class="input-group-prepend"><button class="form-control btn btn-info"><span class="fas fa-edit"></span></button></a>
                 <button type="button" class="form-control btn btn-primary" onclick="openModal('ROBOT', {{robot.id}})"><span class="fas fa-cloud-upload-alt"></span></button>
                 <button class="btn btn-danger form-control" onclick="deleteRobot({{robot.id}})"><span class="fas fa-trash-alt"></span></button>
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    <div id="microphones" class="col-lg-5">
+        <h3>Microphone Responses</h3>
+        <ul id="mic-list" class="list-group">
+          {% for mic in microphones: %}
+            <li class="list-group-item" id="mic_{{ mic.id }}">
+              <div class="row">
+                <h5 class="col-sm-8">Mic Response</h5>
+                <p class="col-sm-4 text-right">{{ mic.name }}</p>
+              </div>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <p class="input-group-text">Actions</p>
+                </div>
+                <!-- <a href="/robotdesign?robot={{mic.id}}" class="input-group-prepend"><button class="form-control btn btn-info"><span class="fas fa-edit"></span></button></a> -->
+                <button type="button" class="form-control btn btn-primary" onclick="openModal('MIC', {{mic.id}})"><span class="fas fa-cloud-upload-alt"></span></button>
+                <!-- <button class="btn btn-danger form-control" onclick="deleteRobot({{mic.id}})"><span class="fas fa-trash-alt"></span></button> -->
               </div>
             </li>
           {% endfor %}
