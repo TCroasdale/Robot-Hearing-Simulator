@@ -443,6 +443,24 @@ class WebServer:
 
             return render_template('search.html', user=self.db.get_user(id=session['userID']), items=relevantItems, addCount = add_count)
 
+        @self.app.route("/quicksearch")
+        def quick_search():
+            query = request.args['query'] if 'query' in request.args else None
+            searchFor = request.args['type'] if 'type' in request.args else '*'
+
+            relevantItems = []
+            
+            if query == None:
+                relevantItems = self.db.get_all('SELECT * FROM public_items WHERE type = ?', [searchFor], type=PublicItem)
+            else:
+                relevantItems = self.db.get_all("SELECT * FROM public_items WHERE type = ? AND (name LIKE ? OR description LIKE ?)" , [searchFor, '%'+query+'%', '%'+query+'%'], type=PublicItem)
+
+            processedItems = [{'id': x.id, 'name': x.name, 'desc': x.description, 'likes': x.likes, 'type': x.type} for x in relevantItems]
+
+            return jsonify({'result': processedItems})
+
+
+
 
         @self.app.route("/publish", methods=['POST'])
         def publish():

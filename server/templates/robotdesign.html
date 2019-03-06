@@ -4,6 +4,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/101/three.min.js" type="text/javascript"></script>
 
 <link rel="stylesheet" href="{{ url_for('static', filename='css/editor.css') }}" media="screen">
+<script src="{{ url_for('static', filename='js/search_functions.js') }}" type="text/javascript"></script>
 <script src="{{ url_for('static', filename='js/3DViewer.js') }}" type="text/javascript" defer></script>
 <script src="{{ url_for('static', filename='js/construct_ui.js') }}" type="text/javascript" defer></script>
 <script src="{{ url_for('static', filename='js/designer_functions.js') }}" type="text/javascript" defer></script>
@@ -105,7 +106,35 @@
       </div>
     </section>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.2/ace.js" type="text/javascript"></script>
-
+    <!-- Modal Search Dialog  -->
+    <div class="modal fade" id="public-search-modal" role="dialog">
+        <div class="modal-dialog">
+        
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4 class="modal-title">Find Public Item</h4>
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+              <form class="form-group" id="quick-search-form">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                      <div class="input-group-text"><span class="fas fa-search"></span></div>
+                    </div>
+                    <input id="modal-search-query" name="query" type="text" class="form-control">
+                  </div>
+              </form>
+              <div class="card deck" id="search-results" style="max-height: 75em; overflow-y: scroll;">
+                
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+          
+        </div>
+      </div>
 {% endblock %}
 {% block templates %}
 <template id="mic-block">
@@ -135,6 +164,7 @@
               <option value="{{mic.id}}">{{ mic.name }}</option>
               {% endfor %}
           </select>
+          <button class="form-control btn btn-info"><fas-icon icon-name="globe-europe"></fas-icon></button>
         </div>
       </div>
     </div>
@@ -166,9 +196,22 @@
               <option value="{{sound.id}}">{{ sound.name }}</option>
               {% endfor %}
           </select>
+          <button onclick="openSearchModal('SOUND')" class="form-control btn btn-info"><fas-icon icon-name="globe-europe"></fas-icon></button>
         </div>
       </div>
     </div>
   </div>
 </template> <!-- Template for a motor panel -->
+<template id="search-result">
+    <div class="card text-white bg-dark border-primary my-1 rounded" id="card-{id}">
+        <div class="card-header">
+            <h4 id="card-{id}-name"> <span class="badge text-dark rounded bg-info" id="card-{id}-type"></span></h4>
+        </div>
+        <div class="card-body">
+            <p id="card-{id}-desc"></p>
+            <button onclick="addLike({id})"class="btn btn-info"><span class="fas fa-smile"></span> <span id="card-{id}-like-count"></span></button>
+        </div>
+    </div>
+</template>
+
 {% endblock %}
