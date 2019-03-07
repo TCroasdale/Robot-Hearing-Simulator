@@ -187,3 +187,37 @@ class DB_Manager_SQLite(DB_Manager):
             con.commit()
             cur.execute("SELECT * FROM sounds WHERE id=?", [rowid])
             return Sound.from_DB(cur.fetchone())
+
+    def insert_public_item(self, item):
+        with sql.connect(self.dbLocation) as con:
+            cur = con.cursor()
+
+            cur.execute("INSERT INTO public_items (name, description, type, itemID, publisherID, publishDate) VALUES (?,?,?,?,?,?)",\
+                        (item.name, item.description, item.type, item.itemID, item.publisherID, item.publishDate))
+            rowid = cur.lastrowid
+            con.commit()
+            cur.execute("SELECT * FROM public_items WHERE id=?", [rowid])
+            return PublicItem.from_DB(cur.fetchone())
+
+    def insert_user_liked_item(self, likedItem):
+        with sql.connect(self.dbLocation) as con:
+            cur = con.cursor()
+
+            cur.execute("INSERT INTO user_liked_items (userID, itemID) VALUES (?,?)",\
+                        (likedItem.userID, likedItem.itemID))
+            rowid = cur.lastrowid
+            con.commit()
+            cur.execute("SELECT * FROM user_liked_items WHERE id=?", [rowid])
+            return UserLikedItem.from_DB(cur.fetchone())
+
+
+    def insert_user_added_item(self, addedItem):
+        with sql.connect(self.dbLocation) as con:
+            cur = con.cursor()
+
+            cur.execute("INSERT INTO user_added_items (userID, itemID) VALUES (?,?)",\
+                        (addedItem.userID, addedItem.itemID))
+            rowid = cur.lastrowid
+            con.commit()
+            cur.execute("SELECT * FROM user_added_items WHERE id=?", [rowid])
+            return UserAddedItem.from_DB(cur.fetchone())

@@ -1,4 +1,4 @@
-.modal-header, h4, .close {
+.modal-header{
     background-color: #5cb85c;
     color:white !important;
     text-align: center;
@@ -11,6 +11,8 @@
 .modal-body{
   background-color: #f5f5f5;
 }
+
+
 html, body{
   background-color: #DDDDDD;
 }

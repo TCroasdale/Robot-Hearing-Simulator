@@ -118,9 +118,14 @@ class WebServer:
             simulations = self.db.get_user_sims(session['userID'])
             sounds = self.db.get_user_sounds(session['userID'])
             robots = self.db.get_user_robots(session['userID'])
+            microphones = self.db.get_user_mics(session['userID'])
+
+            user_added_items = self.db.get_all('SELECT * FROM user_added_items WHERE userID = ?', [session['userID']], type=UserAddedItem)
+            added_items = [self.db.get_one('SELECT * FROM public_items WHERE id = ?', [x.itemID], type=PublicItem) for x in user_added_items]
+            add_count = {x.id: len(self.db.get_all('SELECT * FROM user_added_items WHERE itemID = ?', [x.id], type=UserAddedItem)) for x in added_items}
 
             return render_template('dashboard.html', user=self.db.get_user(id=session['userID']), \
-                                    simulations=simulations, sounds=sounds, robots=robots)
+                                    simulations=simulations, sounds=sounds, robots=robots, microphones=microphones, addedItems=added_items, addCount=add_count)
 
         @self.app.route('/simulator', methods=['GET'])
         def simulator():
@@ -383,6 +388,10 @@ class WebServer:
             if 'robot' in request.args:
                 robotID = request.args['robot']
                 robot = self.db.get_robot(robotID)
+<<<<<<< HEAD
+=======
+                
+>>>>>>> c1aefc9febf4a1a0ba421424546ecb5b7bc7fe30
                 if robot.userID != session['userID']:
                     robot = None
                     robot_conf = ""
@@ -419,6 +428,106 @@ class WebServer:
             # //filename = os.path.join(self.app.root_path, 'uploads' ,'sounds', name)
             return send_file("server/uploads/sounds/{0}".format(name), as_attachment=True)
 
+
+        @self.app.route("/search")
+        def search():
+            if 'query' in request.args:
+                query = request.args['query']
+            else:
+                query = None
+
+            relevantItems = []
+            
+            if query == None:
+                relevantItems = self.db.get_all('SELECT * FROM public_items', [], type=PublicItem)
+            else:
+                relevantItems = self.db.get_all("SELECT * FROM public_items WHERE name LIKE ? OR description LIKE ?" , ['%'+query+'%', '%'+query+'%'], type=PublicItem)
+            
+            add_count = {x.id: len(self.db.get_all('SELECT * FROM user_added_items WHERE itemID = ?', [x.id], type=UserAddedItem)) for x in relevantItems}
+
+            return render_template('search.html', user=self.db.get_user(id=session['userID']), items=relevantItems, addCount = add_count)
+
+        @self.app.route("/quicksearch")
+        def quick_search():
+            query = request.args['query'] if 'query' in request.args else None
+            searchFor = request.args['type'] if 'type' in request.args else '*'
+
+            relevantItems = []
+            
+            if query == None:
+                relevantItems = self.db.get_all('SELECT * FROM public_items WHERE type = ?', [searchFor], type=PublicItem)
+            else:
+                relevantItems = self.db.get_all("SELECT * FROM public_items WHERE type = ? AND (name LIKE ? OR description LIKE ?)" , [searchFor, '%'+query+'%', '%'+query+'%'], type=PublicItem)
+
+            processedItems = [{'id': x.id, 'name': x.name, 'desc': x.description, 'likes': x.likes, 'type': x.type} for x in relevantItems]
+
+            return jsonify({'result': processedItems})
+
+
+
+
+        @self.app.route("/publish", methods=['POST'])
+        def publish():
+            item = None
+            if request.form['type'] == "ROBOT":
+                item = self.db.get_robot(request.form['id'])
+            elif request.form['type'] == "SIM":
+                item = self.db.get_simulation(request.form['id'])
+            elif request.form['type'] == "SOUND":
+                item = self.db.get_sound(request.form['id'])
+            elif request.form['type'] == "MIC":
+                item = self.db.get_microphone(request.form['id'])
+
+            if item == None or item.userID != session['userID']:
+                return redirect('/dashboard')
+
+            date = str(dt.now().date())
+            publicItem = PublicItem(request.form['name'], request.form['desc'], request.form['type'], request.form['id'], session['userID'], publishDate = date)
+            publicItem = self.db.insert_public_item(publicItem)
+
+            
+
+            return render_template('search.html', user=self.db.get_user(id=session['userID']))
+
+        @self.app.route("/toggle_like", methods=["POST"])
+        def toggleLike():
+            if 'userID' not in session: return jsonify({"success": "false"})
+
+            if 'item' not in request.form:
+                return jsonify({"success": "false"})
+
+            existing_like = self.db.get_one("SELECT * FROM user_liked_items WHERE itemID = ? AND userID = ?", [request.form['item'], session['userID']], type=UserLikedItem)
+            
+            if existing_like is None:
+                likedItem = UserLikedItem(session['userID'], request.form['item'])
+                self.db.insert_user_liked_item(likedItem)
+            else:
+                self.db.run_query('DELETE FROM user_liked_items WHERE id = ?', [existing_like.id])
+            
+            allLikes = self.db.get_all('SELECT * FROM user_liked_items WHERE itemID = ?', [request.form['item']], type=UserLikedItem)
+
+            self.db.run_query('UPDATE public_items SET likes = ? WHERE id = ?', [len(allLikes), request.form['item']])
+            return jsonify({"success": "true", "like_count": len(allLikes)})
+
+        @self.app.route("/toggle_add", methods=["POST"])
+        def toggle_add():
+            if 'userID' not in session: return jsonify({"success": "false"})
+
+            if 'item' not in request.form:
+                return jsonify({"success": "false"})
+
+            existing_add = self.db.get_one("SELECT * FROM user_added_items WHERE itemID = ? AND userID = ?", [request.form['item'], session['userID']], type=UserAddedItem)
+            
+            if existing_add is None:
+                addedItem = UserAddedItem(session['userID'], request.form['item'])
+                self.db.insert_user_added_item(addedItem)
+            else:
+                self.db.run_query('DELETE FROM user_added_items WHERE id = ?', [existing_add.id])
+            
+            allAdds = self.db.get_all('SELECT * FROM user_added_items WHERE itemID = ?', [request.form['item']], type=UserAddedItem)
+
+            return jsonify({"success": "true", "add_count": len(allAdds)})
+            
 
 class BadRobotIDException(Exception):
     pass

@@ -82,6 +82,67 @@ class Simulation:
     def from_DB_ls(data_list):
         return [Simulation.from_DB(d) for d in data_list]
 
+class PublicItem:
+    def __init__(self, name, description, type, itemID, publisherID, id=0, likes=1):
+        self.id = id
+        self.name = name
+        self.description = description
+        self.type = type
+        self.itemID = itemID
+        self.likes = likes
+        self.publisherID = publisherID
+
+    def from_DB(data):
+        if data is None: return None
+        return PublicItem(data[1], data[2], data[3], data[4], data[6], data[0], data[5])
+
+    def from_DB_ls(data_list):
+        return [PublicItem.from_DB(d) for d in data_list]
+
+class UserAddedItem:
+    def __init__(self, userID, itemID, id=0):
+        self.id = id
+        self.userID = userID
+        self.itemID = itemID
+
+    def from_DB(data):
+        if data is None: return None
+        return UserAddedItem(data[1], data[2], data[0])
+
+    def from_DB_ls(data_list):
+        return [UserAddedItem.from_DB(d) for d in data_list]
+
+class UserLikedItem:
+    def __init__(self, userID, itemID, id=0):
+        self.id = id
+        self.userID = userID
+        self.itemID = itemID
+
+    def from_DB(data):
+        if data is None: return None
+        return UserLikedItem(data[1], data[2], data[0])
+
+    def from_DB_ls(data_list):
+        return [UserLikedItem.from_DB(d) for d in data_list]
+
+class PublicItem:
+    def __init__(self, name, description, type, itemID, publisherID, id=0, likes=1, publishDate="06/03/2019"):
+        self.id = id
+        self.name = name
+        self.description = description
+        self.type = type
+        self.itemID = itemID
+        self.likes = likes
+        self.publisherID = publisherID
+        self.publishDate = publishDate
+
+    def from_DB(data):
+        if data is None: return None
+        return PublicItem(data[1], data[2], data[3], data[4], data[6], data[0], data[5], data[7])
+
+    def from_DB_ls(data_list):
+        return [PublicItem.from_DB(d) for d in data_list]
+
 class DB_Manager:
 
     def __init__(self): pass
@@ -127,3 +188,9 @@ class DB_Manager:
     def insert_user(self, user): pass
 
     def insert_sound(self, sound): pass
+
+    def insert_public_item(self, item): pass
+
+    def insert_user_liked_item(self, likedItem): pass
+
+    def insert_user_added_item(self, addedItem): pass
