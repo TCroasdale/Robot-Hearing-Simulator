@@ -22,6 +22,14 @@ function deleteRobot(id){
   })
 }
 
+function deleteMic(id){
+  $.post('/removemic', {mic_id: id}, function(data){
+    if(data.success == "true"){
+      $('#mic_' + id).remove()
+    }
+  })
+}
+
 function endTask(id){
   $.post('/revoke_simulation', {sim_id: id}, function(data){
     if(data.success == "true"){

@@ -166,6 +166,11 @@ class DB_Manager_SQLite(DB_Manager):
             cur = con.cursor()
             cur.execute("DELETE FROM robots WHERE id=?", [id])
 
+    def delete_microphone(self, id): 
+        with sql.connect(self.dbLocation) as con:
+            cur = con.cursor()
+            cur.execute("DELETE FROM microphones WHERE id=?", [id])
+
 
     def insert_user(self, user):
         with sql.connect(self.dbLocation) as con:

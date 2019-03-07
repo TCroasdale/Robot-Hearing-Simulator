@@ -185,6 +185,8 @@ class DB_Manager:
 
     def delete_robot(self, id): pass
 
+    def delete_microphone(self, id): pass
+
     def insert_user(self, user): pass
 
     def insert_sound(self, sound): pass

@@ -176,6 +176,19 @@ class WebServer:
 
             return jsonify({'success': 'true'})
 
+        @self.app.route("/removemic", methods=['POST'])
+        def remove_mic():
+            if 'userID' not in session: return jsonify({'success': 'false'})
+            mic = self.db.get_microphone(request.form['mic_id'])
+            try:
+                os.remove(mic.pathToConfig)
+            except:
+                print("Cannot delete microphone file!")
+
+            self.db.delete_microphone(request.form['mic_id'])
+
+            return jsonify({'success': 'true'})
+
 
         @self.app.route('/revoke_simulation', methods=['POST'])
         def revoke_simulation():
