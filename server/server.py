@@ -383,8 +383,6 @@ class WebServer:
             if 'robot' in request.args:
                 robotID = request.args['robot']
                 robot = self.db.get_robot(robotID)
-                print(robot)
-                print("session id: ", session['userID'])
                 if robot.userID != session['userID']:
                     robot = None
                     robot_conf = ""
