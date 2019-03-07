@@ -32,16 +32,16 @@
                           <p class="input-group-text">Actions</p>
                         </div>
                         {% if sim.state == "finished": %}
-                        <a class="form-control btn btn-info" download href="{{sim.pathToZip}}"><span class="fas fa-download"></span></a>
+                        <a class="form-control btn btn-info" download href="{{sim.pathToZip}}" data-toggle="tooltip" title="Download File"><span class="fas fa-download"></span></a>
                         {% elif sim.state == "running": %}
-                        <button class="form-control btn btn-warning" onclick="endTask({{ sim.id }})"><span class="fas fa-ban"></span></button>
+                        <button class="form-control btn btn-warning" onclick="endTask({{ sim.id }})" data-toggle="tooltip" title="End Simulation"><span class="fas fa-ban"></span></button>
                         {% else %}
-                        <button class="form-control btn btn-info disabled"><span class="fas fa-download"></span></button>
+                        <button class="form-control btn btn-info disabled"  data-toggle="tooltip" title="Download File (Un Available)"><span class="fas fa-download"></span></button>
                         {% endif %}
-                        <button class="btn btn-info form-control disabled"><span class="fas fa-edit"></span></button>
-                        <button class="form-control btn btn-info disabled"><span class="fas fa-redo"></span></button>
-                        <button type="button" class="form-control btn btn-primary" onclick="openModal('SIM', {{sim.id}})"><span class="fas fa-cloud-upload-alt"></span></button>
-                        <button class="form-control btn btn-danger" onclick="deleteSimulation({{ sim.id }})"><span class="fas fa-trash-alt"></span></button>
+                        <button class="btn btn-info form-control disabled"  data-toggle="tooltip" title="Edit Simulation Config"><span class="fas fa-edit" ></span></button>
+                        <button class="form-control btn btn-info disabled"  data-toggle="tooltip" title="Re-Run the Simulation"><span class="fas fa-redo"></span></button>
+                        <button type="button" class="form-control btn btn-primary" onclick="openModal('SIM', {{sim.id}})"  data-toggle="tooltip" title="Publish"><span class="fas fa-cloud-upload-alt"></span></button>
+                        <button class="form-control btn btn-danger" onclick="deleteSimulation({{ sim.id }})"  data-toggle="tooltip" title="Delete Simulation"><span class="fas fa-trash-alt"></span></button>
                       </div>
                     </li>
                   {% endfor %}
@@ -61,9 +61,9 @@
                       <div class="input-group-prepend">
                         <p class="input-group-text">Actions</p>
                       </div>
-                      <button class="form-control btn btn-info" onclick="playSound('{{sound.pathToFile}}')"><span class="fas fa-play"></span></button>
-                      <button type="button" class="form-control btn btn-primary" onclick="openModal('SOUND', {{sound.id}})"><span class="fas fa-cloud-upload-alt"></span></button>
-                      <button class="form-control btn btn-danger" onclick="deleteSound({{sound.id}})"><span class="fas fa-trash-alt"></span></button>
+                      <button class="form-control btn btn-info" onclick="playSound('{{sound.pathToFile}}')"  data-toggle="tooltip" title="Play this sound"><span class="fas fa-play"></span></button>
+                      <button type="button" class="form-control btn btn-primary" onclick="openModal('SOUND', {{sound.id}})"  data-toggle="tooltip" title="Publish"><span class="fas fa-cloud-upload-alt"></span></button>
+                      <button class="form-control btn btn-danger" onclick="deleteSound({{sound.id}})"  data-toggle="tooltip" title="Delete this sound"><span class="fas fa-trash-alt"></span></button>
                     </div>
                   </li>
                 {% endfor %}
@@ -83,9 +83,9 @@
                       <div class="input-group-prepend">
                         <p class="input-group-text">Actions</p>
                       </div>
-                      <a href="/robotdesign?robot={{robot.id}}" class="input-group-prepend"><button class="form-control btn btn-info"><span class="fas fa-edit"></span></button></a>
-                      <button type="button" class="form-control btn btn-primary" onclick="openModal('ROBOT', {{robot.id}})"><span class="fas fa-cloud-upload-alt"></span></button>
-                      <button class="btn btn-danger form-control" onclick="deleteRobot({{robot.id}})"><span class="fas fa-trash-alt"></span></button>
+                      <a href="/robotdesign?robot={{robot.id}}" class="input-group-prepend btn btn-info" data-toggle="tooltip" title="Edit the Robot Config"><span class="fas fa-edit"></span></a>
+                      <button type="button" class="form-control btn btn-primary" onclick="openModal('ROBOT', {{robot.id}})" data-toggle="tooltip" title="Publish"><span class="fas fa-cloud-upload-alt"></span></button>
+                      <button class="btn btn-danger form-control" onclick="deleteRobot({{robot.id}})" data-toggle="tooltip" title="Delete this Robot"><span class="fas fa-trash-alt"></span></button>
                     </div>
                   </li>
                 {% endfor %}
@@ -106,23 +106,14 @@
                         <p class="input-group-text">Actions</p>
                       </div>
                       <!-- <a href="/robotdesign?robot={{mic.id}}" class="input-group-prepend"><button class="form-control btn btn-info"><span class="fas fa-edit"></span></button></a> -->
-                      <button type="button" class="form-control btn btn-primary" onclick="openModal('MIC', {{mic.id}})"><span class="fas fa-cloud-upload-alt"></span></button>
-                      <button class="btn btn-danger form-control" onclick="deleteMic({{mic.id}})"><span class="fas fa-trash-alt"></span></button>
+                      <button type="button" class="form-control btn btn-primary" onclick="openModal('MIC', {{mic.id}})" data-toggle="tooltip" title="Publish"><span class="fas fa-cloud-upload-alt"></span></button>
+                      <button class="btn btn-danger form-control" onclick="deleteMic({{mic.id}})" data-toggle="tooltip" title="Delete this microphone response"><span class="fas fa-trash-alt"></span></button>
                     </div>
                   </li>
                 {% endfor %}
               </ul>
         </div>
       
-        <!-- Left and right controls -->
-        <a class="carousel-control-prev" href="#item-Carousel" data-slide="prev">
-          <span class="glyphicon glyphicon-chevron-left"></span>
-          <span class="sr-only">Previous</span>
-        </a>
-        <a class="carousel-control-next" href="#item-Carousel" data-slide="next">
-          <span class="glyphicon glyphicon-chevron-right"></span>
-          <span class="sr-only">Next</span>
-        </a>
       </div>
     </div>  
 

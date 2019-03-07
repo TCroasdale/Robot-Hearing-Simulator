@@ -51,3 +51,7 @@ function openModal(type, id){
   $('#item-type').val(type)
   $('#item-id').val(id)
 }
+
+$(document).ready(function(){
+  $('[data-toggle="tooltip"]').tooltip();
+});
