@@ -48,3 +48,8 @@ $(document).ready(function(){
         searchQuery(lastSearchType, $('#modal-search-query').val())
     });
 });
+
+
+$(document).ready(function(){
+    $('[data-toggle="tooltip"]').tooltip();
+  });

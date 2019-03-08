@@ -4,7 +4,7 @@
 {% endblock %}
 {% block content %}
     <div class="container-fluid my-2">
-        <h3>Search Results <fas-icon></fas-icon></h3>
+        <h3><span class="fas fa-search"></span>  Search Results</h3>
         <div class="input-group">
                 <div class="input-group-prepend">
                     <p class="input-group-text">Sort By</p>
@@ -27,8 +27,8 @@
                 </div>
                 <div class="card-body">
                     <p>{{item.description}}</p>
-                    <button onclick="addLike({{ item.id }})"class="btn btn-info"><span class="fas fa-smile"></span><span id="item-{{item.id}}-like-count">{{item.likes}}</span></button>
-                    <button onclick="addToUser({{ item.id }})"class="btn btn-info"><span class="fas fa-plus"></span><span id="item-{{item.id}}-add-count">{{ addCount[item.id] }}</span></button>
+                    <button onclick="addLike({{ item.id }})" class="btn btn-info" data-toggle="tooltip" title="Like"><span class="fas fa-smile"></span> <span id="item-{{item.id}}-like-count">{{item.likes}}</span></button>
+                    <button onclick="addToUser({{ item.id }})" class="btn btn-info" data-toggle="tooltip" title="Add this to your account"><span class="fas fa-plus" ></span> <span id="item-{{item.id}}-add-count">{{ addCount[item.id] }}</span></button>
                 </div>
                 <div class="card-footer">
                     <p>Published on {{item.publishDate}}</p>

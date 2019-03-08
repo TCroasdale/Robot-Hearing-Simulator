@@ -48,7 +48,7 @@ function addMotorPanel(){
   })
 
   update3DView(compile_ui())
-
+  $('[data-toggle="tooltip"]').tooltip();
   return id
 }
 
@@ -85,10 +85,14 @@ function addMicPanel(){
   })
 
   update3DView(compile_ui())
+  $('[data-toggle="tooltip"]').tooltip();
   return id
 }
 
 $(document).ready(function() {
+  // Set up tooltips
+  $('[data-toggle="tooltip"]').tooltip();
+
   $('#uploadpopup').modal("hide")
 
   var editor = ace.edit("editor");
@@ -386,3 +390,4 @@ function update3DView(config){
   }
 
 }
+

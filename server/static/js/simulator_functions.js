@@ -73,9 +73,12 @@ function addSrcPanel(){
   })
 
   update3DView(compile_ui())
+  $('[data-toggle="tooltip"]').tooltip();
 }
 
 $(document).ready(function() {
+
+  $('[data-toggle="tooltip"]').tooltip();
   $('#uploadpopup').modal("hide")
 
   var editor = ace.edit("editor");
