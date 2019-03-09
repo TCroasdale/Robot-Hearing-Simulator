@@ -132,10 +132,17 @@ class WebServer:
         def simulator():
             if 'userID' not in session: return redirect('/login?ref=simulator')
 
+            simconf = ""
+            if 'sim' in request.args:
+                sim = self.db.get_simulation(request.args['sim'])
+
+                if sim.userID == session['userID']:
+                    simconf = open(sim.pathToConfig).read()
+
             sounds = self.db.get_user_sounds(session['userID'])
             robots = self.db.get_user_robots(session['userID'])
 
-            return render_template('simulator.html', user=self.db.get_user(id=session['userID']), sounds=sounds, robots=robots)
+            return render_template('simulator.html', user=self.db.get_user(id=session['userID']), sounds=sounds, robots=robots, simconf=simconf)
 
         @self.app.route("/removesimulation", methods=['POST'])
         def remove_sim():
@@ -273,25 +280,38 @@ class WebServer:
             except BadRobotIDException:
                 return jsonify({"success": "false", "reason": "Bad robot id"})
 
-            # Save the JSON config to a file
-            unique_name = uuid.uuid4()
-            filename = UPLOAD_DIR + "simulation_configs/{0}.json".format(unique_name)
-            # print("putting sim file in: {0}".format(filename))
-            with open(filename, 'w') as f:
-                json.dump(strdict, f, sort_keys=False, indent=4, ensure_ascii = False)
 
-            date = str(dt.now().date())
-            sim = Simulation(filename, date, seed, session['userID'])
-            sim = self.db.insert_simulation(sim)
+            if 'sim_to_update' in request.form:
+                sim = self.db.get_simulation(request.form['sim_to_update'])
+                if sim.userID == session['userID']:
+                    filename = sim.pathToConfig
+
+                    with open(filename, 'w') as f:
+                        json.dump(strdict, f, sort_keys=False, indent=4, ensure_ascii = False)
+
+                    return jsonify({"success": "true"})
+                else:
+                    return jsonify({"success": "false"})
+            else:
+                # Save the JSON config to a file
+                unique_name = uuid.uuid4()
+                filename = UPLOAD_DIR + "simulation_configs/{0}.json".format(unique_name)
+                # print("putting sim file in: {0}".format(filename))
+                with open(filename, 'w') as f:
+                    json.dump(strdict, f, sort_keys=False, indent=4, ensure_ascii = False)
+
+                date = str(dt.now().date())
+                sim = Simulation(filename, date, seed, session['userID'])
+                sim = self.db.insert_simulation(sim)
 
 
-            robot_conf = open(robotPath).read()
-            robot_conf_dict = json.loads(robot_conf)
+                robot_conf = open(robotPath).read()
+                robot_conf_dict = json.loads(robot_conf)
 
 
-            runSimulation.delay(strdict, robot_conf_dict, unique_name, sim.id)
+                runSimulation.delay(strdict, robot_conf_dict, unique_name, sim.id)
 
-            return jsonify({"success": "true"})
+                return jsonify({"success": "true"})
 
 
         def processFileUpload(file, user_id):
@@ -412,7 +432,6 @@ class WebServer:
                 robot_conf = ""
                 robot = None
             
-            print(robot_conf)
 
             return render_template('robotdesign.html', user=self.db.get_user(id=session['userID']), sounds=sounds, mic_responses=mics, robotconfig=robot_conf, robot=robot)
 

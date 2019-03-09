@@ -33,7 +33,11 @@
           <li class="ml-1 nav-item active" ><a class="nav-link active px-1" data-toggle="tab"  href="#sim-config">Simulation <span class="fas fa-wrench"></span></a></li>
           <li class="nav-item"><a class="nav-link px-1" data-toggle="tab" href="#src-config">Sources  <span class="fas fa-volume-up"></span></a></li>
           <li class="nav-item"><a class="nav-link px-1" data-toggle="tab" id="code-tab" href="#code">Code <span class="fas fa-code"></span></a></li>
+          {% if simconf == "" %}
           <li class="ml-auto nav-item"><a class="btn btn-primary text-white px-1" id="run_conf" data-toggle="tooltip" title="Start the simulation.">Run <span class="fas fa-play"></span></a></li>
+          {% else %}
+          <li class="ml-auto nav-item"><a class="btn btn-primary text-white px-1" id="run_conf" data-toggle="tooltip" title="Save the simulation.">Save <span class="fas fa-save"></span></a></li>
+          {% endif %}
         </ul>
         <div class="tab-content bg-white rounded-top p-1">
           <div class="tab-pane active tall no-hor-scroll" id="sim-config">
@@ -54,7 +58,7 @@
             </div>
           </div><!-- source tab -->
           <div class="tab-pane" id="code">
-            <div id="editor"></div>
+            <div id="editor">{{ simconf }}</div>
               <div class="input-group" role="group" id="upload_controls" data-toggle="tooltip" title="Upload a pre existing simulation config.">
                 <div class="input-group-prepend">
                   <p class="text-info input-group-text">Configuration file.</p>

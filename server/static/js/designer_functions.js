@@ -222,9 +222,7 @@ $(document).ready(function() {
     addMotorPanel()
   })
   if(editor.getValue() === ""){
-    $('#add-mic').click()
     $('#mic-conf-0-del').remove()
-    $('#add-mot').click()
     $('#mot-conf-0-del').remove()
   }
 

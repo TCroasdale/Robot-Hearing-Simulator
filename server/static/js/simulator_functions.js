@@ -87,10 +87,18 @@ $(document).ready(function() {
   var EditSession = require("ace/edit_session").EditSession;
 
 
+  create_vector3_input($('#robo-pos'), "Robot Position", "POS", 0, 0.25,)
+  create_vector3_input($('#room-dim'), "Room Dimensions", "DIM", 5.0, 0.25)
+  create_number_input($('#rt-60'), 'RT 60', 0.4, 0.1, "", true)
+  create_number_input($('#sample-rate'), 'Sample Rate', 16000, 100, "", true)
+
   // ===== Setting up 3D Viewer =====
   room = sceneView.createRoom(1, 1, 1, 0xeeeeee, 0x222222)
   robot = sceneView.createSphere(0.5, 0x3f7faa, false)
   sources = [[sceneView.createSphere(0.25, 0xff0000, false, true)]]
+
+  update_UI(fetchEditorState(true))
+  update3DView(fetchEditorState(true))
 
   // $('#3js-container').click(function(){
   //   objs = sources.flat()
@@ -152,6 +160,11 @@ $(document).ready(function() {
     //THIS MIGHT CAUSE AN ERROR, WAS ORIGINALLY editor.getValue()
     fData.append('config', JSON.stringify(config))
 
+    urlParams = new URLSearchParams(window.location.search)
+    if(urlParams.has('sim')){
+      fData.append('sim_to_update', urlParams.get('sim'))
+    }
+
     //Upload form data
     $.ajax({
       url: 'simulator/run_simulation',
@@ -206,13 +219,9 @@ $(document).ready(function() {
     addSrcPanel()
   })
 
-  create_vector3_input($('#robo-pos'), "Robot Position", "POS", 0, 0.25,)
-  create_vector3_input($('#room-dim'), "Room Dimensions", "DIM", 5.0, 0.25)
-  create_number_input($('#rt-60'), 'RT 60', 0.4, 0.1, "", true)
-  create_number_input($('#sample-rate'), 'Sample Rate', 16000, 100, "", true)
 
 
-  $('#add-src').click()
+  // $('#add-src').click()  
   $('#src-conf-0-del').remove()
 
 
@@ -300,36 +309,38 @@ function update_UI(conf){
   set_number_input('rt-60', conf['simulation_config']['rt60'])
   set_number_input('sample-rate', conf['simulation_config']['sample_rate'])
 
+  console.log("conf", conf)
   var sim_setups = conf['simulation_config']['source_config']['simulation_setups']
-  console.log(sim_setups)
-  for(i = 0; i < sim_setups.length; i++){
+  console.log("sim setups: ", sim_setups)
+  for(s = 0; s < sim_setups.length; s++){
     console.log("updating sim setup") //THIS IS PROBABLY BROKEN
-    if(i >= $('#src-setups')[0].children.length){
+    if(s >= $('#src-setups')[0].children.length){
       addSrcPanel()
     }
 
-    var style = sim_setups[i]['style']
+    console.log("i: ", s)
+    var style = sim_setups[s]['style']
     set_selection_input('src-conf', i, style)
     if(style == "box"){
-      set_vec3_input('src-conf-{0}-box-dim'.format(i), sim_setups[i]['dimensions'], "DIM")
-      set_vec3_input('src-conf-{0}-box-div'.format(i), sim_setups[i]['divisions'], "DIM")
-      set_vec3_input('src-conf-{0}-box-pos'.format(i), sim_setups[i]['origin'])
+      set_vec3_input('src-conf-{0}-box-dim'.format(s), sim_setups[s]['dimensions'], "DIM")
+      set_vec3_input('src-conf-{0}-box-div'.format(s), sim_setups[s]['divisions'], "DIM")
+      set_vec3_input('src-conf-{0}-box-pos'.format(s), sim_setups[s]['origin'])
     }
     else if(style == "pyramid"){
-      set_number_input('src-conf-{0}-pyramid-lays'.format(i), sim_setups[i]['layers'])
-      set_number_input('src-conf-{0}-pyramid-lays'.format(i), sim_setups[i]['division'])
-      set_number_input('src-conf-{0}-pyramid-lays'.format(i), sim_setups[i]['length'])
-      set_number_input('src-conf-{0}-pyramid-lays'.format(i), sim_setups[i]['angle_from_normal'])
-      set_vec3_input('src-conf-{0}-pyramid-pos'.format(i), sim_setups[i]['origin'])
+      set_number_input('src-conf-{0}-pyramid-lays'.format(s), sim_setups[s]['layers'])
+      set_number_input('src-conf-{0}-pyramid-lays'.format(s), sim_setups[s]['division'])
+      set_number_input('src-conf-{0}-pyramid-lays'.format(s), sim_setups[s]['length'])
+      set_number_input('src-conf-{0}-pyramid-lays'.format(s), sim_setups[s]['angle_from_normal'])
+      set_vec3_input('src-conf-{0}-pyramid-pos'.format(s), sim_setups[s]['origin'])
     }
     else if(style == "sphere"){
-      set_number_input('src-conf-{0}-sphere-rings'.format(i), sim_setups[i]['rings'])
-      set_number_input('src-conf-{0}-sphere-segs'.format(i), sim_setups[i]['segments'])
-      set_number_input('src-conf-{0}-sphere-rad'.format(i), sim_setups[i]['radius'])
-      set_vec3_input('src-conf-{0}-sphere-pos'.format(i), sim_setups[i]['origin'])
+      set_number_input('src-conf-{0}-sphere-rings'.format(s), sim_setups[s]['rings'])
+      set_number_input('src-conf-{0}-sphere-segs'.format(s), sim_setups[s]['segments'])
+      set_number_input('src-conf-{0}-sphere-rad'.format(s), sim_setups[s]['radius'])
+      set_vec3_input('src-conf-{0}-sphere-pos'.format(s), sim_setups[s]['origin'])
     }
     else if(style == "single"){
-      set_vec3_input('src-conf-{0}-single-pos'.format(i), sim_setups[i]['origin'])
+      set_vec3_input('src-conf-{0}-single-pos'.format(s), sim_setups[s]['origin'])
     }
   }
   if($('#src-setups')[0].children.length > sim_setups.length){

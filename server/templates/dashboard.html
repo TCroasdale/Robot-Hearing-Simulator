@@ -38,7 +38,7 @@
                         {% else %}
                         <button class="form-control btn btn-info disabled"  data-toggle="tooltip" title="Download File (Un Available)"><span class="fas fa-download"></span></button>
                         {% endif %}
-                        <button class="btn btn-info form-control disabled"  data-toggle="tooltip" title="Edit Simulation Config"><span class="fas fa-edit" ></span></button>
+                        <a href="/simulator?sim={{ sim.id }}" role="button" class="btn btn-info form-control"  data-toggle="tooltip" title="Edit Simulation Config"><span class="fas fa-edit" ></span></a>
                         <button class="form-control btn btn-info disabled"  data-toggle="tooltip" title="Re-Run the Simulation"><span class="fas fa-redo"></span></button>
                         <button type="button" class="form-control btn btn-primary" onclick="openModal('SIM', {{sim.id}})"  data-toggle="tooltip" title="Publish"><span class="fas fa-cloud-upload-alt"></span></button>
                         <button class="form-control btn btn-danger" onclick="deleteSimulation({{ sim.id }})"  data-toggle="tooltip" title="Delete Simulation"><span class="fas fa-trash-alt"></span></button>
@@ -83,7 +83,7 @@
                       <div class="input-group-prepend">
                         <p class="input-group-text">Actions</p>
                       </div>
-                      <a href="/robotdesign?robot={{robot.id}}" class="input-group-prepend btn btn-info" data-toggle="tooltip" title="Edit the Robot Config"><span class="fas fa-edit"></span></a>
+                      <a href="/robotdesign?robot={{robot.id}}" role="button" class="btn btn-info form-control" data-toggle="tooltip" title="Edit the Robot Config"><span class="fas fa-edit"></span></a>
                       <button type="button" class="form-control btn btn-primary" onclick="openModal('ROBOT', {{robot.id}})" data-toggle="tooltip" title="Publish"><span class="fas fa-cloud-upload-alt"></span></button>
                       <button class="btn btn-danger form-control" onclick="deleteRobot({{robot.id}})" data-toggle="tooltip" title="Delete this Robot"><span class="fas fa-trash-alt"></span></button>
                     </div>
