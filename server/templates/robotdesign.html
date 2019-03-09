@@ -52,7 +52,7 @@
                 {% if robot is none: %}
                   <input type="text" name="robot-name" id="robot-name" class="form-control pr-0"/>
                 {% else %}
-                  <p class="text-primary input-group-text">{{ robot.name }}</p>
+                  <p class="text-primary input-group-text" id="robot-name">{{ robot.name }}</p>
                 {% endif %}
               </div>
             </div> <!-- Robot name is submitted as part of form, not config -->

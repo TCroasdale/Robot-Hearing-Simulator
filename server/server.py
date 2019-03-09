@@ -121,7 +121,7 @@ class WebServer:
             microphones = self.db.get_user_mics(session['userID'])
 
             user_added_items = self.db.get_all('SELECT * FROM user_added_items WHERE userID = ?', [session['userID']], type=UserAddedItem)
-            
+
             added_items = [self.db.get_one('SELECT * FROM public_items WHERE id = ?', [x.itemID], type=PublicItem) for x in user_added_items]
             add_count = {x.id: len(self.db.get_all('SELECT * FROM user_added_items WHERE itemID = ?', [x.id], type=UserAddedItem)) for x in added_items}
 
@@ -411,6 +411,8 @@ class WebServer:
             else:
                 robot_conf = ""
                 robot = None
+            
+            print(robot_conf)
 
             return render_template('robotdesign.html', user=self.db.get_user(id=session['userID']), sounds=sounds, mic_responses=mics, robotconfig=robot_conf, robot=robot)
 
