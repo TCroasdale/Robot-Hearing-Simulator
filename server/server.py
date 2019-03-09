@@ -121,6 +121,7 @@ class WebServer:
             microphones = self.db.get_user_mics(session['userID'])
 
             user_added_items = self.db.get_all('SELECT * FROM user_added_items WHERE userID = ?', [session['userID']], type=UserAddedItem)
+            
             added_items = [self.db.get_one('SELECT * FROM public_items WHERE id = ?', [x.itemID], type=PublicItem) for x in user_added_items]
             add_count = {x.id: len(self.db.get_all('SELECT * FROM user_added_items WHERE itemID = ?', [x.id], type=UserAddedItem)) for x in added_items}
 
@@ -495,9 +496,7 @@ class WebServer:
             publicItem = PublicItem(request.form['name'], request.form['desc'], request.form['type'], request.form['id'], session['userID'], publishDate = date)
             publicItem = self.db.insert_public_item(publicItem)
 
-
-
-            return render_template('search.html', user=self.db.get_user(id=session['userID']))
+            return redirect('/search?query={0}&type={1}'.format(publicItem.name, publicItem.type))
 
         @self.app.route("/toggle_like", methods=["POST"])
         def toggleLike():
