@@ -39,7 +39,7 @@
                         <button class="form-control btn btn-info disabled"  data-toggle="tooltip" title="Download File (Un Available)"><span class="fas fa-download"></span></button>
                         {% endif %}
                         <a href="/simulator?sim={{ sim.id }}" role="button" class="btn btn-info form-control"  data-toggle="tooltip" title="Edit Simulation Config"><span class="fas fa-edit" ></span></a>
-                        <button class="form-control btn btn-info disabled"  data-toggle="tooltip" title="Re-Run the Simulation"><span class="fas fa-redo"></span></button>
+                        <button class="form-control btn btn-info" onclick="openSimModal({{sim.id}})" data-toggle="tooltip" title="Re-Run the Simulation"><span class="fas fa-redo"></span></button>
                         <button type="button" class="form-control btn btn-primary" onclick="openModal('SIM', {{sim.id}})"  data-toggle="tooltip" title="Publish"><span class="fas fa-cloud-upload-alt"></span></button>
                         <button class="form-control btn btn-danger" onclick="deleteSimulation({{ sim.id }})"  data-toggle="tooltip" title="Delete Simulation"><span class="fas fa-trash-alt"></span></button>
                       </div>
@@ -143,34 +143,104 @@
     <script src="{{ url_for('static', filename='js/dashboard_functions.js') }}" type="text/javascript"></script>
 
     <div class="modal fade" id="publish-modal" role="dialog">
-        <div class="modal-dialog">
-        
-          <div class="modal-content">
-            <div class="modal-header">
-              <h4 class="modal-title">Publish Item</h4>
-              <button type="button" class="close" data-dismiss="modal">&times;</button>
-            </div>
-            <div class="modal-body">
-              <form id="publish-form" action="/publish" method="POST">
-                <div class="form-group">
-                  <label for="name-input">Name: </label>
-                  <input id="name-input" name="name" type="text" class="form-control" data-toggle="tooltip" title="The public name for this item." required>
-                </div>
-                <div class="form-group">
-                  <label for="desc-input">Description: </label>
-                  <textarea id="desc-input" name="desc" class="form-control" data-toggle="tooltip" title="A description of this item." required></textarea>
-                </div>
-                <input id="item-id" name="id" type="hidden" value="">
-                <input id="item-type" name="type" type="hidden" value="">
+      <div class="modal-dialog">
+      
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title">Run Simulation</h4>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+          <div class="modal-body">
+            <form id="publish-form" action="/publish" method="POST">
+              <div class="form-group">
+                <label for="name-input">Name: </label>
+                <input id="name-input" name="name" type="text" class="form-control" data-toggle="tooltip" title="The public name for this item." required>
+              </div>
+              <div class="form-group">
+                <label for="desc-input">Description: </label>
+                <textarea id="desc-input" name="desc" class="form-control" data-toggle="tooltip" title="A description of this item." required></textarea>
+              </div>
+              <input id="item-id" name="id" type="hidden" value="">
+              <input id="item-type" name="type" type="hidden" value="">
 
-                <button type="submit" class="btn btn-info">Publish</button>
-              </form>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              <button type="submit" class="btn btn-info">Publish</button>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+
+    <!-- Run Sim modal -->
+    <div class="modal fade" id="run-sim-modal" role="dialog">
+      <div class="modal-dialog">
+      
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title">Publish Item</h4>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+          <div class="modal-body">
+            <div id="sound-uploads-form" class=" bg-white rounded-bottom p-1">
+              <hr>
+              <div class="input-group mr-2 my-w" role="group" id="utterance-input-controls" data-toggle="tooltip" title="The utterance file.">
+                <div class="input-group-prepend">
+                  <p class="text-info input-group-text">Utterance</p>
+                </div>
+                <label for="utterancefile" class="input-group-text btn btn-secondary" id="utterancefile-lbl"><fas-icon icon-name="upload"></fas-icon> Browse...</label>
+                <input type="file" name="utterancefile" class="form-control" id="utterancefile" size="1">
+                <select id="utterance-select" class="form-control">
+                    <option value="-1">Upload other file.</option>
+                    {% for sound in sounds: %}
+                    <option value="{{sound.id}}">{{ sound.name }}</option>
+                    {% endfor %}
+                </select>
+                <button onclick="openSearchModal('SOUND')" class="form-control btn btn-info"><fas-icon icon-name="globe-europe"></fas-icon></button>
+              </div>
+              <hr>
+                <div class="input-group mr-2 my-w" role="group" id="bgnoise-input-controls" data-toggle="tooltip" title="An optional background noise file.">
+                  <div class="input-group-prepend">
+                    <p class="text-info input-group-text">Background Noise</p>
+                  </div>
+                  <label for="bgnoise" class="input-group-text btn btn-secondary" id="bgnoise-lbl"><fas-icon icon-name="upload"></fas-icon> Browse...</label>
+                  <input type="file" name="bgnoise" class="form-control" id="bgnoise" size="1">
+                  <select id="bgnoise-select" class="form-control">
+                    <option value="-2">No Background Noise.</option>
+                    <option value="-1">Upload other file.</option>
+                    {% for sound in sounds: %}
+                    <option value="{{sound.id}}">{{ sound.name }}</option>
+                    {% endfor %}
+                  </select>
+                  <button onclick="openSearchModal('SOUND')" class="form-control btn btn-info"><fas-icon icon-name="globe-europe"></fas-icon></button>
+                </div>
+                <hr>
+                  <div class="input-group mr-2 my-2" role="group" class="robot-select-controls" data-toggle="tooltip" title="The robot to use in the simulation.">
+                    <div class="input-group-prepend">
+                      <p class="text-info input-group-text">Robot</p>
+                    </div>
+                    {% if robots: %}
+                    <select id="robot-select" class="form-control">
+                      {% for robot in robots: %}
+                      <option value="{{robot.id}}">{{ robot.name }}</option>
+                      {% endfor %}
+                    </select>
+                    {% else %}
+                    <a id="no-robot-link" href="/robotdesign"><p class="input-group-text btn btn-info px-5">Click to create a robot!</p></a>
+                    {% endif %}
+                    <button onclick="openSearchModal('ROBOT')" class="form-control btn btn-info"><fas-icon icon-name="globe-europe"></fas-icon></button>
+                </div>
+                <input id="sim-id" name="id" type="hidden" value="">
+                <button class="btn btn-info" id="re-run-sim">Run <span class="fas fa-play"></span></button>
             </div>
           </div>
-          
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
         </div>
+        
       </div>
+    </div>
 {% endblock %}
