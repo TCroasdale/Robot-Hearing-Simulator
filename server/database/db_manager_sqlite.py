@@ -150,21 +150,40 @@ class DB_Manager_SQLite(DB_Manager):
             cur.execute("SELECT * FROM robots WHERE id=?", [id])
             return Robot.from_DB(cur.fetchone())
 
+    def delete_public_item(self, itemid, item_type):
+        public_item = self.get_one('SELECT * FROM public_items WHERE itemID=? and type=?', [itemid, item_type], type=PublicItem)
+
+        with sql.connect(self.dbLocation) as con:
+            cur = con.cursor()
+            cur.execute("DELETE FROM public_items WHERE itemID=? and type=?", [itemid, item_type])
+            cur.execute("DELETE FROM user_added_items WHERE itemID=?", [public_item.id])
+            cur.execute("DELETE FROM user_liked_items WHERE itemID=?", [public_item.id])
+
 
     def delete_simulation(self, id):
         with sql.connect(self.dbLocation) as con:
             cur = con.cursor()
             cur.execute("DELETE FROM simulations WHERE id=?", [id])
+        self.delete_public_item(id, "SIM")
+            
 
     def delete_sound(self, id):
         with sql.connect(self.dbLocation) as con:
             cur = con.cursor()
             cur.execute("DELETE FROM sounds WHERE id=?", [id])
+        self.delete_public_item(id, "SOUND")
 
     def delete_robot(self, id):
         with sql.connect(self.dbLocation) as con:
             cur = con.cursor()
             cur.execute("DELETE FROM robots WHERE id=?", [id])
+        self.delete_public_item(id, "ROBOT")
+
+    def delete_microphone(self, id): 
+        with sql.connect(self.dbLocation) as con:
+            cur = con.cursor()
+            cur.execute("DELETE FROM microphones WHERE id=?", [id])
+        self.delete_public_item(id, "MIC")
 
 
     def insert_user(self, user):

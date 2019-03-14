@@ -48,7 +48,7 @@ function addMotorPanel(){
   })
 
   update3DView(compile_ui())
-
+  $('[data-toggle="tooltip"]').tooltip();
   return id
 }
 
@@ -85,10 +85,14 @@ function addMicPanel(){
   })
 
   update3DView(compile_ui())
+  $('[data-toggle="tooltip"]').tooltip();
   return id
 }
 
 $(document).ready(function() {
+  // Set up tooltips
+  $('[data-toggle="tooltip"]').tooltip();
+
   $('#uploadpopup').modal("hide")
 
   var editor = ace.edit("editor");
@@ -176,7 +180,13 @@ $(document).ready(function() {
 
     fData.append('robot-config', JSON.stringify(config))
 
-    fData.append('robot_name', $('#robot-name')[0].value)
+    if($('#robot-name').length > 0){
+      fData.append('robot_name', $('#robot-name')[0].value)
+    }
+    else{
+      fData.append('robot_name', $('#robot-name')[0].innerHTML)
+    }
+    
 
     urlParams = new URLSearchParams(window.location.search)
     if(urlParams.has('robot')){
@@ -212,9 +222,7 @@ $(document).ready(function() {
     addMotorPanel()
   })
   if(editor.getValue() === ""){
-    $('#add-mic').click()
     $('#mic-conf-0-del').remove()
-    $('#add-mot').click()
     $('#mot-conf-0-del').remove()
   }
 
@@ -241,8 +249,7 @@ $(document).ready(function() {
 })
 
 function update_UI(conf){
-  console.log(conf);
-
+  console.log(conf)
   set_number_input('skin-width', conf['robot_config']['skin_width'])
 
   var mic_setups = conf['robot_config']["microphones"]
@@ -295,9 +302,10 @@ function verify(config){
       }
     }
   }
-
-  if($('#robot-name')[0].value === ""){
-    return failVerify("Please enter a name for your robot.", "robot-name")
+  if($('#robot-name').length > 0){
+    if($('#robot-name')[0].value === ""){
+      return failVerify("Please enter a name for your robot.", "robot-name")
+    }
   }
 
   return true
@@ -313,6 +321,7 @@ function failVerify(message, id){
 }
 
 function compile_ui(){
+  console.trace()
   console.log("Compiling robot to code..")
   code = {}
   var skin_width = read_num_input('skin-width')
@@ -386,3 +395,4 @@ function update3DView(config){
   }
 
 }
+

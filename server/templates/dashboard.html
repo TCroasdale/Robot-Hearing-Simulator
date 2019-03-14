@@ -5,102 +5,118 @@
 {% block content %}
     <h1>{{ user.email }}</h1>
     <hr>
-    <div class="row">
-      <div id="simulations" class="col-lg-5">
-        <h3>Simulations</h3>
-        <ul id="sim-list" class="list-group">
-          {% for sim in simulations: %}
-            <li class="list-group-item" id="sim_{{ sim.id }}">
-              <h5>Simulation</h5>
-              <div class="row">
-                <p class="col-sm-4">{{ sim.dateCreated }}</p>
-                <p class="col-sm-5"></p>
-                <p class="col-sm-3 text-right" id="sim_{{ sim.id }}-state">{{ sim.state }}</p>
-              </div>
-              <div class="input-group" role="group">
-                <div class="input-group-prepend">
-                  <p class="input-group-text">Actions</p>
-                </div>
-                {% if sim.state == "finished": %}
-                <a class="form-control btn btn-info" download href="{{sim.pathToZip}}"><span class="fas fa-download"></span></a>
-                {% elif sim.state == "running": %}
-                <button class="form-control btn btn-warning" onclick="endTask({{ sim.id }})"><span class="fas fa-ban"></span></button>
-                {% else %}
-                <button class="form-control btn btn-info disabled"><span class="fas fa-download"></span></button>
-                {% endif %}
-                <button class="btn btn-info form-control disabled"><span class="fas fa-edit"></span></button>
-                <button class="form-control btn btn-info disabled"><span class="fas fa-redo"></span></button>
-                <button type="button" class="form-control btn btn-primary" onclick="openModal('SIM', {{sim.id}})"><span class="fas fa-cloud-upload-alt"></span></button>
-                <button class="form-control btn btn-danger" onclick="deleteSimulation({{ sim.id }})"><span class="fas fa-trash-alt"></span></button>
-              </div>
-            </li>
-          {% endfor %}
-        </ul>
+    <div id="item-Carousel" class="carousel slide" data-ride="carousel">
+        <!-- Indicators -->
+        <div class="input-group">
+          <button data-target="#item-Carousel" data-slide-to="0" class="form-control btn btn-info border border-dark">Simulations</button>
+          <button data-target="#item-Carousel" data-slide-to="1" class="form-control btn-info border border-dark">Sounds</button>
+          <button data-target="#item-Carousel" data-slide-to="2" class="form-control btn btn-info border border-dark">Robots</button>
+          <button data-target="#item-Carousel" data-slide-to="3" class="form-control btn btn-info border border-dark">Microphones</button>
+        </div>
+      
+        <!-- Wrapper for slides -->
+        <div class="carousel-inner">
+          <div class="carousel-item active">
+                <h3>Simulations</h3>
+                <ul id="sim-list" class="list-group">
+                  {% for sim in simulations: %}
+                    <li class="list-group-item" id="sim_{{ sim.id }}">
+                      <h5>Simulation</h5>
+                      <div class="row">
+                        <p class="col-sm-4">{{ sim.dateCreated }}</p>
+                        <p class="col-sm-5"></p>
+                        <p class="col-sm-3 text-right" id="sim_{{ sim.id }}-state">{{ sim.state }}</p>
+                      </div>
+                      <div class="input-group" role="group">
+                        <div class="input-group-prepend">
+                          <p class="input-group-text">Actions</p>
+                        </div>
+                        {% if sim.state == "finished": %}
+                        <a class="form-control btn btn-info" download href="{{sim.pathToZip}}" data-toggle="tooltip" title="Download File"><span class="fas fa-download"></span></a>
+                        {% elif sim.state == "running": %}
+                        <button class="form-control btn btn-warning" onclick="endTask({{ sim.id }})" data-toggle="tooltip" title="End Simulation"><span class="fas fa-ban"></span></button>
+                        {% else %}
+                        <button class="form-control btn btn-info disabled"  data-toggle="tooltip" title="Download File (Un Available)"><span class="fas fa-download"></span></button>
+                        {% endif %}
+                        <a href="/simulator?sim={{ sim.id }}" role="button" class="btn btn-info form-control"  data-toggle="tooltip" title="Edit Simulation Config"><span class="fas fa-edit" ></span></a>
+                        <button class="form-control btn btn-info" onclick="openSimModal({{sim.id}})" data-toggle="tooltip" title="Re-Run the Simulation"><span class="fas fa-redo"></span></button>
+                        <button type="button" class="form-control btn btn-primary" onclick="openModal('SIM', {{sim.id}})"  data-toggle="tooltip" title="Publish"><span class="fas fa-cloud-upload-alt"></span></button>
+                        <button class="form-control btn btn-danger" onclick="deleteSimulation({{ sim.id }})"  data-toggle="tooltip" title="Delete Simulation"><span class="fas fa-trash-alt"></span></button>
+                      </div>
+                    </li>
+                  {% endfor %}
+                </ul>
+          </div>
+      
+          <div class="carousel-item">
+              <h3>Sounds</h3>
+              <ul id="sound-list" class="list-group">
+                {% for sound in sounds: %}
+                  <li class="list-group-item" id="sound_{{ sound.id }}">
+                    <div class="row">
+                      <h5 class="col-sm-8">Sound</h5>
+                      <p class="col-sm-4 text-right">{{ sound.name }}</p>
+                    </div>
+                    <div class="input-group" role="group">
+                      <div class="input-group-prepend">
+                        <p class="input-group-text">Actions</p>
+                      </div>
+                      <button class="form-control btn btn-info" onclick="playSound('{{sound.pathToFile}}')"  data-toggle="tooltip" title="Play this sound"><span class="fas fa-play"></span></button>
+                      <button type="button" class="form-control btn btn-primary" onclick="openModal('SOUND', {{sound.id}})"  data-toggle="tooltip" title="Publish"><span class="fas fa-cloud-upload-alt"></span></button>
+                      <button class="form-control btn btn-danger" onclick="deleteSound({{sound.id}})"  data-toggle="tooltip" title="Delete this sound"><span class="fas fa-trash-alt"></span></button>
+                    </div>
+                  </li>
+                {% endfor %}
+              </ul>
+          </div>
+      
+          <div class="carousel-item">
+              <h3>Robots</h3>
+              <ul id="robot-list" class="list-group">
+                {% for robot in robots: %}
+                  <li class="list-group-item" id="robot_{{ robot.id }}">
+                    <div class="row">
+                      <h5 class="col-sm-8">Robot</h5>
+                      <p class="col-sm-4 text-right">{{ robot.name }}</p>
+                    </div>
+                    <div class="input-group">
+                      <div class="input-group-prepend">
+                        <p class="input-group-text">Actions</p>
+                      </div>
+                      <a href="/robotdesign?robot={{robot.id}}" role="button" class="btn btn-info form-control" data-toggle="tooltip" title="Edit the Robot Config"><span class="fas fa-edit"></span></a>
+                      <button type="button" class="form-control btn btn-primary" onclick="openModal('ROBOT', {{robot.id}})" data-toggle="tooltip" title="Publish"><span class="fas fa-cloud-upload-alt"></span></button>
+                      <button class="btn btn-danger form-control" onclick="deleteRobot({{robot.id}})" data-toggle="tooltip" title="Delete this Robot"><span class="fas fa-trash-alt"></span></button>
+                    </div>
+                  </li>
+                {% endfor %}
+              </ul>
+          </div>
+
+          <div class="carousel-item">
+              <h3>Microphone Responses</h3>
+              <ul id="mic-list" class="list-group">
+                {% for mic in microphones: %}
+                  <li class="list-group-item" id="mic_{{ mic.id }}">
+                    <div class="row">
+                      <h5 class="col-sm-8">Mic Response</h5>
+                      <p class="col-sm-4 text-right">{{ mic.name }}</p>
+                    </div>
+                    <div class="input-group">
+                      <div class="input-group-prepend">
+                        <p class="input-group-text">Actions</p>
+                      </div>
+                      <!-- <a href="/robotdesign?robot={{mic.id}}" class="input-group-prepend"><button class="form-control btn btn-info"><span class="fas fa-edit"></span></button></a> -->
+                      <button type="button" class="form-control btn btn-primary" onclick="openModal('MIC', {{mic.id}})" data-toggle="tooltip" title="Publish"><span class="fas fa-cloud-upload-alt"></span></button>
+                      <button class="btn btn-danger form-control" onclick="deleteMic({{mic.id}})" data-toggle="tooltip" title="Delete this microphone response"><span class="fas fa-trash-alt"></span></button>
+                    </div>
+                  </li>
+                {% endfor %}
+              </ul>
+        </div>
+      
       </div>
-      <div id="sounds" class="col-lg-5">
-        <h3>Sounds</h3>
-        <ul id="sound-list" class="list-group">
-          {% for sound in sounds: %}
-            <li class="list-group-item" id="sound_{{ sound.id }}">
-              <div class="row">
-                <h5 class="col-sm-8">Sound</h5>
-                <p class="col-sm-4 text-right">{{ sound.name }}</p>
-              </div>
-              <div class="input-group" role="group">
-                <div class="input-group-prepend">
-                  <p class="input-group-text">Actions</p>
-                </div>
-                <button class="form-control btn btn-info" onclick="playSound('{{sound.pathToFile}}')"><span class="fas fa-play"></span></button>
-                <button type="button" class="form-control btn btn-primary" onclick="openModal('SOUND', {{sound.id}})"><span class="fas fa-cloud-upload-alt"></span></button>
-                <button class="form-control btn btn-danger" onclick="deleteSound({{sound.id}})"><span class="fas fa-trash-alt"></span></button>
-              </div>
-            </li>
-          {% endfor %}
-        </ul>
-      </div>
-      <div id="robots" class="col-lg-5">
-        <h3>Robots</h3>
-        <ul id="robot-list" class="list-group">
-          {% for robot in robots: %}
-            <li class="list-group-item" id="robot_{{ robot.id }}">
-              <div class="row">
-                <h5 class="col-sm-8">Robot</h5>
-                <p class="col-sm-4 text-right">{{ robot.name }}</p>
-              </div>
-              <div class="input-group">
-                <div class="input-group-prepend">
-                  <p class="input-group-text">Actions</p>
-                </div>
-                <a href="/robotdesign?robot={{robot.id}}" class="input-group-prepend"><button class="form-control btn btn-info"><span class="fas fa-edit"></span></button></a>
-                <button type="button" class="form-control btn btn-primary" onclick="openModal('ROBOT', {{robot.id}})"><span class="fas fa-cloud-upload-alt"></span></button>
-                <button class="btn btn-danger form-control" onclick="deleteRobot({{robot.id}})"><span class="fas fa-trash-alt"></span></button>
-              </div>
-            </li>
-          {% endfor %}
-        </ul>
-      </div>
-    <div id="microphones" class="col-lg-5">
-        <h3>Microphone Responses</h3>
-        <ul id="mic-list" class="list-group">
-          {% for mic in microphones: %}
-            <li class="list-group-item" id="mic_{{ mic.id }}">
-              <div class="row">
-                <h5 class="col-sm-8">Mic Response</h5>
-                <p class="col-sm-4 text-right">{{ mic.name }}</p>
-              </div>
-              <div class="input-group">
-                <div class="input-group-prepend">
-                  <p class="input-group-text">Actions</p>
-                </div>
-                <!-- <a href="/robotdesign?robot={{mic.id}}" class="input-group-prepend"><button class="form-control btn btn-info"><span class="fas fa-edit"></span></button></a> -->
-                <button type="button" class="form-control btn btn-primary" onclick="openModal('MIC', {{mic.id}})"><span class="fas fa-cloud-upload-alt"></span></button>
-                <!-- <button class="btn btn-danger form-control" onclick="deleteRobot({{mic.id}})"><span class="fas fa-trash-alt"></span></button> -->
-              </div>
-            </li>
-          {% endfor %}
-        </ul>
-      </div>
-    </div>
+    </div>  
+
     <br>
     <hr>
     <h3>Your Added Items.</h3>
@@ -112,8 +128,8 @@
             </div>
             <div class="card-body">
                 <p>{{item.description}}</p>
-                <span class="fas fa-smile"></span> <span id="item-{{item.id}}-like-count" class="badge rounded bg-info">{{item.likes}}</span>
-                <span class="fas fa-plus"></span> <span id="item-{{item.id}}-add-count" class="badge rounded bg-info">{{ addCount[item.id] }}</span>
+                <span class="fas fa-smile" data-toggle="tooltip" title="Likes"></span> <span id="item-{{item.id}}-like-count" class="badge rounded bg-info">{{item.likes}}</span>
+                <span class="fas fa-plus" data-toggle="tooltip" title="Adds"></span> <span id="item-{{item.id}}-add-count" class="badge rounded bg-info">{{ addCount[item.id] }}</span>
             </div>
             <div class="card-footer">
               <p>Published on {{item.publishDate}}</p>
@@ -127,34 +143,104 @@
     <script src="{{ url_for('static', filename='js/dashboard_functions.js') }}" type="text/javascript"></script>
 
     <div class="modal fade" id="publish-modal" role="dialog">
-        <div class="modal-dialog">
-        
-          <div class="modal-content">
-            <div class="modal-header">
-              <h4 class="modal-title">Publish Item</h4>
-              <button type="button" class="close" data-dismiss="modal">&times;</button>
-            </div>
-            <div class="modal-body">
-              <form id="publish-form" action="/publish" method="POST">
-                <div class="form-group">
-                  <label for="name-input">Name: </label>
-                  <input id="name-input" name="name" type="text" class="form-control" required>
-                </div>
-                <div class="form-group">
-                  <label for="desc-input">Description: </label>
-                  <textarea id="desc-input" name="desc" class="form-control" required></textarea>
-                </div>
-                <input id="item-id" name="id" type="hidden" value="">
-                <input id="item-type" name="type" type="hidden" value="">
+      <div class="modal-dialog">
+      
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title">Run Simulation</h4>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+          <div class="modal-body">
+            <form id="publish-form" action="/publish" method="POST">
+              <div class="form-group">
+                <label for="name-input">Name: </label>
+                <input id="name-input" name="name" type="text" class="form-control" data-toggle="tooltip" title="The public name for this item." required>
+              </div>
+              <div class="form-group">
+                <label for="desc-input">Description: </label>
+                <textarea id="desc-input" name="desc" class="form-control" data-toggle="tooltip" title="A description of this item." required></textarea>
+              </div>
+              <input id="item-id" name="id" type="hidden" value="">
+              <input id="item-type" name="type" type="hidden" value="">
 
-                <button type="submit" class="btn btn-info">Publish</button>
-              </form>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              <button type="submit" class="btn btn-info">Publish</button>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+
+    <!-- Run Sim modal -->
+    <div class="modal fade" id="run-sim-modal" role="dialog">
+      <div class="modal-dialog">
+      
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title">Publish Item</h4>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+          <div class="modal-body">
+            <div id="sound-uploads-form" class=" bg-white rounded-bottom p-1">
+              <hr>
+              <div class="input-group mr-2 my-w" role="group" id="utterance-input-controls" data-toggle="tooltip" title="The utterance file.">
+                <div class="input-group-prepend">
+                  <p class="text-info input-group-text">Utterance</p>
+                </div>
+                <label for="utterancefile" class="input-group-text btn btn-secondary" id="utterancefile-lbl"><fas-icon icon-name="upload"></fas-icon> Browse...</label>
+                <input type="file" name="utterancefile" class="form-control" id="utterancefile" size="1">
+                <select id="utterance-select" class="form-control">
+                    <option value="-1">Upload other file.</option>
+                    {% for sound in sounds: %}
+                    <option value="{{sound.id}}">{{ sound.name }}</option>
+                    {% endfor %}
+                </select>
+                <button onclick="openSearchModal('SOUND')" class="form-control btn btn-info"><fas-icon icon-name="globe-europe"></fas-icon></button>
+              </div>
+              <hr>
+                <div class="input-group mr-2 my-w" role="group" id="bgnoise-input-controls" data-toggle="tooltip" title="An optional background noise file.">
+                  <div class="input-group-prepend">
+                    <p class="text-info input-group-text">Background Noise</p>
+                  </div>
+                  <label for="bgnoise" class="input-group-text btn btn-secondary" id="bgnoise-lbl"><fas-icon icon-name="upload"></fas-icon> Browse...</label>
+                  <input type="file" name="bgnoise" class="form-control" id="bgnoise" size="1">
+                  <select id="bgnoise-select" class="form-control">
+                    <option value="-2">No Background Noise.</option>
+                    <option value="-1">Upload other file.</option>
+                    {% for sound in sounds: %}
+                    <option value="{{sound.id}}">{{ sound.name }}</option>
+                    {% endfor %}
+                  </select>
+                  <button onclick="openSearchModal('SOUND')" class="form-control btn btn-info"><fas-icon icon-name="globe-europe"></fas-icon></button>
+                </div>
+                <hr>
+                  <div class="input-group mr-2 my-2" role="group" class="robot-select-controls" data-toggle="tooltip" title="The robot to use in the simulation.">
+                    <div class="input-group-prepend">
+                      <p class="text-info input-group-text">Robot</p>
+                    </div>
+                    {% if robots: %}
+                    <select id="robot-select" class="form-control">
+                      {% for robot in robots: %}
+                      <option value="{{robot.id}}">{{ robot.name }}</option>
+                      {% endfor %}
+                    </select>
+                    {% else %}
+                    <a id="no-robot-link" href="/robotdesign"><p class="input-group-text btn btn-info px-5">Click to create a robot!</p></a>
+                    {% endif %}
+                    <button onclick="openSearchModal('ROBOT')" class="form-control btn btn-info"><fas-icon icon-name="globe-europe"></fas-icon></button>
+                </div>
+                <input id="sim-id" name="id" type="hidden" value="">
+                <button class="btn btn-info" id="re-run-sim">Run <span class="fas fa-play"></span></button>
             </div>
           </div>
-          
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
         </div>
+        
       </div>
+    </div>
 {% endblock %}

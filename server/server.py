@@ -121,6 +121,7 @@ class WebServer:
             microphones = self.db.get_user_mics(session['userID'])
 
             user_added_items = self.db.get_all('SELECT * FROM user_added_items WHERE userID = ?', [session['userID']], type=UserAddedItem)
+
             added_items = [self.db.get_one('SELECT * FROM public_items WHERE id = ?', [x.itemID], type=PublicItem) for x in user_added_items]
             add_count = {x.id: len(self.db.get_all('SELECT * FROM user_added_items WHERE itemID = ?', [x.id], type=UserAddedItem)) for x in added_items}
 
@@ -131,10 +132,17 @@ class WebServer:
         def simulator():
             if 'userID' not in session: return redirect('/login?ref=simulator')
 
+            simconf = ""
+            if 'sim' in request.args:
+                sim = self.db.get_simulation(request.args['sim'])
+
+                if sim.userID == session['userID']:
+                    simconf = open(sim.pathToConfig).read()
+
             sounds = self.db.get_user_sounds(session['userID'])
             robots = self.db.get_user_robots(session['userID'])
 
-            return render_template('simulator.html', user=self.db.get_user(id=session['userID']), sounds=sounds, robots=robots)
+            return render_template('simulator.html', user=self.db.get_user(id=session['userID']), sounds=sounds, robots=robots, simconf=simconf)
 
         @self.app.route("/removesimulation", methods=['POST'])
         def remove_sim():
@@ -173,6 +181,19 @@ class WebServer:
                 print("Cannot delete robot file!")
 
             self.db.delete_robot(request.form['robot_id'])
+
+            return jsonify({'success': 'true'})
+
+        @self.app.route("/removemic", methods=['POST'])
+        def remove_mic():
+            if 'userID' not in session: return jsonify({'success': 'false'})
+            mic = self.db.get_microphone(request.form['mic_id'])
+            try:
+                os.remove(mic.pathToConfig)
+            except:
+                print("Cannot delete microphone file!")
+
+            self.db.delete_microphone(request.form['mic_id'])
 
             return jsonify({'success': 'true'})
 
@@ -219,6 +240,64 @@ class WebServer:
 
             return (dict, robot.pathToConfig)
 
+        @self.app.route('/simulator/redo_simulation', methods=['POST'])
+        def re_run_simulation():
+            if 'userID' not in session: return jsonify({"success": "false"})
+
+            old_sim = self.db.get_simulation(request.form['sim_id'])
+
+            sim_conf = open(old_sim.pathToConfig).read()
+            strdict = json.loads(sim_conf)
+
+            if 'utterance' in request.files:
+                utt = processSoundUpload(request.files['utterance'], session['userID'])
+                strdict['simulation_config']['source_config']['input_utterance']['uid'] = utt.id
+            else:
+                strdict['simulation_config']['source_config']['input_utterance']['uid'] = request.form['utterance_id']
+
+
+            if 'bgnoise' in request.files:
+                bgnoise = processSoundUpload(request.files['bgnoise'], session['userID'])
+                strdict['simulation_config']['source_config']['background_noise']['uid'] = bgnoise.id
+            else:
+                if int(request.form['bgnoise_id']) < 0:
+                    # Remove the background_noise entry if bg noise has not been provided
+                    strdict['simulation_config']['source_config'].pop('background_noise', None)
+                else:
+                    strdict['simulation_config']['source_config']['background_noise']['uid'] = request.form['bgnoise_id']
+
+            strdict['simulation_config']['robot_config']['uid'] = request.form['robot_id']
+            seed = strdict['simulation_config']['seed']
+
+
+            # Fix the file paths
+            try:
+                (strdict, robotPath) = insert_config_paths(strdict)
+            except BadSoundIDException:
+                return jsonify({"success": "false", "reason": "Bad sound id"})
+            except BadRobotIDException:
+                return jsonify({"success": "false", "reason": "Bad robot id"})
+
+
+            # Save the JSON config to a file
+            unique_name = uuid.uuid4()
+            filename = UPLOAD_DIR + "simulation_configs/{0}.json".format(unique_name)
+            # print("putting sim file in: {0}".format(filename))
+            with open(filename, 'w') as f:
+                json.dump(strdict, f, sort_keys=False, indent=4, ensure_ascii = False)
+
+            date = str(dt.now().date())
+            sim = Simulation(filename, date, seed, session['userID'])
+            sim = self.db.insert_simulation(sim)
+
+            robot_conf = open(robotPath).read()
+            robot_conf_dict = json.loads(robot_conf)
+
+            runSimulation.delay(strdict, robot_conf_dict, unique_name, sim.id)
+
+            return jsonify({"success": "true"})
+
+
         @self.app.route('/simulator/run_simulation', methods=['POST'])
         def run_simulation():
             if 'userID' not in session: return jsonify({"success": "false"})
@@ -259,25 +338,38 @@ class WebServer:
             except BadRobotIDException:
                 return jsonify({"success": "false", "reason": "Bad robot id"})
 
-            # Save the JSON config to a file
-            unique_name = uuid.uuid4()
-            filename = UPLOAD_DIR + "simulation_configs/{0}.json".format(unique_name)
-            # print("putting sim file in: {0}".format(filename))
-            with open(filename, 'w') as f:
-                json.dump(strdict, f, sort_keys=False, indent=4, ensure_ascii = False)
 
-            date = str(dt.now().date())
-            sim = Simulation(filename, date, seed, session['userID'])
-            sim = self.db.insert_simulation(sim)
+            if 'sim_to_update' in request.form:
+                sim = self.db.get_simulation(request.form['sim_to_update'])
+                if sim.userID == session['userID']:
+                    filename = sim.pathToConfig
+
+                    with open(filename, 'w') as f:
+                        json.dump(strdict, f, sort_keys=False, indent=4, ensure_ascii = False)
+
+                    return jsonify({"success": "true"})
+                else:
+                    return jsonify({"success": "false"})
+            else:
+                # Save the JSON config to a file
+                unique_name = uuid.uuid4()
+                filename = UPLOAD_DIR + "simulation_configs/{0}.json".format(unique_name)
+                # print("putting sim file in: {0}".format(filename))
+                with open(filename, 'w') as f:
+                    json.dump(strdict, f, sort_keys=False, indent=4, ensure_ascii = False)
+
+                date = str(dt.now().date())
+                sim = Simulation(filename, date, seed, session['userID'])
+                sim = self.db.insert_simulation(sim)
 
 
-            robot_conf = open(robotPath).read()
-            robot_conf_dict = json.loads(robot_conf)
+                robot_conf = open(robotPath).read()
+                robot_conf_dict = json.loads(robot_conf)
 
 
-            runSimulation.delay(strdict, robot_conf_dict, unique_name, sim.id)
+                runSimulation.delay(strdict, robot_conf_dict, unique_name, sim.id)
 
-            return jsonify({"success": "true"})
+                return jsonify({"success": "true"})
 
 
         def processFileUpload(file, user_id):
@@ -397,6 +489,7 @@ class WebServer:
             else:
                 robot_conf = ""
                 robot = None
+            
 
             return render_template('robotdesign.html', user=self.db.get_user(id=session['userID']), sounds=sounds, mic_responses=mics, robotconfig=robot_conf, robot=robot)
 
@@ -480,7 +573,10 @@ class WebServer:
             publicItem = PublicItem(request.form['name'], request.form['desc'], request.form['type'], request.form['id'], session['userID'], publishDate = date)
             publicItem = self.db.insert_public_item(publicItem)
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 4d7a5a5b245cec01890d57647926652f7abd5bfc
             return redirect('/search?query={0}&type={1}'.format(publicItem.name, publicItem.type))
 
         @self.app.route("/toggle_like", methods=["POST"])

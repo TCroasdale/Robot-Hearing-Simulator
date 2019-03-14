@@ -18,14 +18,14 @@
           <div class="input-group-prepend">
             <p class="input-group-text">Actions</p>
           </div>
-          <div id="3d-zoom-in" class="form-control btn btn-light"><fas-icon icon-name="search-plus"></fas-icon></div>
-          <div id="3d-zoom-out" class="form-control btn btn-light"><fas-icon icon-name="search-minus"></fas-icon></div>
-          <div id="3d-stop-anim" class="form-control btn btn-light"><fas-icon icon-name="stop-circle"></fas-icon></div>
-          <div id="3d-start-anim" class="form-control btn btn-light"><fas-icon icon-name="play-circle"></fas-icon></div>
-          <div id="3d-cam-left" class="form-control btn btn-light"><fas-icon icon-name="chevron-left"></fas-icon></div>
-          <div id="3d-cam-up" class="form-control btn btn-light"><fas-icon icon-name="chevron-up"></fas-icon></div>
-          <div id="3d-cam-down"class="form-control btn btn-light"><fas-icon icon-name="chevron-down"></fas-icon></div>
-          <div id="3d-cam-right" class="form-control btn btn-light"><fas-icon icon-name="chevron-right"></fas-icon></div>
+          <div id="3d-zoom-in" class="form-control btn btn-light" data-toggle="tooltip" title="Zoom in"><fas-icon icon-name="search-plus"></fas-icon></div>
+          <div id="3d-zoom-out" class="form-control btn btn-light" data-toggle="tooltip" title="Zoom out"><fas-icon icon-name="search-minus"></fas-icon></div>
+          <div id="3d-stop-anim" class="form-control btn btn-light" data-toggle="tooltip" title="Stop Spin"><fas-icon icon-name="stop-circle"></fas-icon></div>
+          <div id="3d-start-anim" class="form-control btn btn-light" data-toggle="tooltip" title="Start Spin"><fas-icon icon-name="play-circle"></fas-icon></div>
+          <div id="3d-cam-left" class="form-control btn btn-light" data-toggle="tooltip" title="Move Left"><fas-icon icon-name="chevron-left"></fas-icon></div>
+          <div id="3d-cam-up" class="form-control btn btn-light" data-toggle="tooltip" title="Move Up"><fas-icon icon-name="chevron-up"></fas-icon></div>
+          <div id="3d-cam-down"class="form-control btn btn-light" data-toggle="tooltip" title="Move Down"><fas-icon icon-name="chevron-down"></fas-icon></div>
+          <div id="3d-cam-right" class="form-control btn btn-light" data-toggle="tooltip" title="Move Down"><fas-icon icon-name="chevron-right"></fas-icon></div>
         </div>
       </div>
       <div id="interface-container" class="bg-gray py-1 col-md-5">
@@ -35,9 +35,9 @@
           <li class="nav-item"><a class="nav-link px-1" data-toggle="tab" href="#mot-config">Motors <fas-icon icon-name="volume-up"></fas-icon></a></li>
           <li class="nav-item"><a class="nav-link px-1" data-toggle="tab" id="code-tab" href="#code">Code <fas-icon icon-name="code"></fas-icon></a></li>
           {% if editing: %}
-            <li class="ml-auto nav-item"><button type="button" class="btn btn-primary" id="save-robot">Save <fas-icon icon-name="save"></fas-icon></button>
+            <li class="ml-auto nav-item"><button type="button" class="btn btn-primary" id="save-robot" data-toggle="tooltip" title="Save the robot.">Save <fas-icon icon-name="save"></fas-icon></button>
           {% else: %}
-            <li class="ml-auto nav-item"><button type="button" class="btn btn-primary" id="save-robot">Save <fas-icon icon-name="save"></fas-icon></button>
+            <li class="ml-auto nav-item"><button type="button" class="btn btn-primary" id="save-robot" data-toggle="tooltip" title="Save the robot">Save <fas-icon icon-name="save"></fas-icon></button>
           {% endif %}
         </ul>
         <div class="tab-content bg-white rounded-top p-1">
@@ -45,18 +45,18 @@
             <h2 class="text-center">Robot Configuration</h2>
             <hr>
             <div class="row mx-0">
-              <div class="input-group">
+              <div class="input-group"  data-toggle="tooltip" title="The name of the robot.">
                 <div class="input-group-prepend">
                   <p class="text-info input-group-text">Robot Name: </p>
                 </div>
                 {% if robot is none: %}
                   <input type="text" name="robot-name" id="robot-name" class="form-control pr-0"/>
                 {% else %}
-                  <p class="text-primary input-group-text">{{ robot.name }}</p>
+                  <p class="text-primary input-group-text" id="robot-name">{{ robot.name }}</p>
                 {% endif %}
               </div>
             </div> <!-- Robot name is submitted as part of form, not config -->
-            <number-input label="Skin Width" id="skin-width" value="0.25" step="0.05"></number-input>
+            <number-input label="Skin Width" id="skin-width" value="0.25" step="0.05" data-toggle="tooltip" title="The radius of the bounding sphere."></number-input>
           </div><!-- robot tab -->
           <div class="tab-pane" id="mic-config">
             <h2 class="text-center">Microphone Configuration</h2>
@@ -80,7 +80,7 @@
           </div><!-- motor tab -->
           <div class="tab-pane" id="code">
             <div id="editor">{{ robotconfig }}</div>
-            <div class="btn-group mr-2" role="group" id="upload_controls">
+            <div class="btn-group mr-2" role="group" id="upload_controls" data-toggle="tooltip" title="Upload a pre made config.">
               <div class="input-group-prepend">
                 <p class="text-info input-group-text">Configuration file.</p>
               </div>
@@ -144,14 +144,14 @@
       <button class="btn btn-info col-md-1 p-0" id="{id}-col" data-toggle="collapse" data-target="#{id}-body" aria-example="True" aria-controls="{id}-body">
         <fas-icon icon-name="sort-down"></fas-icon>
       </button>
-      <button class="btn btn-danger col-md-1 p-0" id="{id}-del" ev-click="del-mic"><fas-icon icon-name="minus"></fas-icon></button>
+      <button class="btn btn-danger col-md-1 p-0" id="{id}-del" ev-click="del-mic"  data-toggle="tooltip" title="Remove this microphone."><fas-icon icon-name="minus"></fas-icon></button>
     </div>
     <div class="collapse" id="{id}-body">
-      <number-input label="ID" id="{id}-id" value="{num}" step="1.0"></number-input>
-      <vec3-input label="Origin" id="{id}-pos" value="0" step="0.25" label-style="POS"></vec3-input>
-      <vec3-input label="Rotation" id="{id}-rot" value="0" step="30" label-style="ROT"></vec3-input>
+      <number-input label="ID" id="{id}-id" value="{num}" step="1.0" data-toggle="tooltip" title="A Unique ID for this mic"></number-input>
+      <vec3-input label="Origin" id="{id}-pos" value="0" step="0.25" label-style="POS" data-toggle="tooltip" title="The relative position of this mic."></vec3-input>
+      <vec3-input label="Rotation" id="{id}-rot" value="0" step="30" label-style="ROT" data-toggle="tooltip" title="The relative orientation of this mic."></vec3-input>
       <hr>
-      <div id="{id}-file-container">
+      <div id="{id}-file-container" data-toggle="tooltip" title="The microphone response file.">
         <div class="input-group mr-2" role="group">
           <div class="input-group-prepend">
             <p class="text-info input-group-text">Mic Response</p>
@@ -177,13 +177,13 @@
       <button class="btn btn-info col-md-1 p-0" id="{id}-col" data-toggle="collapse" data-target="#{id}-body" aria-example="True" aria-controls="{id}-body">
         <fas-icon icon-name="sort-down"></fas-icon>
       </button>
-      <button class="btn btn-danger col-md-1 p-0" id="{id}-del" ev-click="del-motor"><fas-icon icon-name="minus"></fas-icon></button>
+      <button class="btn btn-danger col-md-1 p-0" id="{id}-del" ev-click="del-motor" data-toggle="tooltip" title="Remove this motor."><fas-icon icon-name="minus"></fas-icon></button>
     </div>
     <div class="collapse" id="{id}-body">
-      <number-input label="ID" id="{id}-id" value="{num}" step="1.0"></number-input>
-      <vec3-input label="Origin" id="{id}-pos" value="0" step="0.25" label-style="POS"></vec3-input>
+      <number-input label="ID" id="{id}-id" value="{num}" step="1.0" data-toggle="tooltip" title="A unique ID for this motor."></number-input>
+      <vec3-input label="Origin" id="{id}-pos" value="0" step="0.25" label-style="POS" data-toggle="tooltip" title="The relative position of this motor."></vec3-input>
       <hr>
-      <div id="{id}-sound-container">
+      <div id="{id}-sound-container" data-toggle="tooltip" title="Select a sound file for the motor.">
         <div class="input-group mr-2" role="group">
           <div class="input-group-prepend">
             <p class="text-info input-group-text">Motor sound</p>
