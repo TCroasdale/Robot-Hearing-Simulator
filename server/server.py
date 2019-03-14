@@ -194,7 +194,7 @@ class WebServer:
             # attach the utterance path
             utteranceid = dict['simulation_config']['source_config']['input_utterance']['uid']
             utterance = self.db.get_one("SELECT * FROM sounds WHERE id=?", [utteranceid], type=Sound)
-            if utterance is not None and (utterance.userID == session['userID'] or utterance.visibility > 0):
+            if utterance is not None and (utterance.userID == session['userID'] or self.db.item_is_public(utterance.id, "SOUND")):
                 dict['simulation_config']['source_config']['input_utterance']['path'] = utterance.pathToFile
             else:
                 raise BadSoundIDException
@@ -203,7 +203,7 @@ class WebServer:
             if 'background_noise' in dict['simulation_config']['source_config']:
                 bgnoiseid = dict['simulation_config']['source_config']['background_noise']['uid']
                 bgnoise = self.db.get_one("SELECT * FROM sounds WHERE id=?", [bgnoiseid], type=Sound)
-                if bgnoise is not None and (bgnoise.userID == session['userID'] or bgnoise.visibility > 0):
+                if bgnoise is not None and (bgnoise.userID == session['userID'] or self.db.item_is_public(bgnoise.id, "SOUND")):
                     dict['simulation_config']['source_config']['background_noise']['path'] = bgnoise.pathToFile
                 else:
                     raise BadSoundIDException
@@ -212,7 +212,7 @@ class WebServer:
             robotid = dict['simulation_config']['robot_config']['uid']
             robot = self.db.get_one("SELECT * FROM robots WHERE id =?", [robotid], type=Robot)
             print(robotid)
-            if robot is not None and (robot.userID == session['userID'] or robot.visibility > 0):
+            if robot is not None and (robot.userID == session['userID'] or self.db.item_is_public(robot.id, "ROBOT")):
                 dict['simulation_config']['robot_config']['path'] = robot.pathToConfig
             else:
                 raise BadRobotIDException
@@ -428,17 +428,15 @@ class WebServer:
 
         @self.app.route("/search")
         def search():
-            if 'query' in request.args:
-                query = request.args['query']
-            else:
-                query = None
+            query = request.args['query'] if 'query' in request.args else None
+            searchFor = request.args['type'] if 'type' in request.args else '%'
 
             relevantItems = []
 
             if query == None:
-                relevantItems = self.db.get_all('SELECT * FROM public_items', [], type=PublicItem)
+                relevantItems = self.db.get_all('SELECT * FROM public_items WHERE type LIKE ?', [searchFor], type=PublicItem)
             else:
-                relevantItems = self.db.get_all("SELECT * FROM public_items WHERE name LIKE ? OR description LIKE ?" , ['%'+query+'%', '%'+query+'%'], type=PublicItem)
+                relevantItems = self.db.get_all("SELECT * FROM public_items WHERE type LIKE ? AND (name LIKE ? OR description LIKE ?)" , [searchFor, '%'+query+'%', '%'+query+'%'], type=PublicItem)
 
             add_count = {x.id: len(self.db.get_all('SELECT * FROM user_added_items WHERE itemID = ?', [x.id], type=UserAddedItem)) for x in relevantItems}
 
@@ -447,14 +445,14 @@ class WebServer:
         @self.app.route("/quicksearch")
         def quick_search():
             query = request.args['query'] if 'query' in request.args else None
-            searchFor = request.args['type'] if 'type' in request.args else '*'
+            searchFor = request.args['type'] if 'type' in request.args else '%'
 
             relevantItems = []
 
             if query == None:
-                relevantItems = self.db.get_all('SELECT * FROM public_items WHERE type = ?', [searchFor], type=PublicItem)
+                relevantItems = self.db.get_all('SELECT * FROM public_items WHERE type LIKE ?', [searchFor], type=PublicItem)
             else:
-                relevantItems = self.db.get_all("SELECT * FROM public_items WHERE type = ? AND (name LIKE ? OR description LIKE ?)" , [searchFor, '%'+query+'%', '%'+query+'%'], type=PublicItem)
+                relevantItems = self.db.get_all("SELECT * FROM public_items WHERE type LIKE ? AND (name LIKE ? OR description LIKE ?)" , [searchFor, '%'+query+'%', '%'+query+'%'], type=PublicItem)
 
             processedItems = [{'id': x.id, 'name': x.name, 'desc': x.description, 'likes': x.likes, 'type': x.type} for x in relevantItems]
 
@@ -483,8 +481,7 @@ class WebServer:
             publicItem = self.db.insert_public_item(publicItem)
 
 
-
-            return render_template('search.html', user=self.db.get_user(id=session['userID']))
+            return redirect('/search?query={0}&type={1}'.format(publicItem.name, publicItem.type))
 
         @self.app.route("/toggle_like", methods=["POST"])
         def toggleLike():

@@ -221,3 +221,13 @@ class DB_Manager_SQLite(DB_Manager):
             con.commit()
             cur.execute("SELECT * FROM user_added_items WHERE id=?", [rowid])
             return UserAddedItem.from_DB(cur.fetchone())
+
+    def item_is_public(self, itemID, type):
+        with sql.connect(self.dbLocation) as con:
+            cur = con.cursor()
+
+            cur.execute("SELECT * FROM public_items WHERE itemID = ? AND type = ?", [itemID, type])
+
+            result = cur.fetchone()
+
+            return (result is not None)
