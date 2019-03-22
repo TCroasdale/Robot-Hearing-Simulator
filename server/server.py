@@ -232,13 +232,53 @@ class WebServer:
             # Attach the robot config path
             robotid = dict['simulation_config']['robot_config']['uid']
             robot = self.db.get_one("SELECT * FROM robots WHERE id =?", [robotid], type=Robot)
-            print(robotid)
             if robot is not None and (robot.userID == session['userID'] or robot.visibility > 0):
                 dict['simulation_config']['robot_config']['path'] = robot.pathToConfig
             else:
                 raise BadRobotIDException
 
             return (dict, robot.pathToConfig)
+
+        @self.app.route('/simulator/preview_sim', methods=['POST'])
+        def preview_simulation():
+            if 'userID' not in session: return jsonify({"success": "false"})
+            
+            conf = { "simulation_config": {'source_config': {'simulation_setups': [{'style': 'single'}], 'input_utterance': {}}, 'robot_config': {}} }
+
+            room_dim = request.form['room-size']
+            robo_pos = request.form['robo-pos']
+            src_pos = request.form['src-pos']
+            rt60= request.form['rt60']
+
+            conf['simulation_config']['room_dimensions'] = room_dim
+            conf['simulation_config']['robot_pos'] = robo_pos
+            conf['simulation_config']['rt60'] = rt60
+            conf['simulation_config']['source_config']['simulation_setups'][0]['origin'] = src_pos
+
+            if 'utterance' in request.files:
+                utt = request.files['utterance']
+                conf['simulation_config']['source_config']['input_utterance']['uid'] = utt.id
+            else:
+                conf['simulation_config']['source_config']['input_utterance']['uid'] = request.form['utterance_id']
+
+            conf['simulation_config']['source_config']['robot_config']['uid'] = request.form['robot_id']
+            
+            # Fix the file paths
+            try:
+                (conf, robotPath) = insert_config_paths(conf)
+            except BadSoundIDException:
+                return jsonify({"success": "false", "reason": "Bad sound id"})
+            except BadRobotIDException:
+                return jsonify({"success": "false", "reason": "Bad robot id"})
+
+            robot_conf = open(robotPath).read()
+            robot_conf_dict = json.loads(robot_conf)
+
+            runSimulation.delay(strdict, robot_conf_dict, unique_name, sim.id)
+
+            return jsonify({"success": "true"})
+
+            
 
         @self.app.route('/simulator/redo_simulation', methods=['POST'])
         def re_run_simulation():

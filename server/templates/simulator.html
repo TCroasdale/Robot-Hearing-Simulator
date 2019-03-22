@@ -20,12 +20,12 @@
           <div id="3d-zoom-out" class="form-control btn btn-light" data-toggle="tooltip" title="Zoom out"><fas-icon icon-name="search-minus"></fas-icon></div>
           <div id="3d-stop-anim" class="form-control btn btn-light" data-toggle="tooltip" title="Stop Spin"><fas-icon icon-name="stop-circle"></fas-icon></div>
           <div id="3d-start-anim" class="form-control btn btn-light" data-toggle="tooltip" title="Start Spin"><fas-icon icon-name="play-circle"></fas-icon></div>
-          <div id="3d-cam-left" class="form-control btn btn-light" data-toggle="tooltip" title="Move Left"><fas-icon icon-name="chevron-left"></fas-icon></div>
+          <!-- <div id="3d-cam-left" class="form-control btn btn-light" data-toggle="tooltip" title="Move Left"><fas-icon icon-name="chevron-left"></fas-icon></div> -->
           <div id="3d-cam-up" class="form-control btn btn-light" data-toggle="tooltip" title="Move Up"><fas-icon icon-name="chevron-up"></fas-icon></div>
           <div id="3d-cam-down"class="form-control btn btn-light" data-toggle="tooltip" title="Move Down"><fas-icon icon-name="chevron-down"></fas-icon></div>
-          <div id="3d-cam-right" class="form-control btn btn-light" data-toggle="tooltip" title="Move Down"><fas-icon icon-name="chevron-right"></fas-icon></div>
-        </div>
-        <div class="3d-menu" id="src-select">
+          <div id="preview-src"class="form-control btn btn-light btn-long disabled" data-toggle="tooltip" title="Preview the selected sourcen">Preview <fas-icon icon-name="play"></fas-icon></div>
+
+          <!-- <div id="3d-cam-right" class="form-control btn btn-light" data-toggle="tooltip" title="Move Down"><fas-icon icon-name="chevron-right"></fas-icon></div> -->
         </div>
       </div>
       <div id="interface-container" class="bg-gray py-1 col-md-5">
@@ -84,7 +84,8 @@
                 <option value="{{sound.id}}">{{ sound.name }}</option>
                 {% endfor %}
             </select>
-            <button onclick="openSearchModal('SOUND')" class="form-control btn btn-info"><fas-icon icon-name="globe-europe"></fas-icon></button>
+            <button onclick="openSearchModal('SOUND', 'public-utt-id', 'utterance-select')" class="form-control btn btn-info"><fas-icon icon-name="globe-europe"></fas-icon></button>
+            <input id="public-utt-id" type="hidden" value="-1">
           </div>
           <hr>
             <div class="input-group mr-2 my-w" role="group" id="bgnoise-input-controls" data-toggle="tooltip" title="An optional background noise file.">
@@ -100,7 +101,8 @@
                 <option value="{{sound.id}}">{{ sound.name }}</option>
                 {% endfor %}
               </select>
-              <button onclick="openSearchModal('SOUND')" class="form-control btn btn-info"><fas-icon icon-name="globe-europe"></fas-icon></button>
+              <button onclick="openSearchModal('SOUND', 'public-bgnoise-id', 'bgnoise-select')" class="form-control btn btn-info"><fas-icon icon-name="globe-europe"></fas-icon></button>
+              <input id="public-bgnoise-id" type="hidden" value="-1">
             </div>
             <hr>
               <div class="input-group mr-2 my-2" role="group" class="robot-select-controls" data-toggle="tooltip" title="The robot to use in the simulation.">
@@ -116,7 +118,8 @@
                 {% else %}
                 <a id="no-robot-link" href="/robotdesign"><p class="input-group-text btn btn-info px-5">Click to create a robot!</p></a>
                 {% endif %}
-                <button onclick="openSearchModal('ROBOT')" class="form-control btn btn-info"><fas-icon icon-name="globe-europe"></fas-icon></button>
+                <button onclick="openSearchModal('ROBOT', 'public-robot-id', 'robot-select')" class="form-control btn btn-info"><fas-icon icon-name="globe-europe"></fas-icon></button>
+                <input id="public-robot-id" type="hidden" value="-1">
             </div>
         </div>
       </div>
@@ -158,6 +161,7 @@
               </div>
             </div>
             <div class="modal-footer">
+              <button id="clr-search-selection" type="button" class="btn btn-danger" data-dismiss="modal">Clear Selection</button>
               <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
             </div>
           </div>

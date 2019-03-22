@@ -13,3 +13,25 @@
   max-width: 100%;
   overflow-x: hidden;
 }
+
+.menu-3d{
+  position: absolute;
+  display: inline-block;
+  z-index: 9999;
+  top: 1px;
+  left: 1px;
+  width: 25%;
+  height: 10%;
+}
+
+canvas{
+  position: relative;
+  display: inline-block;
+  top: 0px;
+  left: 0px;
+}
+
+.btn-long {
+  padding-right: 40px;
+  padding-left: 20px;
+}

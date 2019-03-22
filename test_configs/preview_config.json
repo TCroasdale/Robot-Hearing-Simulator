@@ -1,0 +1,35 @@
+{
+    "simulation_config": {
+     "seed": 42069,
+     "robot_pos": {
+      "x": 0,
+      "y": 0,
+      "z": 0
+     },
+     "room_dimensions": {
+      "x": 5,
+      "y": 5,
+      "z": 5
+     },
+     "rt60": 0.4,
+     "sample_rate": 16000,
+     "source_config": {
+      "simulation_setups": [
+       {
+        "style": "single",
+        "origin": {
+         "x": 0,
+         "y": 2,
+         "z": 0
+        }
+       }
+      ],
+      "input_utterance": {
+       "uid": -1
+      }
+     },
+     "robot_config": {
+      "uid": -1
+     }
+    }
+   }

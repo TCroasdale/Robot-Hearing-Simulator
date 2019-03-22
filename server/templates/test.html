@@ -6,56 +6,84 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.1/css/all.css" integrity="sha384-gfdkjb5BdAXd+lj+gudLWI+BXq4IuLW5IT+brZEZsLFm++aCMlF1V92rMkPaX4PP" crossorigin="anonymous">
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js" integrity="sha384-xrRywqdh3PHs8keKZN+8zzc5TX0GRTLCcmivcbNJWm2rs5C8PRhcEn3czEjhAO9o" crossorigin="anonymous"></script>
 </head>
 <body>
 
 <div class="container">
-  <h2>Modal Example</h2>
-  <!-- Trigger the modal with a button -->
-  <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#publish-modal">Open Modal</button>
 
-  <!-- Modal -->
-  <div class="modal fade" id="publish-modal" role="dialog">
-    <div class="modal-dialog">
-    
-      
-      <div class="modal-content">
-        <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal">&times;</button>
-          <h4 class="modal-title">Modal Header</h4>
+  <div id="3js-container" >
+    <div id="3d-controls" class="input-group" role="toolbar">
+        <div class="input-group-prepend">
+          <p class="input-group-text">Actions</p>
         </div>
-        <div class="modal-body">
-          <p>Some text in the modal.</p>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        </div>
+        <div id="3d-zoom-in" class="form-control btn btn-light" data-toggle="tooltip" title="Zoom in"><span class="fas fa-search-plus"></span></div>
+        <div id="3d-zoom-out" class="form-control btn btn-light" data-toggle="tooltip" title="Zoom out"><span class="fas fa-search-minus"></span></div>
+        <div id="3d-stop-anim" class="form-control btn btn-light" data-toggle="tooltip" title="Stop Spin"><span class="fas fa-stop-circle"></span></div>
+        <div id="3d-start-anim" class="form-control btn btn-light" data-toggle="tooltip" title="Start Spin"><span class="fas fa-play-circle"></span></div>
+        <div id="3d-cam-left" class="form-control btn btn-light" data-toggle="tooltip" title="Move Left"><span class="fas fa-chevron-left"></span></div>
+        <div id="3d-cam-up" class="form-control btn btn-light" data-toggle="tooltip" title="Move Up"><span class="fas fa-chevron-up"></span></div>
+        <div id="3d-cam-down"class="form-control btn btn-light" data-toggle="tooltip" title="Move Down"><span class="fas fa-chevron-down"></span></div>
+        <div id="3d-cam-right" class="form-control btn btn-light" data-toggle="tooltip" title="Move Down"><span class="fas fa-chevron-right"></span></div>
       </div>
-      
-    </div>
   </div>
-
-  <div class="modal fade" id="publish-modal" role="dialog">
-    <div class="modal-dialog">
-
-      <div class="model-content">
-            
-        <div class="modal-header"> 
-          <h4 class="modal-title" id="myModalLabel">Modal title</h4>
-        </div>
-        <div class="modal-body">
-          <p>Some text in the modal.</p>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        </div>
-      </div>
-
-    </div>
-  </div> 
-  
 </div>
 
+  
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/three.js/101/three.min.js" type="text/javascript"></script>
+<script type="text/javascript" src="../static/js/3DViewer.js"></script>
+<script type="text/javascript">
+
+function generate_sphere_array(setup){
+  allPositions = []
+  origin = [Number(setup['origin']['x']), Number(setup['origin']['y']), Number(setup['origin']['z'])]
+  r = Number(setup['radius'])
+
+  //#Top and bottom ring
+  top_point = {'x': origin[0],'y':  origin[1]+r,'z':  origin[2]}
+  bottom = {'x': origin[0],'y':  origin[1]-r,'z':  origin[2]}
+  allPositions.push(top_point)
+  allPositions.push(bottom)
+
+  for(var ring = 1; ring < setup['rings']-1; ring++){
+      for(var seg = 0; seg <= setup['segments']; seg++){
+          theta = (360/(setup['segments'])) * (Math.PI / 180)
+          phi = (180/(setup['rings']-1)) * (Math.PI / 180)
+
+          y = r * Math.cos(phi * ring)
+          x = r * Math.sin(theta * seg) * Math.sin(phi * ring)
+          z = r * Math.cos(theta * seg) * Math.sin(phi * ring)
+
+          allPositions.push({'x': x+origin[0],'y': y+origin[1],'z':z+origin[2]})
+      }
+  }
+  return allPositions
+}
+
+
+$(document).ready(function() {
+  // room = sceneView.createRoom(5, 5, 5, 0xeeeeee, 0x222222)
+  // robot = sceneView.createSphere(0.5, 0x3f7faa, true, false)
+  sources = [[]]
+  source_pos_arr = generate_sphere_array({'origin': {'x': 0, 'y': 0, 'z': 0}, 'rings': 4, 'segments': 8, 'radius': 5.0})
+
+  console.log(sources)
+  for(var k in source_pos_arr){
+      sources[0].push(sceneView.createSphere(0.25, 0xff0000, false, true))
+      sources[0][k].position.x = source_pos_arr[k]['x']// + offset['x']
+      sources[0][k].position.y = source_pos_arr[k]['y']// + offset['y']
+      sources[0][k].position.z = source_pos_arr[k]['z']// + offset['z']
+    }
+
+  // robot.position.y = -2
+
+  $('#3js-container').click(function(){
+    objs = sources.flat()
+    
+    sceneView.raycastToObjects(objs)
+  })
+})
+</script>
 </body>
 </html>
