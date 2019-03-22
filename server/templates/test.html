@@ -17,6 +17,21 @@
     <div id="3d-controls" class="input-group" role="toolbar">
         <div class="input-group-prepend">
           <p class="input-group-text">Actions</p>
+  <!-- Modal -->
+  <div class="modal fade" id="their-modal" role="dialog">
+    <div class="modal-dialog">
+
+
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Modal Header</h4>
+        </div>
+        <div class="modal-body">
+          <p>Some text in the modal.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
         </div>
         <div id="3d-zoom-in" class="form-control btn btn-light" data-toggle="tooltip" title="Zoom in"><span class="fas fa-search-plus"></span></div>
         <div id="3d-zoom-out" class="form-control btn btn-light" data-toggle="tooltip" title="Zoom out"><span class="fas fa-search-minus"></span></div>
@@ -27,6 +42,8 @@
         <div id="3d-cam-down"class="form-control btn btn-light" data-toggle="tooltip" title="Move Down"><span class="fas fa-chevron-down"></span></div>
         <div id="3d-cam-right" class="form-control btn btn-light" data-toggle="tooltip" title="Move Down"><span class="fas fa-chevron-right"></span></div>
       </div>
+
+    </div>
   </div>
 </div>
 
@@ -61,6 +78,23 @@ function generate_sphere_array(setup){
   return allPositions
 }
 
+      <div class="model-content">
+
+        <div class="modal-header">
+          <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+        </div>
+        <div class="modal-body">
+          <p>Some text in the modal.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
 
 $(document).ready(function() {
   // room = sceneView.createRoom(5, 5, 5, 0xeeeeee, 0x222222)

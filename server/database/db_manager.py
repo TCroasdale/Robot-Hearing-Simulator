@@ -82,23 +82,6 @@ class Simulation:
     def from_DB_ls(data_list):
         return [Simulation.from_DB(d) for d in data_list]
 
-class PublicItem:
-    def __init__(self, name, description, type, itemID, publisherID, id=0, likes=1):
-        self.id = id
-        self.name = name
-        self.description = description
-        self.type = type
-        self.itemID = itemID
-        self.likes = likes
-        self.publisherID = publisherID
-
-    def from_DB(data):
-        if data is None: return None
-        return PublicItem(data[1], data[2], data[3], data[4], data[6], data[0], data[5])
-
-    def from_DB_ls(data_list):
-        return [PublicItem.from_DB(d) for d in data_list]
-
 class UserAddedItem:
     def __init__(self, userID, itemID, id=0):
         self.id = id
@@ -196,3 +179,5 @@ class DB_Manager:
     def insert_user_liked_item(self, likedItem): pass
 
     def insert_user_added_item(self, addedItem): pass
+
+    def item_is_public(self, type): pass
