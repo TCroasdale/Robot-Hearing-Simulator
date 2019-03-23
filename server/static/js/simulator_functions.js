@@ -462,6 +462,11 @@ function compile_ui(){
     var style = $('#{0}-sel'.format(id))[0].value
     old_setup = old_cfg['simulation_config']['source_config']['simulation_setups'][i]
     if(style == "box"){
+      if(old_setup === undefined){ old_setup = {
+        "origin": { "x": 0, "y": 0, "z": 0 },
+       "dimensions": { "x": 1, "y": 1, "z": 1 },
+       "divisions": { "x": 2, "y": 2, "z": 2 } }
+      }
       var dim = read_vec3_input('{0}-box-dim'.format(id), "DIM", old_setup['dimensions'])
       var div = read_vec3_input('{0}-box-div'.format(id), "DIM", old_setup['divisions'])
       var or = read_vec3_input('{0}-box-pos'.format(id), "POS", old_setup['origin'])
@@ -469,6 +474,9 @@ function compile_ui(){
       sim_setups.push(src_setup)
     }
     else if(style == "pyramid"){
+      if(old_setup === undefined){
+        old_setup = { "origin": { "x": 0, "y": 0, "z": 0 }, "layers": 4, "divisions": 3, "angle_from_normal": 30, "length": 8 }
+      }
       var lay = read_num_input('{0}-pyramid-lays'.format(id), old_setup['layers'])
       var div = read_num_input('{0}-pyramid-divs'.format(id), old_setup['divisions'])
       var len = read_num_input('{0}-pyramid-len'.format(id), old_setup['length'])
@@ -478,6 +486,9 @@ function compile_ui(){
       sim_setups.push(src_setup)
     }
     else if(style == "sphere"){
+      if(old_setup === undefined){
+        old_setup = { "origin": { "x": 0, "y": 0, "z": 0 }, "rings": 4, "segments": 8, "radius": 4 }
+      }
       var rin = read_num_input('{0}-sphere-rings'.format(id), old_setup['rings'])
       var seg = read_num_input('{0}-sphere-segs'.format(id), old_setup['segments'])
       var rad = read_num_input('{0}-sphere-rad'.format(id), old_setup['radius'])
@@ -486,6 +497,9 @@ function compile_ui(){
       sim_setups.push(src_setup)
     }
     else if(style == "single"){
+      if(old_setup === undefined){
+        old_setup = { "origin": { "x": 0, "y": 0, "z": 0 } }
+      }
       var pos = read_vec3_input('{0}-single-pos'.format(id), "POS", old_setup['origin'])
       src_setup = {"style": style, "origin": pos}
       sim_setups.push(src_setup)
