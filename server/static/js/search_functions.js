@@ -10,7 +10,7 @@ function addToUser(id){
     })
 }
 
-function searchQuery(type, query){
+function searchQuery(type, query, input_id){
     url = '/quicksearch?query='+query
     if(type !== 'ALL'){
         url += ('&type=' + type)
@@ -21,7 +21,6 @@ function searchQuery(type, query){
     $.get(url, function(data){
         console.log(data);
         data.result.forEach(addSearchCard)
-
         
         function addSearchCard(item){
             $('#card-{0}'.format(item.id)).remove()
@@ -31,13 +30,21 @@ function searchQuery(type, query){
             $('#card-{0}-like-count'.format(item.id))[0].innerHTML = item.likes
             $('#card-{0}-name'.format(item.id))[0].innerHTML = item.name
             $('#card-{0}-desc'.format(item.id))[0].innerHTML = item.desc
+
+            $('#card-{0}'.format(item.id)).click(function(){
+                $('#' + input_id).val(item.id)
+                $('#public-search-modal').modal("hide")
+            })
         }
     })
 }
 lastSearchType = "ALL"
-function openSearchModal(searchFor){
+function openSearchModal(searchFor, input_id){
     $('#public-search-modal').modal("show")
-    searchQuery(searchFor, "")
+    $('#clr-search-selection').click(function(){
+        $('#' + input_id).val("-1")
+    })
+    searchQuery(searchFor, "", input_id)
     lastSearchType = searchFor
 }
 

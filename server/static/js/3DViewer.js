@@ -6,6 +6,7 @@ class SceneView{
     this.renderer.setClearColor(0x35355be, 0.5)
     this.renderer.antialias = true
 
+
     parent = $('#'+canvasID)
 
 
@@ -26,7 +27,7 @@ class SceneView{
     window.addEventListener('mousemove', this.onMouseMove, false)
 
     var axesHelper = new THREE.AxesHelper(3);
-    // this.scene.add(axesHelper);
+    this.scene.add(axesHelper);
 
     this.selected = null
 
@@ -37,37 +38,46 @@ class SceneView{
 
   onMouseMove( event ) {
   	// calculate mouse position in normalized device coordinates
-  	// (-1 to +1) for both components
-    // console.log((event.clientX / window.innerWidth)*2-1, -(event.clientY / window.innerHeight)*2+1);
-  	sceneView.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-  	sceneView.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-    // sceneView.raycastToObjects([])
-
+    // (-1 to +1) for both components
+    sceneView.mouse.x = (event.offsetX / $('canvas')[0].clientWidth) * 2 - 1;
+    sceneView.mouse.y = (1 - (event.offsetY / $('canvas')[0].clientHeight)) * 2 - 1;
   }
 
   raycastToObjects(objs){
-    // console.log(this.mouse);
+    console.log(this.mouse)
   	this.raycaster.setFromCamera(this.mouse, this.camera);
 
-    // calculate objects intersecting the picking ray
     // console.log(objs);
-    // console.log(this.scene.children);
-
-    // for (var i in objs){
-    //   objs[i].updateMatrixWorld()
-    // }
-
-    console.log(this.scene.children);
-    console.log(objs);
     var intersects = this.raycaster.intersectObjects(objs, true);
-    console.log(intersects);
     var intersection = ( intersects.length ) > 0 ? intersects[ 0 ] : null;
 
-    console.log(intersection);
     if(intersection !== null) {
-      intersection.object.material.color.set( 0x00ff00 );
+      return intersection
     }
+  }
 
+  getSelectedPosition(){
+    if(this.selected !== null){
+      return {
+        'x': this.selected.position.x,
+        'y': this.selected.position.y,
+        'z': this.selected.position.z
+      }
+    }else{
+      return{
+        'x': 0,
+        'y': 0,
+        'z': 0
+      }
+    }
+  }
+
+  setSelected(object){
+    if(this.selected !== null) this.selected.material.color = new THREE.Color(0xff0000)
+    if(object !== null){
+      this.selected = object
+      this.selected.material.color = new THREE.Color(0x00ff00)
+    }
   }
 
 

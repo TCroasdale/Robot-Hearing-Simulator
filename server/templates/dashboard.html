@@ -127,9 +127,12 @@
               <h4>{{item.name}} <span class="badge text-dark rounded bg-info">{{item.type}}</span></h4>
             </div>
             <div class="card-body">
-                <p>{{item.description}}</p>
-                <span class="fas fa-smile" data-toggle="tooltip" title="Likes"></span> <span id="item-{{item.id}}-like-count" class="badge rounded bg-info">{{item.likes}}</span>
-                <span class="fas fa-plus" data-toggle="tooltip" title="Adds"></span> <span id="item-{{item.id}}-add-count" class="badge rounded bg-info">{{ addCount[item.id] }}</span>
+              <p>{{item.description}}</p>
+              <span class="fas fa-smile" data-toggle="tooltip" title="Likes"></span> <span id="item-{{item.id}}-like-count" class="badge rounded bg-info">{{item.likes}}</span>
+              <span class="fas fa-plus" data-toggle="tooltip" title="Adds"></span> <span id="item-{{item.id}}-add-count" class="badge rounded bg-info">{{ addCount[item.id] }}</span>
+              {% if item.type == "SIM" %}
+              <button class="btn btn-info float-right" onclick="openSimModal({{item.itemID}})" data-toggle="tooltip" title="Run the Simulation"><span class="fas fa-redo"></span></button>
+              {% endif %}
             </div>
             <div class="card-footer">
               <p>Published on {{item.publishDate}}</p>

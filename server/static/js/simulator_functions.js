@@ -100,11 +100,20 @@ $(document).ready(function() {
   update_UI(fetchEditorState(true))
   update3DView(fetchEditorState(true))
 
-  // $('#3js-container').click(function(){
-  //   objs = sources.flat()
+  $('#3js-container').click(function(){
+    objs = sources.flat()
 
-  //   sceneView.raycastToObjects(objs)
-  // })
+    selected = sceneView.raycastToObjects(objs)
+
+    if(selected !== null && selected !== undefined){
+      sceneView.setSelected(selected.object)
+      $('#preview-src').removeClass("disabled")
+    }else{
+      sceneView.setSelected(null)
+      $('#preview-src').addClass("disabled")
+    }
+  })
+
 
 
   // ===== Config Upload Handler =====
@@ -125,6 +134,56 @@ $(document).ready(function() {
     });
   })
 
+  // ===== Preview Button Handler =====
+  $('#preview-src').click(function(){
+    if($('#preview-src').hasClass('disabled')) return;
+
+    $('#uploadpopup').modal({backdrop: 'static', keyboard: false})
+
+
+    //Add utterance and bgnoise to formdata
+    fData = new FormData();
+    uttupload = $('#utterancefile')
+    if(!uttupload[0].disabled){
+      fData.append('utterance', uttupload[0].files[0])
+    }else{
+      fData.append('utterance_id', getFileIDSelection('utterance-select', 'public-utt-id'))
+    }
+
+    fData.append('robot_id', getFileIDSelection('robot-select', 'public-robot-id'))
+
+
+    var robopos = read_vec3_input('robo-pos', "POS", { "x": 0, "y": 0, "z": 0 })
+    var roomdim = read_vec3_input('room-dim', "DIM", { "x": 5, "y": 5, "z": 5 })
+    var rt60 = set_number_input('rt-60', 0.4)
+
+    fData.append('room-size', roomdim)
+    fData.append('robo-pos', robopos)
+    fData.append('RT-60', rt60)
+    fData.append('src-pos', sceneView.getSelectedPosition())
+    fData.append('robot_id', $('#robot-select')[0].value)
+
+    //Upload form data
+    $.ajax({
+      url: 'simulator/preview_sim',
+      type: 'POST',
+      data: fData,
+
+      success: function(data){
+        console.log(data)
+        if(data.success == false){
+          console.log(data.reason)
+        }
+        $('#uploadpopup').modal("hide")
+      },
+      cache: false,
+      contentType: false,
+      dataType: 'json',
+      enctype: 'multipart/form-data',
+      processData: false
+    });
+  })
+
 
   // ===== Run Button Handler =====
   $('#run_conf').click(function(){
@@ -140,11 +199,10 @@ $(document).ready(function() {
     //Add utterance and bgnoise to formdata
     fData = new FormData();
     uttupload = $('#utterancefile')
-    console.log(fData);
     if(!uttupload[0].disabled){
       fData.append('utterance', uttupload[0].files[0])
     }else{
-      fData.append('utterance_id', $('#utterance-select')[0].value)
+      fData.append('utterance_id', getFileIDSelection('utterance-select', 'public-utt-id'))
     }
 
     bgupload = $('#bgnoise')
@@ -152,10 +210,10 @@ $(document).ready(function() {
       fData.append('bgnoise', bgupload[0].files[0])
     }
     else{
-      fData.append('bgnoise_id', $('#bgnoise-select')[0].value)
+      fData.append('bgnoise_id', getFileIDSelection('bgnoise-select', 'public-bgnoise-id'))
     }
 
-    fData.append('robot_id', $('#robot-select')[0].value)
+    fData.append('robot_id', getFileIDSelection('robot-select', 'public-robot-id'))
 
     //THIS MIGHT CAUSE AN ERROR, WAS ORIGINALLY editor.getValue()
     fData.append('config', JSON.stringify(config))
@@ -247,16 +305,23 @@ $(document).ready(function() {
   })
 })
 
+function getFileIDSelection(selectID, publicID){
+  if($('#' + selectID).value < 0){
+    return $('#' + publicID).val()
+  }else{
+    return $('#' + selectID).value
+  }
+}
 
 function verify(config){
-  if(Number($('#bgnoise-select')[0].value) == -1){
+  if(Number(getFileIDSelection('bgnoise-select', 'public-bgnoise-id')) <= -1){
     if($('#bgnoise')[0].files.length < 1){
       failVerify("Please select a background noise file.", 'bgnoise-select')
       return false
     }
   }
 
-  if(Number($('#utterance-select')[0].value) == -1){
+  if(Number(getFileIDSelection('utterance-select', 'public-utt-id')) <= -1){
     if($('#utterancefile')[0].files.length < 1){
       return failVerify("Please select an utterance sound file.", 'utterance-select')
     }
@@ -473,14 +538,14 @@ function update3DView(config){
 
 function generate_cube_array(setup_options){
   allPositions = []
-  dim = [setup['dimensions']['x'], setup['dimensions']['y'], setup['dimensions']['z']]
-  midpoint = [setup['origin']['x'], setup['origin']['y'], setup['origin']['z']]
+  dim = [setup_options['dimensions']['x'], setup_options['dimensions']['y'], setup_options['dimensions']['z']]
+  midpoint = [setup_options['origin']['x'], setup_options['origin']['y'], setup_options['origin']['z']]
 
-  x_divs = Number(setup['divisions']['x'])
+  x_divs = Number(setup_options['divisions']['x'])
   x_space = (dim[0]/(x_divs-1))
-  y_divs = Number(setup['divisions']['y'])
+  y_divs = Number(setup_options['divisions']['y'])
   y_space = (dim[1]/(y_divs-1))
-  z_divs = Number(setup['divisions']['z'])
+  z_divs = Number(setup_options['divisions']['z'])
   z_space = (dim[2]/(z_divs-1))
   for(var x = 0; x < x_divs; x++){
       x_pos = midpoint[0] + (x * x_space) - dim[0]/2
@@ -500,8 +565,8 @@ function generate_cube_array(setup_options){
 
 function generate_sphere_array(setup_options){
   allPositions = []
-  origin = [Number(setup['origin']['x']), Number(setup['origin']['y']), Number(setup['origin']['z'])]
-  r = Number(setup['radius'])
+  origin = [Number(setup_options['origin']['x']), Number(setup_options['origin']['y']), Number(setup_options['origin']['z'])]
+  r = Number(setup_options['radius'])
 
   //#Top and bottom ring
   top_point = {'x': origin[0],'y':  origin[1]+r,'z':  origin[2]}
@@ -509,10 +574,10 @@ function generate_sphere_array(setup_options){
   allPositions.push(top_point)
   allPositions.push(bottom)
 
-  for(var ring = 1; ring < setup['rings']-1; ring++){
-      for(var seg = 0; seg <= setup['segments']; seg++){
-          theta = (360/(setup['segments'])) * (Math.PI / 180)
-          phi = (180/(setup['rings']-1)) * (Math.PI / 180)
+  for(var ring = 1; ring < setup_options['rings']-1; ring++){
+      for(var seg = 0; seg <= setup_options['segments']; seg++){
+          theta = (360/(setup_options['segments'])) * (Math.PI / 180)
+          phi = (180/(setup_options['rings']-1)) * (Math.PI / 180)
 
           y = r * Math.cos(phi * ring)
           x = r * Math.sin(theta * seg) * Math.sin(phi * ring)
@@ -526,10 +591,10 @@ function generate_sphere_array(setup_options){
 
 function generate_pyramid_array(setup_options){
   allPositions = []
-  origin = [Number(setup['origin']['x']), Number(setup['origin']['y']), Number(setup['origin']['z'])]
-  theta = Number(setup['angle_from_normal']) * (Math.PI / 180)
+  origin = [Number(setup_options['origin']['x']), Number(setup_options['origin']['y']), Number(setup_options['origin']['z'])]
+  theta = Number(setup_options['angle_from_normal']) * (Math.PI / 180)
 
-  divisions = Number(setup['divisions'])
+  divisions = Number(setup_options['divisions'])
 
   // Top Point
   point = {'x': origin[0], 'y': origin[1], 'z': origin[2]}
@@ -537,7 +602,7 @@ function generate_pyramid_array(setup_options){
 
   for(var layer = 1; layer <= Number(setup['layers']); layer++){
     // Create the corner vertex for eacg layer
-    h = (layer)/Number(setup['layers']) * Number(setup['length'])
+    h = (layer)/Number(setup_options['layers']) * Number(setup_options['length'])
     d = h * Math.sin(theta)
 
     allPositions.push({'x': d+origin[0], 'y': origin[1]-h, 'z': d+origin[2]})
