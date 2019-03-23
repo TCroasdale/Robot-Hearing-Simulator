@@ -589,7 +589,7 @@ class WebServer:
             else:
                 relevantItems = self.db.get_all("SELECT * FROM public_items WHERE type LIKE ? AND (name LIKE ? OR description LIKE ?)" , [searchFor, '%'+query+'%', '%'+query+'%'], type=PublicItem)
 
-            processedItems = [{'id': x.id, 'name': x.name, 'desc': x.description, 'likes': x.likes, 'type': x.type} for x in relevantItems]
+            processedItems = [{'id': x.id, 'name': x.name, 'desc': x.description, 'likes': x.likes, 'type': x.type, 'itemID': x.itemID} for x in relevantItems]
 
             return jsonify({'result': processedItems})
 
@@ -666,27 +666,23 @@ class WebServer:
                     doc = f.read()
             except:
                 return jsonify({'success': 'false'})
-            doc_html = Markup(markdown.markdown(doc))
+            doc_html = Markup(markdown.markdown(doc, extensions=['fenced_code']))
 
             return jsonify({'success': 'true', 'html': doc_html})
 
         @self.app.route('/getrobotconfig')
         def getrobotconfig():
             if 'userID' not in session: return jsonify({"success": "false", "reason": "No user session"})
-            print('A')
+
             robotID = request.args['robot'] if 'robot' in request.args else None
-            print('B')
+            print(robotID)
             if robotID is not None:
                 robot = self.db.get_one("SELECT * FROM robots WHERE id =?", [robotID], type=Robot)
-                print('C')
 
                 if robot is not None and (robot.userID == session['userID'] or self.db.item_is_public(robot.id, "ROBOT")):
-                    print('D')
                     robot_conf = open(robot.pathToConfig).read()
-                    print('E')
                     return jsonify({"success": "true", "robot": json.loads(robot_conf)})
                 else:
-                    print('F')
                     return jsonify({"success": "false", "reason": "robot not found"})
             else:
                 return jsonify({"success": "false", "reason": "robotID not sent"})

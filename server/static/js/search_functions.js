@@ -23,6 +23,7 @@ function searchQuery(type, query, input_id){
         data.result.forEach(addSearchCard)
         
         function addSearchCard(item){
+            console.log(item)
             $('#card-{0}'.format(item.id)).remove()
             appendTemplate($('#search-results'), 'search-result', {'id': item.id})
 
@@ -32,7 +33,8 @@ function searchQuery(type, query, input_id){
             $('#card-{0}-desc'.format(item.id))[0].innerHTML = item.desc
 
             $('#card-{0}'.format(item.id)).click(function(){
-                $('#' + input_id).val(item.id)
+                $('#' + input_id).val(item.itemID)
+                $('#' + input_id).change()
                 $('#public-search-modal').modal("hide")
             })
         }
