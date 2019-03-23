@@ -9,7 +9,7 @@
 #
 #######################################
 
-from flask import Flask, session, redirect, url_for, request, render_template, jsonify, send_file
+from flask import Flask, session, redirect, url_for, request, render_template, jsonify, send_file, Markup
 import hashlib
 import json
 import os
@@ -21,6 +21,7 @@ from database.db_manager import *
 from database.db_manager_sqlite import DB_Manager_SQLite
 from config import *
 from utilities import Utilities as util
+import markdown
 
 ALLOWED_EXTENSIONS = set(['wav', 'txt'])
 
@@ -489,7 +490,7 @@ class WebServer:
             else:
                 robot_conf = ""
                 robot = None
-            
+
 
             return render_template('robotdesign.html', user=self.db.get_user(id=session['userID']), sounds=sounds, mic_responses=mics, robotconfig=robot_conf, robot=robot)
 
@@ -573,10 +574,6 @@ class WebServer:
             publicItem = PublicItem(request.form['name'], request.form['desc'], request.form['type'], request.form['id'], session['userID'], publishDate = date)
             publicItem = self.db.insert_public_item(publicItem)
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 4d7a5a5b245cec01890d57647926652f7abd5bfc
             return redirect('/search?query={0}&type={1}'.format(publicItem.name, publicItem.type))
 
         @self.app.route("/toggle_like", methods=["POST"])
@@ -617,6 +614,21 @@ class WebServer:
             allAdds = self.db.get_all('SELECT * FROM user_added_items WHERE itemID = ?', [request.form['item']], type=UserAddedItem)
 
             return jsonify({"success": "true", "add_count": len(allAdds)})
+
+        @self.app.route('/documentation')
+        def documentation():
+            p = request.args['p'] if 'p' in request.args else 'introduction'
+
+            doc = ""
+            try:
+                with open('server/doc_files/{0}.md'.format(p), 'r') as f:
+                    doc = f.read()
+            except:
+                return jsonify({'success': 'false'})
+            doc_html = Markup(markdown.markdown(doc))
+
+            return jsonify({'success': 'true', 'html': doc_html})
+
 
 
 class BadRobotIDException(Exception):

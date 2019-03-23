@@ -3,3 +3,4 @@ flask
 celery==3.1.25
 pymongo
 apscheduler
+markdown
