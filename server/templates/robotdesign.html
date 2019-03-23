@@ -56,7 +56,8 @@
                 {% endif %}
               </div>
             </div> <!-- Robot name is submitted as part of form, not config -->
-            <number-input label="Skin Width" id="skin-width" value="0.25" step="0.05" data-toggle="tooltip" title="The radius of the bounding sphere."></number-input>
+            <!-- <number-input label="Skin Width" id="skin-width" value="0.25" step="0.05" data-toggle="tooltip" title="The radius of the bounding sphere."></number-input> -->
+            <vec3-input label="Dimensions" id="robot-dim" value="1" step="0.25" label-style="POS" data-toggle="tooltip" title="The Dimensions of this robot."></vec3-input>
           </div><!-- robot tab -->
           <div class="tab-pane" id="mic-config">
             <h2 class="text-center">Microphone Configuration</h2>

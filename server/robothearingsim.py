@@ -144,7 +144,8 @@ class RobotHearingSim:
         all_pos = [roboconf.Vector3(RobotHearingSim.check_value(pos.x, rand), \
                     RobotHearingSim.check_value(pos.y, rand),\
                     RobotHearingSim.check_value(pos.z, rand)) for pos in all_robot_pos] # Checking random values
-        robot = roboconf.Robot(all_pos[0], roborot, mics, motors, roboConfig['skin_width'])
+        robot_dim = [roboConfig['dimensions']['x'], roboConfig['dimensions']['y'], roboConfig['dimensions']['z']]
+        robot = roboconf.Robot(all_pos[0], roborot, mics, motors, robot_dim)
 
         # Reading the data from the source file
         [data, fs] = sf.read(simConfig['source_config']['input_utterance']['path'], always_2d=True)
