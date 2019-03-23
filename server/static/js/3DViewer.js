@@ -191,12 +191,16 @@ class SceneView{
     return cube
   }
 
-  createBox(width, height, depth, colour=0x00ff00, inverted=false){
+  createBox(width, height, depth, colour=0x00ff00, inverted=false, attachAxes = false){
     var geometry = new THREE.BoxGeometry( width, height, depth );
     var material = new THREE.MeshBasicMaterial( { color: colour } );
     var cube = new THREE.Mesh( geometry, material );
     if(inverted){
       material.side = THREE.BackSide
+    }
+    if(attachAxes){
+      var axesHelper = new THREE.AxesHelper(1);
+      cube.add(axesHelper);
     }
     this.scene.add( cube );
     return cube

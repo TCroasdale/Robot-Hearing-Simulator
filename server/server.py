@@ -234,7 +234,6 @@ class WebServer:
             robotid = dict['simulation_config']['robot_config']['uid']
             robot = self.db.get_one("SELECT * FROM robots WHERE id =?", [robotid], type=Robot)
 
-            print(robotid)
             if robot is not None and (robot.userID == session['userID'] or self.db.item_is_public(robot.id, "ROBOT")):
                 dict['simulation_config']['robot_config']['path'] = robot.pathToConfig
             else:
@@ -670,6 +669,27 @@ class WebServer:
             doc_html = Markup(markdown.markdown(doc))
 
             return jsonify({'success': 'true', 'html': doc_html})
+
+        @self.app.route('/getrobotconfig')
+        def getrobotconfig():
+            if 'userID' not in session: return jsonify({"success": "false", "reason": "No user session"})
+            print('A')
+            robotID = request.args['robot'] if 'robot' in request.args else None
+            print('B')
+            if robotID is not None:
+                robot = self.db.get_one("SELECT * FROM robots WHERE id =?", [robotID], type=Robot)
+                print('C')
+
+                if robot is not None and (robot.userID == session['userID'] or self.db.item_is_public(robot.id, "ROBOT")):
+                    print('D')
+                    robot_conf = open(robot.pathToConfig).read()
+                    print('E')
+                    return jsonify({"success": "true", "robot": json.loads(robot_conf)})
+                else:
+                    print('F')
+                    return jsonify({"success": "false", "reason": "robot not found"})
+            else:
+                return jsonify({"success": "false", "reason": "robotID not sent"})
 
 
 

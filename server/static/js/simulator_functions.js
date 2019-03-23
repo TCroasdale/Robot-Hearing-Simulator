@@ -4,7 +4,7 @@ function fetchEditorState(link=false){
     return {
       "variables": {},
       "simulation_config": {
-       "robot_pos": { "x": 0, "y": -2, "z": 0 },
+       "robot_pos": { "x": 0, "y": -1, "z": 0 },
        "room_dimensions": {"x": 5,"y": 5,"z": 5},
        "rt60": 0.4,"sample_rate": 16000,
        "source_config": {
@@ -21,6 +21,16 @@ function fetchEditorState(link=false){
       editorState = linkVars(editorState)
     return editorState
   }
+}
+
+function updateRobotView(data){
+    console.log(data)
+    if (data.success){
+      config = data.robot
+      robot.scale.x = Number(config['robot_config']['dimensions']['x'])
+      robot.scale.y = Number(config['robot_config']['dimensions']['y'])
+      robot.scale.z = Number(config['robot_config']['dimensions']['z'])
+    }
 }
 
 function linkVars(conf){
@@ -94,8 +104,10 @@ $(document).ready(function() {
 
   // ===== Setting up 3D Viewer =====
   room = sceneView.createRoom(1, 1, 1, 0xeeeeee, 0x222222)
-  robot = sceneView.createSphere(0.5, 0x3f7faa, false)
+  robot = sceneView.createBox(1, 1, 1, 0x3f7faa, true, true)
   sources = [[sceneView.createSphere(0.25, 0xff0000, false, true)]]
+
+  sceneView.setZoomLevel(8)
 
   update_UI(fetchEditorState(true))
   update3DView(fetchEditorState(true))
@@ -113,6 +125,14 @@ $(document).ready(function() {
       $('#preview-src').addClass("disabled")
     }
   })
+
+  $('#robot-select').change(function(){
+    id = $(this).children('option:selected').val()
+    $.get('/getrobotconfig', {robot: id}, updateRobotView)
+  })
+
+  id = $('#robot-select').children('option:selected').val()
+  $.get('/getrobotconfig', {robot: id}, updateRobotView)
 
 
 
