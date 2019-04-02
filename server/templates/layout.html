@@ -53,7 +53,7 @@
               <ul class="navbar-nav ml-auto">
                 <li class="nav-item dropdown">
                   <a class="nav-link dropdown-toggle {{ 'active' if request.path == '/dashboard' else ''}}" href="/dashboard" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Account <span class="fas fa-user-circle"/></a>
-                  <div class="dropdown-menu" aria-labelledby="dropdown01">
+                  <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown01">
                     {% if 'userID' in session %}
                     <p class="dropdown-item text-muted">{{ user.email }}</p>
                     <hr>
