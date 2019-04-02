@@ -4,7 +4,7 @@ function fetchEditorState(link=false){
     return {
       "variables": {},
       "simulation_config": {
-       "robot_pos": { "x": 0, "y": -2, "z": 0 },
+       "robot_pos": { "x": 0, "y": -1, "z": 0 },
        "room_dimensions": {"x": 5,"y": 5,"z": 5},
        "rt60": 0.4,"sample_rate": 16000,
        "source_config": {
@@ -21,6 +21,16 @@ function fetchEditorState(link=false){
       editorState = linkVars(editorState)
     return editorState
   }
+}
+
+function updateRobotView(data){
+    console.log(data)
+    if (data.success){
+      config = data.robot
+      robot.scale.x = Number(config['robot_config']['dimensions']['x'])
+      robot.scale.y = Number(config['robot_config']['dimensions']['y'])
+      robot.scale.z = Number(config['robot_config']['dimensions']['z'])
+    }
 }
 
 function linkVars(conf){
@@ -90,12 +100,14 @@ $(document).ready(function() {
   create_vector3_input($('#robo-pos'), "Robot Position", "POS", 0, 0.25,)
   create_vector3_input($('#room-dim'), "Room Dimensions", "DIM", 5.0, 0.25)
   create_number_input($('#rt-60'), 'RT 60', 0.4, 0.1, "", true)
-  create_number_input($('#sample-rate'), 'Sample Rate', 16000, 100, "", true)
+  // create_number_input($('#sample-rate'), 'Sample Rate', 16000, 100, "", true)
 
   // ===== Setting up 3D Viewer =====
   room = sceneView.createRoom(1, 1, 1, 0xeeeeee, 0x222222)
-  robot = sceneView.createSphere(0.5, 0x3f7faa, false)
+  robot = sceneView.createBox(1, 1, 1, 0x3f7faa, true, true)
   sources = [[sceneView.createSphere(0.25, 0xff0000, false, true)]]
+
+  sceneView.setZoomLevel(8)
 
   update_UI(fetchEditorState(true))
   update3DView(fetchEditorState(true))
@@ -113,6 +125,18 @@ $(document).ready(function() {
       $('#preview-src').addClass("disabled")
     }
   })
+
+  $('#robot-select').change(function(){
+    id = $(this).children('option:selected').val()
+    $.get('/getrobotconfig', {robot: id}, updateRobotView)
+  })
+  $('#public-robot-id').change(function(){
+    id = $(this).val()
+    $.get('/getrobotconfig', {robot: id}, updateRobotView)
+  })
+
+  id = $('#robot-select').children('option:selected').val()
+  $.get('/getrobotconfig', {robot: id}, updateRobotView)
 
 
 
@@ -372,7 +396,7 @@ function update_UI(conf){
   set_vec3_input('robo-pos', conf['simulation_config']['robot_pos'])
   set_vec3_input('room-dim', conf['simulation_config']['room_dimensions'], "DIM")
   set_number_input('rt-60', conf['simulation_config']['rt60'])
-  set_number_input('sample-rate', conf['simulation_config']['sample_rate'])
+  // set_number_input('sample-rate', conf['simulation_config']['sample_rate'])
 
   console.log("conf", conf)
   var sim_setups = conf['simulation_config']['source_config']['simulation_setups']
@@ -427,8 +451,8 @@ function compile_ui(){
   var robopos = read_vec3_input('robo-pos', "POS", old_cfg['simulation_config']['robot_pos'])
   var roomdim = read_vec3_input('room-dim', "DIM", old_cfg['simulation_config']['room_dimensions'])
   var rt60 = read_num_input('rt-60', old_cfg['simulation_config']['rt60'])
-  var sample = read_num_input('sample-rate', old_cfg['simulation_config']['sample_rate'])
-  sim_config = {"robot_pos": robopos, "room_dimensions": roomdim, "rt60": rt60, "sample_rate": sample}
+  // var sample = read_num_input('sample-rate', old_cfg['simulation_config']['sample_rate'])
+  sim_config = {"robot_pos": robopos, "room_dimensions": roomdim, "rt60": rt60, "sample_rate": "16000"}
 
   num_srcs = $('#src-setups')[0].children.length
   sim_setups = []
@@ -438,6 +462,11 @@ function compile_ui(){
     var style = $('#{0}-sel'.format(id))[0].value
     old_setup = old_cfg['simulation_config']['source_config']['simulation_setups'][i]
     if(style == "box"){
+      if(old_setup === undefined){ old_setup = {
+        "origin": { "x": 0, "y": 0, "z": 0 },
+       "dimensions": { "x": 1, "y": 1, "z": 1 },
+       "divisions": { "x": 2, "y": 2, "z": 2 } }
+      }
       var dim = read_vec3_input('{0}-box-dim'.format(id), "DIM", old_setup['dimensions'])
       var div = read_vec3_input('{0}-box-div'.format(id), "DIM", old_setup['divisions'])
       var or = read_vec3_input('{0}-box-pos'.format(id), "POS", old_setup['origin'])
@@ -445,6 +474,9 @@ function compile_ui(){
       sim_setups.push(src_setup)
     }
     else if(style == "pyramid"){
+      if(old_setup === undefined){
+        old_setup = { "origin": { "x": 0, "y": 0, "z": 0 }, "layers": 4, "divisions": 3, "angle_from_normal": 30, "length": 8 }
+      }
       var lay = read_num_input('{0}-pyramid-lays'.format(id), old_setup['layers'])
       var div = read_num_input('{0}-pyramid-divs'.format(id), old_setup['divisions'])
       var len = read_num_input('{0}-pyramid-len'.format(id), old_setup['length'])
@@ -454,6 +486,9 @@ function compile_ui(){
       sim_setups.push(src_setup)
     }
     else if(style == "sphere"){
+      if(old_setup === undefined){
+        old_setup = { "origin": { "x": 0, "y": 0, "z": 0 }, "rings": 4, "segments": 8, "radius": 4 }
+      }
       var rin = read_num_input('{0}-sphere-rings'.format(id), old_setup['rings'])
       var seg = read_num_input('{0}-sphere-segs'.format(id), old_setup['segments'])
       var rad = read_num_input('{0}-sphere-rad'.format(id), old_setup['radius'])
@@ -462,6 +497,9 @@ function compile_ui(){
       sim_setups.push(src_setup)
     }
     else if(style == "single"){
+      if(old_setup === undefined){
+        old_setup = { "origin": { "x": 0, "y": 0, "z": 0 } }
+      }
       var pos = read_vec3_input('{0}-single-pos'.format(id), "POS", old_setup['origin'])
       src_setup = {"style": style, "origin": pos}
       sim_setups.push(src_setup)

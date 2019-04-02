@@ -2,7 +2,6 @@ from server import WebServer
 from utilities import Utilities
 from database.db_manager import User, Simulation, Sound, Robot
 from database.db_manager_sqlite import DB_Manager_SQLite
-from database.db_manager_mongodb import DB_Manager_MongoDB
 from config import *
 from apscheduler.schedulers.background import BackgroundScheduler
 

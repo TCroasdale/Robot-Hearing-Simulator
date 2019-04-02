@@ -3,7 +3,7 @@ function fetchEditorState(){
     // Return a default config if editor is empty
     return {
      "robot_config": {
-      "skin_width": 0.25,
+      "dimensions": {"x": 1,"y": 1,"z": 1},
       "microphones": [{"id": 0,
         "local_pos": { "x": 0, "y": 0, "z": 0},
         "local_rot": {"x": 0,"y": 0,"z": 0},
@@ -118,7 +118,9 @@ $(document).ready(function() {
 
   // ===== Setting up 3D Viewer =====
   sceneView.createRoom(5, 5, 5, 0xeeeeee, 0x222222)
-  robot = sceneView.createSphere(1.0, 0x3f7faa, true)
+  sceneView.setZoomLevel(3)
+  // robot = sceneView.createSphere(1.0, 0x3f7faa, true)
+  robot = sceneView.createBox(1.0, 1.0, 1.0, 0x3f7faa, true)
   mics = [sceneView.createCone(0.2, 0.2)]
   motors = [sceneView.createSphere(0.1, 0x44ee44)]
 
@@ -250,7 +252,8 @@ $(document).ready(function() {
 
 function update_UI(conf){
   console.log(conf)
-  set_number_input('skin-width', conf['robot_config']['skin_width'])
+  // set_number_input('skin-width', conf['robot_config']['skin_width'])
+  set_vec3_input('robot-dim', conf['robot_config']['dimensions'])
 
   var mic_setups = conf['robot_config']["microphones"]
   $('#mic-setups').empty()
@@ -321,10 +324,10 @@ function failVerify(message, id){
 }
 
 function compile_ui(){
-  console.trace()
   console.log("Compiling robot to code..")
   code = {}
-  var skin_width = read_num_input('skin-width')
+  // var skin_width = read_num_input('skin-width')
+  var dimensions = read_vec3_input('robot-dim')
 
   num_mics = $('#mic-setups')[0].children.length
 
@@ -352,7 +355,7 @@ function compile_ui(){
   }
   $('#mot-conf-0-del').remove()
 
-  code['robot_config'] = {'skin_width': skin_width, "microphones": mic_setups, "motors": mot_setups}
+  code['robot_config'] = {'dimensions': dimensions, "microphones": mic_setups, "motors": mot_setups}
   return code
 }
 
@@ -360,9 +363,9 @@ function compile_ui(){
 function update3DView(config){
   console.log("Updating your view.")
 
-  robot.scale.x = Number(config['robot_config']['skin_width'])
-  robot.scale.y = Number(config['robot_config']['skin_width'])
-  robot.scale.z = Number(config['robot_config']['skin_width'])
+  robot.scale.x = Number(config['robot_config']['dimensions']['x'])
+  robot.scale.y = Number(config['robot_config']['dimensions']['y'])
+  robot.scale.z = Number(config['robot_config']['dimensions']['z'])
 
   motor_confs = config['robot_config']['motors']
   for(var i in motors){

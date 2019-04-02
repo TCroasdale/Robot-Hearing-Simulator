@@ -9,8 +9,7 @@ This tab contains the basic information of the robot: name and shape.
 
 - Robot Name: The name of the robot to be used.
     - This is not stored in the config file.
-- Skin Width: The radius of the bounding sphere of the robot.
-    - This will change soon.
+- Dimensions: The size (in metres) of the bounding box of the robot.
 
 ---
 ## The Microphones Tab
