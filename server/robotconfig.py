@@ -37,7 +37,7 @@ class Vector3(object):
             z = self.z / other
             return Vector3(x, y, z)
         else:
-            print("Cannot divide vector by type {0}".format(type(other))) 
+            print("Cannot divide vector by type {0}".format(type(other)))
             return Vector3(0, 0, 0)
 
     def __str__(self):
@@ -99,7 +99,7 @@ class Transform(object):
             return self.position
         else:
             return self.parent.get_world_pos() + self.position
-                    
+
 
 
     def get_world_rot(self):
@@ -122,6 +122,7 @@ class RobotMotor(object):
     def __init__(self, localpos, sounddata, id):
         self.id = id
         self.transform = Transform(localpos, [0.0, 0.0, 0.0], None)
+        self.sounddata = sounddata
 
     def __str__(self):
         info = "id: {0}, transform: {1}".format(self.id, self.transform)

@@ -1,6 +1,10 @@
 {
  "robot_config": {
-  "skin_width": 0.5,
+  "dimensions": {
+    "x": 0.4,
+    "y": 0.5,
+    "z": 0.5
+  },
   "microphones": [
    {
     "id": 0,
@@ -46,7 +50,8 @@
      "z": -0.05
     },
     "sound": {
-     "uid": -1
+     "uid": -1,
+     "path": "../test_data/lg-servo.wav"
     }
    },
    {
@@ -57,7 +62,8 @@
      "z": -0.05
     },
     "sound": {
-     "uid": -1
+     "uid": -1,
+     "path": "../test_data/sm-elec.wav"
     }
    }
   ]

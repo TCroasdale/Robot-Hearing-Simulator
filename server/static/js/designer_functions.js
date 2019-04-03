@@ -122,7 +122,7 @@ $(document).ready(function() {
   // robot = sceneView.createSphere(1.0, 0x3f7faa, true)
   robot = sceneView.createBox(1.0, 1.0, 1.0, 0x3f7faa, true)
   mics = [sceneView.createCone(0.2, 0.2)]
-  motors = [sceneView.createSphere(0.1, 0x44ee44)]
+  motors = [sceneView.createSphere(0.05, 0x44ee44)]
 
 
   // Update UI with default values
@@ -188,7 +188,7 @@ $(document).ready(function() {
     else{
       fData.append('robot_name', $('#robot-name')[0].innerHTML)
     }
-    
+
 
     urlParams = new URLSearchParams(window.location.search)
     if(urlParams.has('robot')){
@@ -374,7 +374,7 @@ function update3DView(config){
   motors = []
   for(var i in motor_confs){
     conf = motor_confs[i]
-    motors.push(sceneView.createSphere(0.1, 0x44ee44))
+    motors.push(sceneView.createSphere(0.05, 0x44ee44))
     motors[i].position.x = Number(conf['local_pos']['x'])
     motors[i].position.y = Number(conf['local_pos']['y'])
     motors[i].position.z = Number(conf['local_pos']['z'])
@@ -398,4 +398,3 @@ function update3DView(config){
   }
 
 }
-

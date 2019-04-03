@@ -9,9 +9,8 @@ function fetchEditorState(link=false){
        "rt60": 0.4,"sample_rate": 16000,
        "source_config": {
          "simulation_setups": [{"style": "single", "origin": { "x": 0.0, "y": 0.0, "z": 0.0 }}],
-         "background_noise": { "uid": -1 }, "input_utterance": { "uid": -1, "volume": 1.0 }
-        },
-         "robot_config": { "uid": -1 }
+         "background_noise": { "volume": 1.0 }
+        }
       }
     }
   }else{
@@ -105,7 +104,7 @@ $(document).ready(function() {
   // ===== Setting up 3D Viewer =====
   room = sceneView.createRoom(1, 1, 1, 0xeeeeee, 0x222222)
   robot = sceneView.createBox(1, 1, 1, 0x3f7faa, true, true)
-  sources = [[sceneView.createSphere(0.25, 0xff0000, false, true)]]
+  sources = [[sceneView.createSphere(0.15, 0xff0000, false, true)]]
 
   sceneView.setZoomLevel(8)
 
@@ -226,6 +225,7 @@ $(document).ready(function() {
     if(!uttupload[0].disabled){
       fData.append('utterance', uttupload[0].files[0])
     }else{
+      console.log("fileID", getFileIDSelection('utterance-select', 'public-utt-id'))
       fData.append('utterance_id', getFileIDSelection('utterance-select', 'public-utt-id'))
     }
 
@@ -303,7 +303,7 @@ $(document).ready(function() {
 
 
 
-  // $('#add-src').click()  
+  // $('#add-src').click()
   $('#src-conf-0-del').remove()
 
 
@@ -330,15 +330,16 @@ $(document).ready(function() {
 })
 
 function getFileIDSelection(selectID, publicID){
-  if($('#' + selectID).value < 0){
+  console.log($('#' + selectID))
+  if($('#' + selectID).val() < 0){
     return $('#' + publicID).val()
   }else{
-    return $('#' + selectID).value
+    return $('#' + selectID).val()
   }
 }
 
 function verify(config){
-  if(Number(getFileIDSelection('bgnoise-select', 'public-bgnoise-id')) <= -1){
+  if(Number(getFileIDSelection('bgnoise-select', 'public-bgnoise-id')) < -1){
     if($('#bgnoise')[0].files.length < 1){
       failVerify("Please select a background noise file.", 'bgnoise-select')
       return false
@@ -565,7 +566,7 @@ function update3DView(config){
     }
     sources.push([])
     for(var k in source_pos_arr){
-      sources[i].push(sceneView.createSphere(0.25, 0xff0000, false, true))
+      sources[i].push(sceneView.createSphere(0.15, 0xff0000, false, true))
       sources[i][k].position.x = source_pos_arr[k]['x']// + offset['x']
       sources[i][k].position.y = source_pos_arr[k]['y']// + offset['y']
       sources[i][k].position.z = source_pos_arr[k]['z']// + offset['z']

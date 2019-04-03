@@ -91,11 +91,16 @@ input[type="file"]{
   animation-timing-function: ease;
 }
 label{
-  margin-bottom: 0px
+  margin-bottom: 0px;
+}
+
+.loading{
+  font-size: 60px;
+  left: -30px;
 }
 
 @keyframes loader {
-  0% {color: black; font-size: 30px; left: -15px;}
-  50% {color: #007bff; font-size: 60px; left: -30px;}
-  100% {color: black; font-size: 30px; left: -15px;}
+  0% {color: black; }
+  50% {color: #007bff;}
+  100% {color: black;  }
 }

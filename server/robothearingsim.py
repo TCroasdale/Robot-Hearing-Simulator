@@ -55,18 +55,14 @@ class RobotHearingSim:
         mics = [roomsimove_single.Microphone(mic.transform.get_world_pos().to_array(), mic.id,  \
                 orientation=mic.transform.get_world_rot(), direction=mic.style) \
                 for mic in robot.microphones]
-
-
         sim_rir = roomsimove_single.RoomSim(conf.sample_rate, room, mics, RT60=conf.rt60)
         rir = sim_rir.create_rir(source_position.to_array())
-
 
         data = conf.sound_data
         data_rev = []
         for x in range(0, len(mics)): # Simulate a channel for each microphone in th  scene
             data_simmed = olafilt.olafilt(rir[:,x], data)
             data_rev += [data_simmed]
-
 
         data_rev_array = np.array(data_rev) #put the data together
         sf.write('temp_data/{0}/{3}_{1}.{2}'.format(conf.unique_name, i, SIM_FILE_EXT, file_prefix), data_rev_array.T, conf.sample_rate) #Write new file into a folder called temp_data
@@ -77,6 +73,11 @@ class RobotHearingSim:
             data_with_noise = np.add(data_rev_array, np.array(conf.bg_sound))
             sf.write('temp_data/{0}/{3}_with_noise_{1}.{2}'.format(conf.unique_name, i, SIM_FILE_EXT, file_prefix), data_with_noise.T, conf.sample_rate) #Write new file into a folder called temp_data
             print('Writing to temp_data/{0}/{3}_with_noise_{1}.{2}'.format(conf.unique_name, i, SIM_FILE_EXT, file_prefix))
+
+        for motor in robot.motors:
+            data_with_motors = np.add(data_rev_array, np.array(motor.sounddata))
+            sf.write('temp_data/{0}/{3}_with_motor_{4}_{1}.{2}'.format(conf.unique_name, i, SIM_FILE_EXT, file_prefix, motor.id), data_with_motors.T, conf.sample_rate)
+            print('Writing to temp_data/{0}/{3}_with_motor_{4}_{1}.{2}'.format(conf.unique_name, i, SIM_FILE_EXT, file_prefix, motor.id))
 
     def get_random_number(r_dict, rand):
 
@@ -96,7 +97,7 @@ class RobotHearingSim:
             return val
 
 
-    def run_from_json_config(sim_config, robot_config, filename):
+    def run_from_json_config(sim_config, robot_config, sounds, filename):
         simConfig = sim_config['simulation_config']
         roboConfig = robot_config['robot_config']
         rand = random.Random()
@@ -109,6 +110,21 @@ class RobotHearingSim:
                                     RobotHearingSim.check_value(room_dim.y, rand), \
                                     RobotHearingSim.check_value(room_dim.z, rand))# Check for random numbers
         print("room_dim: {0}".format(room_dim))
+
+        # Reading the data from the source file
+        [data, fs] = sf.read(sounds['utterance'], always_2d=True)
+        data =  data[:,0]
+
+
+        # If a BG noise has been specified, add that to the config after processing it.
+        if sounds['bgnoise'] is not None:
+            [bg_data, bg_fs] = sf.read(sounds['bgnoise'], always_2d=True)
+            bg_data = bg_data[:,0] # Converts to mono
+            # Then convert to the correct shape and amplify/quiten it
+            bg_data = util.resample_sound(bg_data, fs, bg_fs)
+            bg_data = util.resize_sound(bg_data, len(data))
+            if 'volume' in simConfig['source_config']['background_noise']:
+                bg_data = util.amplify_sound(bg_data, simConfig['source_config']['background_noise']['volume'])
 
 
         source_positions = []
@@ -132,11 +148,22 @@ class RobotHearingSim:
         for mic in roboConfig['microphones']:
             pos = roboconf.Vector3(mic['local_pos']['x'], mic['local_pos']['y'], mic['local_pos']['z'])
             rot = [mic['local_rot']['x'], mic['local_rot']['y'], mic['local_rot']['z']]
-            microphone = roboconf.RobotMicrophone(pos, rot, mic['mic_style']['path'], mic['id'])
+            style = mic['mic_style']['path']
+            style = style.replace(".txt", "")
+            microphone = roboconf.RobotMicrophone(pos, rot, style, mic['id'])
             mics.append(microphone)
 
         # Do motors
         motors = []
+        for motor in roboConfig['motors']:
+            pos = roboconf.Vector3(motor['local_pos']['x'], motor['local_pos']['y'], motor['local_pos']['z'])
+            [sound, mo_fs] = sf.read(motor['sound']['path'], always_2d=True)
+            sound = sound[:,0] # Convert to mono
+            sound = util.resample_sound(sound, fs, mo_fs)
+            sound = util.resize_sound(sound, len(data))
+            sound = util.amplify_sound(sound, 0.4)
+            motor = roboconf.RobotMotor(pos, sound, motor['id'])
+            motors.append(motor)
 
         robopos = roboconf.Vector3(simConfig['robot_pos']['x'], simConfig['robot_pos']['y'], simConfig['robot_pos']['z'])
         roborot = [0.0,0.0,0.0] #[simConfig['robot_rot']['x'], simConfig['robot_rot']['y'], simConfig['robot_rot']['z']]
@@ -147,25 +174,9 @@ class RobotHearingSim:
         robot_dim = [roboConfig['dimensions']['x'], roboConfig['dimensions']['y'], roboConfig['dimensions']['z']]
         robot = roboconf.Robot(all_pos[0], roborot, mics, motors, robot_dim)
 
-        # Reading the data from the source file
-        [data, fs] = sf.read(simConfig['source_config']['input_utterance']['path'], always_2d=True)
-        data =  data[:,0]
 
         unique_num = uuid.uuid4()
-
-        config = SimulationConfig(data, room_dim, rt60, fs, robot, unique_num)
-
-        # If a BG noise has been specified, add that to the config after processing it.
-        use_bg_noise = 'path' in simConfig['source_config']['background_noise']
-        if use_bg_noise:
-            [bg_data, bg_fs] = sf.read(simConfig['source_config']['background_noise']['path'], always_2d=True)
-            bg_data = bg_data[:,0] # Converts to mono
-            # Then convert to the correct shape and amplify/quiten it
-            bg_data = util.resample_sound(bg_data, fs, bg_fs)
-            bg_data = util.resize_sound(bg_data, len(data))
-            if 'volume' in simConfig['source_config']['background_noise']:
-                bg_data = util.amplify_sound(bg_data, simConfig['source_config']['background_noise']['volume'])
-            config.bg_sound = bg_data
+        config = SimulationConfig(data, room_dim, rt60, fs, robot, unique_num, bg_sound = bg_data)
 
         os.mkdir('temp_data/{0}'.format(unique_num)) # Create folder for temp data
 
@@ -178,13 +189,14 @@ class RobotHearingSim:
         zipper.make_archive(zip_name, 'zip', directory_name)
         for i in range(len(source_positions)):
             os.remove('temp_data/{0}/{3}_{1}.{2}'.format(unique_num, i, SIM_FILE_EXT, "data"))
-            if use_bg_noise:
+            if sounds['bgnoise'] is not None:
                 os.remove('temp_data/{0}/{3}_{1}.{2}'.format(unique_num, i, SIM_FILE_EXT, "data_with_noise"))
+            for motor in robot.motors:
+                os.remove('temp_data/{0}/{3}_with_motor_{4}_{1}.{2}'.format(unique_num, i, SIM_FILE_EXT, "data", motor.id))
+
 
         os.rmdir('temp_data/{0}'.format(unique_num))
         return zip_name + ".zip"
-
-
 
 
     def parse_box_source_setup(setup):
@@ -275,8 +287,8 @@ class RobotHearingSim:
 # Test Harness for this system
 if __name__ == '__main__': #Main Entry point
     parser = argparse.ArgumentParser() # Parsing program arguments
-    parser.add_argument('-c', help='The config file', default='../configexample.json')
-    parser.add_argument('-r', help='The robot config', default='../config_robot.json')
+    parser.add_argument('-c', help='The config file', default='../test_configs/configexample.json')
+    parser.add_argument('-r', help='The robot config', default='../test_configs/config_robot.json')
     parser.add_argument('-u', help='The robot config', default='../test_data/data.wav')
     parser.add_argument('-bg', help='The robot config', default='../test_data/bg-noise.wav')
 
@@ -293,8 +305,11 @@ if __name__ == '__main__': #Main Entry point
 
     robot_config_json=open(args.r).read()
     robot_config = json.loads(robot_config_json)
+    sounds = {'utterance': None, 'bgnoise': None}
+    sounds['utterance'] = args.u
+    sounds['bgnoise'] = args.bg
 
-    RobotHearingSim.run_from_json_config(sim_config, robot_config, "test")
+    RobotHearingSim.run_from_json_config(sim_config, robot_config, sounds, "test")
 
     box = RobotHearingSim.parse_box_source_setup({"style": "box","origin": {"x": 0,"y": 0,"z": 0},"dimensions": {"x": 5,"y": 5,"z": 5}, "divisions": {"x": 3,"y": 3,"z": 3}})
     sphere = RobotHearingSim.parse_sphere_source_setup({"style": "sphere","origin": {"x": 0,"y": 0,"z": 0}, "rings": 8,"segments": 12,"radius": 2})

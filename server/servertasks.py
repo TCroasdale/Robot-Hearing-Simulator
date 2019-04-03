@@ -5,14 +5,17 @@ from database.db_manager_sqlite import DB_Manager_SQLite
 from celery import Celery
 from datetime import datetime as dt
 from config import *
+from celery.utils.log import get_task_logger
+
 
 celeryApp = Celery('servertasks', broker='pyamqp://guest@localhost//')
+logger = get_task_logger(__name__)
 
 def endTask(taskID):
     celeryApp.control.revoke(taskID, terminate=True)
 
 @celeryApp.task(bind=True)
-def runSimulation(self, simconfig, roboconfig, filename, simid):
+def runSimulation(self, simconfig, roboconfig, sounds, filename, simid):
     if DATABASE == "SQLite":
         db = DB_Manager_SQLite(SQLITE_DB_LOCATION)
     else:
@@ -25,7 +28,9 @@ def runSimulation(self, simconfig, roboconfig, filename, simid):
     db.run_query("UPDATE simulations SET state = ?, taskID = ? WHERE id = ?" , ("running", self.request.id, simid))
 
     try:
-        dlFile = sim.run_from_json_config(sim_config, robo_config, filename)
+
+        dlFile = sim.run_from_json_config(sim_config, robo_config, sounds, filename)
+
         db.run_query("UPDATE simulations SET state = ? WHERE id = ?" , ("finished", simid))
         db.run_query("UPDATE simulations SET pathToZip = ? WHERE id = ?" , (dlFile, simid))
         db.run_query("UPDATE simulations SET dateFinished = ? WHERE id = ?" , (str(dt.now().date()), simid))

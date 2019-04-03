@@ -12,7 +12,8 @@ class Utilities:
                         Utilities.objectifyJson(val)
                 else:
                     try: # CHeck if it has numeric
-                        json[key] = float(json[key])
+                        if json[key] is not None:
+                            json[key] = float(json[key])
                     except ValueError:
                         0 # Do Nothing
         else:
@@ -68,7 +69,11 @@ class Utilities:
         if len(sound) > target_length:
             return sound[:target_length]
         elif len(sound) < target_length:
-            return sound.append(sound[:(target_length - len(sound))])
+            length_needed = target_length - len(sound)
+            nRepeats = int(np.ceil(length_needed / len(sound)))+1
+
+            sound = np.tile(sound, nRepeats)
+            return sound[:target_length]
         else:
             return sound
 

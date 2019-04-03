@@ -212,39 +212,10 @@ class WebServer:
             return jsonify({"success": "true"})
 
 
-        def insert_config_paths(dict):
-            # attach the utterance path
-            utteranceid = dict['simulation_config']['source_config']['input_utterance']['uid']
-            utterance = self.db.get_one("SELECT * FROM sounds WHERE id=?", [utteranceid], type=Sound)
-            if utterance is not None and (utterance.userID == session['userID'] or self.db.item_is_public(utterance.id, "SOUND")):
-                dict['simulation_config']['source_config']['input_utterance']['path'] = utterance.pathToFile
-            else:
-                raise BadSoundIDException
-
-            # attach the bgnoise path if it exists
-            if 'background_noise' in dict['simulation_config']['source_config']:
-                bgnoiseid = dict['simulation_config']['source_config']['background_noise']['uid']
-                bgnoise = self.db.get_one("SELECT * FROM sounds WHERE id=?", [bgnoiseid], type=Sound)
-                if bgnoise is not None and (bgnoise.userID == session['userID'] or self.db.item_is_public(bgnoise.id, "SOUND")):
-                    dict['simulation_config']['source_config']['background_noise']['path'] = bgnoise.pathToFile
-                else:
-                    raise BadSoundIDException
-
-            # Attach the robot config path
-            robotid = dict['simulation_config']['robot_config']['uid']
-            robot = self.db.get_one("SELECT * FROM robots WHERE id =?", [robotid], type=Robot)
-
-            if robot is not None and (robot.userID == session['userID'] or self.db.item_is_public(robot.id, "ROBOT")):
-                dict['simulation_config']['robot_config']['path'] = robot.pathToConfig
-            else:
-                raise BadRobotIDException
-
-            return (dict, robot.pathToConfig)
-
         @self.app.route('/simulator/preview_sim', methods=['POST'])
         def preview_simulation():
             if 'userID' not in session: return jsonify({"success": "false"})
-            
+
             conf = { "simulation_config": {'source_config': {'simulation_setups': [{'style': 'single'}], 'input_utterance': {}}, 'robot_config': {}} }
 
             room_dim = request.form['room-size']
@@ -264,7 +235,7 @@ class WebServer:
                 conf['simulation_config']['source_config']['input_utterance']['uid'] = request.form['utterance_id']
 
             conf['simulation_config']['source_config']['robot_config']['uid'] = request.form['robot_id']
-            
+
             # Fix the file paths
             try:
                 (conf, robotPath) = insert_config_paths(conf)
@@ -280,7 +251,7 @@ class WebServer:
 
             return jsonify({"success": "true"})
 
-            
+
 
         @self.app.route('/simulator/redo_simulation', methods=['POST'])
         def re_run_simulation():
@@ -292,14 +263,15 @@ class WebServer:
             strdict = json.loads(sim_conf)
 
             if 'utterance' in request.files:
-                utt = processSoundUpload(request.files['utterance'], session['userID'])
+                utt = processFileUpload(request.files['utterance'], session['userID'])
                 strdict['simulation_config']['source_config']['input_utterance']['uid'] = utt.id
             else:
                 strdict['simulation_config']['source_config']['input_utterance']['uid'] = request.form['utterance_id']
 
 
+
             if 'bgnoise' in request.files:
-                bgnoise = processSoundUpload(request.files['bgnoise'], session['userID'])
+                bgnoise = processFileUpload(request.files['bgnoise'], session['userID'])
                 strdict['simulation_config']['source_config']['background_noise']['uid'] = bgnoise.id
             else:
                 if int(request.form['bgnoise_id']) < 0:
@@ -342,43 +314,17 @@ class WebServer:
 
         @self.app.route('/simulator/run_simulation', methods=['POST'])
         def run_simulation():
-            if 'userID' not in session: return jsonify({"success": "false"})
+            if 'userID' not in session: return jsonify({"success": "false", "reason": "no user found"})
 
-            strdict = json.loads(request.form['config'])
+            sim_conf = json.loads(request.form['config'])
 
             # Link variables
-            strdict['simulation_config'] = util.link_vars(strdict['simulation_config'], strdict['variables'])
+            sim_conf['simulation_config'] = util.link_vars(sim_conf['simulation_config'], sim_conf['variables'])
 
 
-            if 'utterance' in request.files:
-                utt = processSoundUpload(request.files['utterance'], session['userID'])
-                strdict['simulation_config']['source_config']['input_utterance']['uid'] = utt.id
-            else:
-                strdict['simulation_config']['source_config']['input_utterance']['uid'] = request.form['utterance_id']
-
-
-            if 'bgnoise' in request.files:
-                bgnoise = processSoundUpload(request.files['bgnoise'], session['userID'])
-                strdict['simulation_config']['source_config']['background_noise']['uid'] = bgnoise.id
-            else:
-                if int(request.form['bgnoise_id']) < 0:
-                    # Remove the background_noise entry if bg noise has not been provided
-                    strdict['simulation_config']['source_config'].pop('background_noise', None)
-                else:
-                    strdict['simulation_config']['source_config']['background_noise']['uid'] = request.form['bgnoise_id']
-
-            strdict['simulation_config']['robot_config']['uid'] = request.form['robot_id']
+            # sim_conf['simulation_config']['robot_config']['uid'] = request.form['robot_id']
             seed = str(uuid.uuid4())
-            strdict['simulation_config']['seed'] = seed
-
-
-            # Fix the file paths
-            try:
-                (strdict, robotPath) = insert_config_paths(strdict)
-            except BadSoundIDException:
-                return jsonify({"success": "false", "reason": "Bad sound id"})
-            except BadRobotIDException:
-                return jsonify({"success": "false", "reason": "Bad robot id"})
+            sim_conf['simulation_config']['seed'] = seed
 
 
             if 'sim_to_update' in request.form:
@@ -387,7 +333,7 @@ class WebServer:
                     filename = sim.pathToConfig
 
                     with open(filename, 'w') as f:
-                        json.dump(strdict, f, sort_keys=False, indent=4, ensure_ascii = False)
+                        json.dump(sim_conf, f, sort_keys=False, indent=4, ensure_ascii = False)
 
                     return jsonify({"success": "true"})
                 else:
@@ -396,20 +342,61 @@ class WebServer:
                 # Save the JSON config to a file
                 unique_name = uuid.uuid4()
                 filename = UPLOAD_DIR + "simulation_configs/{0}.json".format(unique_name)
-                # print("putting sim file in: {0}".format(filename))
+                print("putting sim file in: {0}".format(filename))
                 with open(filename, 'w') as f:
-                    json.dump(strdict, f, sort_keys=False, indent=4, ensure_ascii = False)
+                    json.dump(sim_conf, f, sort_keys=False, indent=4, ensure_ascii = False)
+
+                sounds = {'utterance': None, 'bgnoise': None}
+
+                # Check for utterance ID
+                if 'utterance' in request.files:
+                    sounds['utterance'] = processFileUpload(request.files['utterance'], session['userID'])
+                else:
+                    print(request.form)
+                    sounds['utterance'] = self.db.get_sound(request.form['utterance_id'])
+
+                # Checking the utterance file.
+                utt = sounds['utterance']
+                print(utt)
+                if utt is None or (utt.userID != session['userID'] and not self.db.item_is_public(utt.id, "SOUND")):
+                    return jsonify({"success": "false", "reason": "No sound found."})
+
+                if 'bgnoise' in request.files:
+                    sounds['bgnoise'] = processFileUpload(request.files['bgnoise'], session['userID'])
+                else:
+                    if int(request.form['bgnoise_id']) >= 0:
+                        sounds['bgnoise'] = self.db.get_sound(request.form['bgnoise_id'])
+
+                bgn = sounds['bgnoise']
+                if bgn is not None and (bgn.userID != session['userID'] or not self.db.item_is_public(bgn.id, "SOUND")):
+                    return jsonify({"success": "false", "reason": "No background noise sound found."})
+
+                sounds['utterance'] = sounds['utterance'].pathToFile
+                sounds['bgnoise'] = sounds['bgnoise'].pathToFile if sounds['bgnoise'] is not None else None
+
+                robotid = request.form['robot_id']
+                robot = self.db.get_one("SELECT * FROM robots WHERE id =?", [robotid], type=Robot)
+
+                if robot is None or (robot.userID != session['userID'] and not self.db.item_is_public(robot.id, "ROBOT")):
+                    print("Robot: {0}".format(robot))
+                    print("userID {0}, sessionID {1}".format(robot.userID, session['userID']))
+                    print("public item {0}".format(self.db.item_is_public(robot.id, "ROBOT")))
+                    return jsonify({"success": "false", "reason": "No robot found."})
+
+                robot_conf = open(robot.pathToConfig).read()
+                robot_conf_dict = json.loads(robot_conf)
 
                 date = str(dt.now().date())
                 sim = Simulation(filename, date, seed, session['userID'])
                 sim = self.db.insert_simulation(sim)
 
+                print("Running sim with: ")
+                print(sim_conf)
+                print(robot_conf_dict)
+                print(sounds)
 
-                robot_conf = open(robotPath).read()
-                robot_conf_dict = json.loads(robot_conf)
 
-
-                runSimulation.delay(strdict, robot_conf_dict, unique_name, sim.id)
+                runSimulation.delay(sim_conf, robot_conf_dict, sounds, unique_name, sim.id)
 
                 return jsonify({"success": "true"})
 

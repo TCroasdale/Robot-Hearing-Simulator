@@ -1,0 +1,39 @@
+{
+    "simulation_config": {
+        "robot_pos": {
+            "x": 0,
+            "y": -1,
+            "z": 0
+        },
+        "room_dimensions": {
+            "x": 12,
+            "y": 5,
+            "z": 12
+        },
+        "rt60": 0.4,
+        "sample_rate": "16000",
+        "source_config": {
+            "simulation_setups": [
+                {
+                    "style": "single",
+                    "origin": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                    }
+                }
+            ],
+            "background_noise": {
+                "uid": -1
+            },
+            "input_utterance": {
+                "uid": -1
+            }
+        },
+        "robot_config": {
+            "uid": -1
+        },
+        "seed": "75c92c2e-6043-47b4-8bc9-14efc77314d5"
+    },
+    "variables": {}
+}

@@ -104,8 +104,8 @@ class DB_Manager_SQLite(DB_Manager):
         with sql.connect(self.dbLocation) as con:
             cur = con.cursor()
 
-            cur.execute("INSERT INTO simulations (pathToConfig, dateCreated, state, seed, userID, visibility) \
-                VALUES (?,?,?,?,?,?)",(sim.pathToConfig, sim.dateCreated, sim.state, sim.seed, sim.userID, sim.visibility))
+            cur.execute("INSERT INTO simulations (pathToConfig, dateCreated, state, seed, userID) \
+                VALUES (?,?,?,?,?,?)",(sim.pathToConfig, sim.dateCreated, sim.state, sim.seed, sim.userID))
             rowid = cur.lastrowid
             con.commit()
             cur.execute("SELECT * FROM simulations WHERE id=?", [rowid])
@@ -115,8 +115,8 @@ class DB_Manager_SQLite(DB_Manager):
         with sql.connect(self.dbLocation) as con:
             cur = con.cursor()
 
-            cur.execute("INSERT INTO robots (name, pathToConfig, userID, visibility) \
-                VALUES (?,?,?,?)",(robo.name, robo.pathToConfig, robo.userID, robo.visibility))
+            cur.execute("INSERT INTO robots (name, pathToConfig, userID) \
+                VALUES (?,?,?,?)",(robo.name, robo.pathToConfig, robo.userID))
             rowid = cur.lastrowid
             con.commit()
             cur.execute("SELECT * FROM robots WHERE id=?", [rowid])
@@ -165,7 +165,7 @@ class DB_Manager_SQLite(DB_Manager):
             cur = con.cursor()
             cur.execute("DELETE FROM simulations WHERE id=?", [id])
         self.delete_public_item(id, "SIM")
-            
+
 
     def delete_sound(self, id):
         with sql.connect(self.dbLocation) as con:
@@ -179,7 +179,7 @@ class DB_Manager_SQLite(DB_Manager):
             cur.execute("DELETE FROM robots WHERE id=?", [id])
         self.delete_public_item(id, "ROBOT")
 
-    def delete_microphone(self, id): 
+    def delete_microphone(self, id):
         with sql.connect(self.dbLocation) as con:
             cur = con.cursor()
             cur.execute("DELETE FROM microphones WHERE id=?", [id])
@@ -200,8 +200,8 @@ class DB_Manager_SQLite(DB_Manager):
         with sql.connect(self.dbLocation) as con:
             cur = con.cursor()
 
-            cur.execute("INSERT INTO sounds (name, pathToFile, visibility, userID) VALUES (?,?,?,?)",\
-                        (sound.name, sound.pathToFile, sound.visibility, sound.userID))
+            cur.execute("INSERT INTO sounds (name, pathToFile, userID) VALUES (?,?,?,?)",\
+                        (sound.name, sound.pathToFile, sound.userID))
             rowid = cur.lastrowid
             con.commit()
             cur.execute("SELECT * FROM sounds WHERE id=?", [rowid])
