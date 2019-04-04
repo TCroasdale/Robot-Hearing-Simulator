@@ -6,7 +6,7 @@ function fetchEditorState(link=false){
       "simulation_config": {
        "robot_pos": { "x": 0, "y": -1, "z": 0 },
        "room_dimensions": {"x": 5,"y": 5,"z": 5},
-       "rt60": 0.4,"sample_rate": 16000,
+       "abs_coeff": {"Ax1": 0.6, "Ax2": 0.6, "Ay1": 0.6, "Ay2": 0.6,"Az1": 0.6, "Az2": 0.6},
        "source_config": {
          "simulation_setups": [{"style": "single", "origin": { "x": 0.0, "y": 0.0, "z": 0.0 }}],
          "background_noise": { "volume": 1.0 }
@@ -98,7 +98,7 @@ $(document).ready(function() {
 
   create_vector3_input($('#robo-pos'), "Robot Position", "POS", 0, 0.25,)
   create_vector3_input($('#room-dim'), "Room Dimensions", "DIM", 5.0, 0.25)
-  create_number_input($('#rt-60'), 'RT 60', 0.4, 0.1, "", true)
+  // create_number_input($('#rt-60'), 'RT 60', 0.4, 0.1, "", true)
   // create_number_input($('#sample-rate'), 'Sample Rate', 16000, 100, "", true)
 
   // ===== Setting up 3D Viewer =====
@@ -396,10 +396,17 @@ function update_UI(conf){
 
   set_vec3_input('robo-pos', conf['simulation_config']['robot_pos'])
   set_vec3_input('room-dim', conf['simulation_config']['room_dimensions'], "DIM")
-  set_number_input('rt-60', conf['simulation_config']['rt60'])
+  // set_number_input('rt-60', conf['simulation_config']['rt60'])
   // set_number_input('sample-rate', conf['simulation_config']['sample_rate'])
-
   console.log("conf", conf)
+  //
+  $('#Ax1').val(conf['simulation_config']['abs_coeff']['Ax1'])
+  $('#Ax2').val(conf['simulation_config']['abs_coeff']['Ax2'])
+  $('#Ay1').val(conf['simulation_config']['abs_coeff']['Ay1'])
+  $('#Ay2').val(conf['simulation_config']['abs_coeff']['Ay2'])
+  $('#Az1').val(conf['simulation_config']['abs_coeff']['Az1'])
+  $('#Az2').val(conf['simulation_config']['abs_coeff']['Az2'])
+
   var sim_setups = conf['simulation_config']['source_config']['simulation_setups']
   console.log("sim setups: ", sim_setups)
   for(s = 0; s < sim_setups.length; s++){
@@ -451,9 +458,18 @@ function compile_ui(){
   console.log("Compiling Code..")
   var robopos = read_vec3_input('robo-pos', "POS", old_cfg['simulation_config']['robot_pos'])
   var roomdim = read_vec3_input('room-dim', "DIM", old_cfg['simulation_config']['room_dimensions'])
-  var rt60 = read_num_input('rt-60', old_cfg['simulation_config']['rt60'])
+  // var rt60 = read_num_input('rt-60', old_cfg['simulation_config']['rt60'])
   // var sample = read_num_input('sample-rate', old_cfg['simulation_config']['sample_rate'])
-  sim_config = {"robot_pos": robopos, "room_dimensions": roomdim, "rt60": rt60, "sample_rate": "16000"}
+
+  let Ax1 = $('#Ax1').val()
+  let Ax2 = $('#Ax2').val()
+  let Ay1 = $('#Ay1').val()
+  let Ay2 = $('#Ay2').val()
+  let Az1 = $('#Az1').val()
+  let Az2 = $('#Az2').val()
+  let abs_coeff = { "Ax1": Ax1, "Ax2": Ax2, "Ay1": Ay1, "Ay2": Ay2, "Az1": Az1, "Az2": Az2 }
+
+  sim_config = {"robot_pos": robopos, "room_dimensions": roomdim, "abs_coeff": abs_coeff, "sample_rate": "16000"}
 
   num_srcs = $('#src-setups')[0].children.length
   sim_setups = []

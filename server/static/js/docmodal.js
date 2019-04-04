@@ -1,8 +1,6 @@
 function loadDocumentation(page){
   $.get('/documentation?p=' + page, function(data){
-    console.log(data)
     if(data.success === "true"){
-      console.log(data.html)
       $('#doc-section')[0].innerHTML = data.html
     }
     else{

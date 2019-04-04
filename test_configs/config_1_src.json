@@ -11,7 +11,7 @@
       "y": 5,
       "z": 12
      },
-     "rt60": 0.4,
+     "abs_coeff": {"Ax1": 0.3, "Ax2": 0.3, "Ay1": 0.3, "Ay2": 0.3,"Az1": 0.3, "Az2": 0.3},
      "sample_rate": 16000,
      "source_config": {
       "simulation_setups": [

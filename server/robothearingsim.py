@@ -24,11 +24,11 @@ from config import *
 import json
 
 class SimulationConfig:
-    def __init__(self, sound_data, room_dim, rt60, sample_rate, robot, unique_name, bg_sound=None):
+    def __init__(self, sound_data, room_dim, abs_coeff, sample_rate, robot, unique_name, bg_sound=None):
         self.sound_data = sound_data
         self.bg_sound = bg_sound
         self.room_dim = room_dim
-        self.rt60 = rt60
+        self.abs_coeff = abs_coeff
         self.sample_rate = sample_rate
         self.robot = robot
         self.unique_name = unique_name
@@ -48,14 +48,14 @@ class RobotHearingSim:
 
         print("\n--Generation {0}\n----\t Robot Position:\t{1}\n----\tSource Position:\t{2}\n".format(i, robot.transform.get_world_pos(), source_position))
 
-        absorption = roomsimove_single.rt60_to_absorption(conf.room_dim.to_array(), conf.rt60)
-        room = roomsimove_single.Room(conf.room_dim.to_array(), abs_coeff=absorption)
+        # absorption = roomsimove_single.rt60_to_absorption(conf.room_dim.to_array(), conf.rt60)
+        room = roomsimove_single.Room(conf.room_dim.to_array(), abs_coeff=conf.abs_coeff)
 
         # Using list comprehension to create a list of all mics
         mics = [roomsimove_single.Microphone(mic.transform.get_world_pos().to_array(), mic.id,  \
                 orientation=mic.transform.get_world_rot(), direction=mic.style) \
                 for mic in robot.microphones]
-        sim_rir = roomsimove_single.RoomSim(conf.sample_rate, room, mics, RT60=conf.rt60)
+        sim_rir = roomsimove_single.RoomSim(conf.sample_rate, room, mics)
         rir = sim_rir.create_rir(source_position.to_array())
 
         data = conf.sound_data
@@ -80,7 +80,6 @@ class RobotHearingSim:
             print('Writing to temp_data/{0}/{3}_with_motor_{4}_{1}.{2}'.format(conf.unique_name, i, SIM_FILE_EXT, file_prefix, motor.id))
 
     def get_random_number(r_dict, rand):
-
         min = max = 0
         min = float(r_dict['min'])
         max = float(r_dict['max'])
@@ -103,7 +102,15 @@ class RobotHearingSim:
         rand = random.Random()
         rand.seed(simConfig['seed'])
 
-        rt60 = RobotHearingSim.check_value(simConfig['rt60'], rand)
+        # rt60 = RobotHearingSim.check_value(simConfig['rt60'], rand)
+
+        abs_coeff = [[simConfig['abs_coeff']['Ax1']] * 7,
+                    [simConfig['abs_coeff']['Ax2']] * 7,
+                    [simConfig['abs_coeff']['Ay1']] * 7,
+                    [simConfig['abs_coeff']['Ay2']] * 7,
+                    [simConfig['abs_coeff']['Az1']] * 7,
+                    [simConfig['abs_coeff']['Az2']] * 7]
+
         sampling_rate = int(simConfig['sample_rate'])
         room_dim = roboconf.Vector3(simConfig['room_dimensions']['x'], simConfig['room_dimensions']['y'], simConfig['room_dimensions']['z'])
         room_dim = roboconf.Vector3(RobotHearingSim.check_value(room_dim.x, rand), \
@@ -176,7 +183,7 @@ class RobotHearingSim:
 
 
         unique_num = uuid.uuid4()
-        config = SimulationConfig(data, room_dim, rt60, fs, robot, unique_num, bg_sound = bg_data)
+        config = SimulationConfig(data, room_dim, abs_coeff, fs, robot, unique_num, bg_sound = bg_data)
 
         os.mkdir('temp_data/{0}'.format(unique_num)) # Create folder for temp data
 

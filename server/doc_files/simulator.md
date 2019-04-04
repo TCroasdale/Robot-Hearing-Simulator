@@ -9,9 +9,9 @@ This tab contains the basic setup of the scene.
 
 - Room Dimensions: This is the size of the room in metres.
 - Robot Position: This is where the robot is positioned inside the room.
-- RT60: The RT-60 value of the surfaces in the room.
-    - This is the time it takes for an audio signal to fall by 60db
-- Sample Rate: 
+- Absorption coefficients: The Absorption coefficient value for each of the 6 surfaces
+    - low number for reflective surfaces, high number for absorbative surfaces.
+- Sample Rate:
 
 ---
 ## The Sources Tab

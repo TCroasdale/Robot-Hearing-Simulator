@@ -44,7 +44,42 @@
             <h2 class="text-center">Simulation Configuration</h2>
             <div class="mx-0" id="room-dim" data-toggle="tooltip" title="The dimensions of the room."></div>
             <div class="mx-0" id="robo-pos" data-toggle="tooltip" title="The position of the robot in the room."> </div>
-            <div class="mx-0" id="rt-60" data-toggle="tooltip" title="The RT-60 value of the room."></div>
+            <div class="mx-0 my-2" id="sliders">
+              <hr>
+              <p class="text-secondary">Absorption coefficients</p>
+
+              <div class="input-group" id="X-sliders" data-toggle="tooltip" title="The east and west wall absorption values.">
+                <div class="input-group-prepend">
+                  <p class="input-group-text text-info" for="Ax1">X-</p>
+                </div>
+                <input class="form-control custom-range mt-2" id="Ax1" name="Ax1" type="range" min="0" max="1" step="0.05">
+                <div class="input-group-prepend">
+                  <p class="input-group-text text-info" for="Ax1">X+</p>
+                </div>
+                <input class="form-control custom-range mt-2" id="Ax2" name="Ax2" type="range" min="0" max="1" step="0.05">
+              </div>
+              <div class="input-group" id="Y-sliders" data-toggle="tooltip" title="The ceiling and floor absorption values.">
+                <div class="input-group-prepend">
+                  <p class="input-group-text text-info" for="Ay1">Y-</p>
+                </div>
+                <input class="form-control custom-range mt-2" id="Ay1" name="Ay1" type="range" min="0" max="1" step="0.05">
+                <div class="input-group-prepend">
+                  <p class="input-group-text text-info" for="Ay2">Y+</p>
+                </div>
+                <input class="form-control custom-range mt-2" id="Ay2" name="Ay2" type="range" min="0" max="1" step="0.05">
+              </div>
+              <div class="input-group" id="Z-sliders" data-toggle="tooltip" title="The north and south wall absorption values.">
+                <div class="input-group-prepend">
+                  <p class="input-group-text text-info" for="Az1">Z-</p>
+                </div>
+                <input class="form-control custom-range mt-2" id="Az1" name="Az1" type="range" min="0" max="1" step="0.05">
+                <div class="input-group-prepend">
+                  <p class="input-group-text text-info" for="Az1">Z+</p>
+                </div>
+                <input class="form-control custom-range mt-2" id="Az2" name="Az2" type="range" min="0" max="1" step="0.05">
+              </div>
+            </div>
+            <!-- <div class="mx-0" id="rt-60" data-toggle="tooltip" title="The RT-60 value of the room."></div> -->
             <div class="mx-0" id="sample-rate" data-toggle="tooltip" title="The sample rate of the simulation."></div>
           </div><!-- sim tab -->
           <div class="tab-pane" id="src-config">
@@ -141,7 +176,7 @@
     <!-- Modal Search Dialog  -->
     <div class="modal fade" id="public-search-modal" role="dialog">
         <div class="modal-dialog">
-        
+
           <div class="modal-content">
             <div class="modal-header">
               <h4 class="modal-title">Find Public Item</h4>
@@ -157,7 +192,7 @@
                   </div>
               </form>
               <div class="card deck" id="search-results" style="max-height: 75em; overflow-y: scroll;">
-                
+
               </div>
             </div>
             <div class="modal-footer">
@@ -165,7 +200,7 @@
               <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
             </div>
           </div>
-          
+
         </div>
       </div>
 {% endblock %}
