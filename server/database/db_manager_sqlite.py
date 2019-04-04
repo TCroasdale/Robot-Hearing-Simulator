@@ -105,7 +105,7 @@ class DB_Manager_SQLite(DB_Manager):
             cur = con.cursor()
 
             cur.execute("INSERT INTO simulations (pathToConfig, dateCreated, state, seed, userID) \
-                VALUES (?,?,?,?,?,?)",(sim.pathToConfig, sim.dateCreated, sim.state, sim.seed, sim.userID))
+                VALUES (?,?,?,?,?)",(sim.pathToConfig, sim.dateCreated, sim.state, sim.seed, sim.userID))
             rowid = cur.lastrowid
             con.commit()
             cur.execute("SELECT * FROM simulations WHERE id=?", [rowid])
@@ -116,7 +116,7 @@ class DB_Manager_SQLite(DB_Manager):
             cur = con.cursor()
 
             cur.execute("INSERT INTO robots (name, pathToConfig, userID) \
-                VALUES (?,?,?,?)",(robo.name, robo.pathToConfig, robo.userID))
+                VALUES (?,?,?)",(robo.name, robo.pathToConfig, robo.userID))
             rowid = cur.lastrowid
             con.commit()
             cur.execute("SELECT * FROM robots WHERE id=?", [rowid])
@@ -164,26 +164,31 @@ class DB_Manager_SQLite(DB_Manager):
         with sql.connect(self.dbLocation) as con:
             cur = con.cursor()
             cur.execute("DELETE FROM simulations WHERE id=?", [id])
-        self.delete_public_item(id, "SIM")
+        if self.item_is_public(id, "SIM"):
+            self.delete_public_item(id, "SIM")
 
 
     def delete_sound(self, id):
         with sql.connect(self.dbLocation) as con:
             cur = con.cursor()
             cur.execute("DELETE FROM sounds WHERE id=?", [id])
-        self.delete_public_item(id, "SOUND")
+
+        if self.item_is_public(id, "SOUND"):
+            self.delete_public_item(id, "SOUND")
 
     def delete_robot(self, id):
         with sql.connect(self.dbLocation) as con:
             cur = con.cursor()
             cur.execute("DELETE FROM robots WHERE id=?", [id])
-        self.delete_public_item(id, "ROBOT")
+        if self.item_is_public(id, "ROBOT"):
+            self.delete_public_item(id, "ROBOT")
 
     def delete_microphone(self, id):
         with sql.connect(self.dbLocation) as con:
             cur = con.cursor()
             cur.execute("DELETE FROM microphones WHERE id=?", [id])
-        self.delete_public_item(id, "MIC")
+        if self.item_is_public(id, "MIC"):
+            self.delete_public_item(id, "MIC")
 
 
     def insert_user(self, user):
@@ -200,7 +205,7 @@ class DB_Manager_SQLite(DB_Manager):
         with sql.connect(self.dbLocation) as con:
             cur = con.cursor()
 
-            cur.execute("INSERT INTO sounds (name, pathToFile, userID) VALUES (?,?,?,?)",\
+            cur.execute("INSERT INTO sounds (name, pathToFile, userID) VALUES (?,?,?)",\
                         (sound.name, sound.pathToFile, sound.userID))
             rowid = cur.lastrowid
             con.commit()

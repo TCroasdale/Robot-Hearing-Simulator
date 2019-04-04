@@ -85,7 +85,7 @@ $(document).ready(function(){
 
     //Upload form data
     $.ajax({
-      url: 'simulator/redo_simulation',
+      url: 'simulator/run_simulation',
       type: 'POST',
       data: fData,
 

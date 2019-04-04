@@ -5,19 +5,8 @@
 {% block content %}
     <div class="container-fluid my-2">
         <h3><span class="fas fa-search"></span>  Search Results</h3>
-        <div class="input-group">
-                <div class="input-group-prepend">
-                    <p class="input-group-text">Sort By</p>
-                </div>
-                <select class="input-control">
-                    <option>Likes</option>
-                    <option>Type</option>
-                    <option>Name</option>
-                    <option>Description</option>
-                </select>
-            </div>
     </div>
-    
+
     <div class="container-fluid">
         <div class="card-columns">
         {% for item in items: %}

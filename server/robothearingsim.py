@@ -55,14 +55,20 @@ class RobotHearingSim:
         mics = [roomsimove_single.Microphone(mic.transform.get_world_pos().to_array(), mic.id,  \
                 orientation=mic.transform.get_world_rot(), direction=mic.style) \
                 for mic in robot.microphones]
+
+
         sim_rir = roomsimove_single.RoomSim(conf.sample_rate, room, mics)
+
+        print(source_position.to_array())
         rir = sim_rir.create_rir(source_position.to_array())
+
 
         data = conf.sound_data
         data_rev = []
         for x in range(0, len(mics)): # Simulate a channel for each microphone in th  scene
             data_simmed = olafilt.olafilt(rir[:,x], data)
             data_rev += [data_simmed]
+
 
         data_rev_array = np.array(data_rev) #put the data together
         sf.write('temp_data/{0}/{3}_{1}.{2}'.format(conf.unique_name, i, SIM_FILE_EXT, file_prefix), data_rev_array.T, conf.sample_rate) #Write new file into a folder called temp_data
@@ -102,6 +108,11 @@ class RobotHearingSim:
         rand = random.Random()
         rand.seed(simConfig['seed'])
 
+
+        sounds['utterance'] = sounds['utterance'].replace('server/', '')
+        sounds['bgnoise'] = sounds['bgnoise'].replace('server/', '')
+
+
         # rt60 = RobotHearingSim.check_value(simConfig['rt60'], rand)
 
         abs_coeff = [[simConfig['abs_coeff']['Ax1']] * 7,
@@ -110,6 +121,7 @@ class RobotHearingSim:
                     [simConfig['abs_coeff']['Ay2']] * 7,
                     [simConfig['abs_coeff']['Az1']] * 7,
                     [simConfig['abs_coeff']['Az2']] * 7]
+
 
         sampling_rate = int(simConfig['sample_rate'])
         room_dim = roboconf.Vector3(simConfig['room_dimensions']['x'], simConfig['room_dimensions']['y'], simConfig['room_dimensions']['z'])
@@ -134,6 +146,7 @@ class RobotHearingSim:
                 bg_data = util.amplify_sound(bg_data, simConfig['source_config']['background_noise']['volume'])
 
 
+
         source_positions = []
         for source_setup in simConfig['source_config']['simulation_setups']:
             if source_setup['style'] == "single":
@@ -151,26 +164,36 @@ class RobotHearingSim:
                 posArray = RobotHearingSim.parse_pyramid_source_setup(source_setup)
                 source_positions += (posArray)
 
+
         mics = []
         for mic in roboConfig['microphones']:
             pos = roboconf.Vector3(mic['local_pos']['x'], mic['local_pos']['y'], mic['local_pos']['z'])
             rot = [mic['local_rot']['x'], mic['local_rot']['y'], mic['local_rot']['z']]
             style = mic['mic_style']['path']
-            style = style.replace(".txt", "")
+            style = style.replace(".txt", "").replace("server/", "")
             microphone = roboconf.RobotMicrophone(pos, rot, style, mic['id'])
             mics.append(microphone)
+
+
 
         # Do motors
         motors = []
         for motor in roboConfig['motors']:
             pos = roboconf.Vector3(motor['local_pos']['x'], motor['local_pos']['y'], motor['local_pos']['z'])
-            [sound, mo_fs] = sf.read(motor['sound']['path'], always_2d=True)
+            path = motor['sound']['path'].replace('server/', '')
+
+            print(path)
+
+            [sound, mo_fs] = sf.read(path, always_2d=True)
             sound = sound[:,0] # Convert to mono
             sound = util.resample_sound(sound, fs, mo_fs)
             sound = util.resize_sound(sound, len(data))
             sound = util.amplify_sound(sound, 0.4)
             motor = roboconf.RobotMotor(pos, sound, motor['id'])
             motors.append(motor)
+
+
+
 
         robopos = roboconf.Vector3(simConfig['robot_pos']['x'], simConfig['robot_pos']['y'], simConfig['robot_pos']['z'])
         roborot = [0.0,0.0,0.0] #[simConfig['robot_rot']['x'], simConfig['robot_rot']['y'], simConfig['robot_rot']['z']]
@@ -182,18 +205,22 @@ class RobotHearingSim:
         robot = roboconf.Robot(all_pos[0], roborot, mics, motors, robot_dim)
 
 
+
+
         unique_num = uuid.uuid4()
         config = SimulationConfig(data, room_dim, abs_coeff, fs, robot, unique_num, bg_sound = bg_data)
 
         os.mkdir('temp_data/{0}'.format(unique_num)) # Create folder for temp data
-
+        print("Running {0} simulations".format(len(source_positions)))
         # Parallel(n_jobs=int(4))(delayed(RobotHearingSim.run_sim)(all_pos[i], source_positions[i], i, config, "data") for i in range(len(source_positions)))
         for i in range(len(source_positions)): RobotHearingSim.run_sim(all_pos[i], source_positions[i], i, config, "data")
 
         # Zip up new files, and delete old ones.
+        print("Finished, zipping results.")
         zip_name = 'static/dl/{0}'.format(filename)
         directory_name = 'temp_data/{0}'.format(unique_num)
         zipper.make_archive(zip_name, 'zip', directory_name)
+        print("Cleaning up old files.")
         for i in range(len(source_positions)):
             os.remove('temp_data/{0}/{3}_{1}.{2}'.format(unique_num, i, SIM_FILE_EXT, "data"))
             if sounds['bgnoise'] is not None:

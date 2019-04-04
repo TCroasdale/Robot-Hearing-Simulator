@@ -14,46 +14,43 @@ class User:
         return [User.from_DB(d) for d in data_list]
 
 class Microphone:
-    def __init__(self, name, pathToFile, userID, id=0, visibility=0):
+    def __init__(self, name, pathToFile, userID, id=0):
         self.id = id
         self.name = name
         self.pathToFile = pathToFile
         self.userID = userID
-        self.visibility = visibility
 
     def from_DB(data):
         if data is None: return None
-        return Microphone(data[1], data[2], data[3], data[0], data[4])
+        return Microphone(data[1], data[2], data[3], data[0])
 
     def from_DB_ls(data_list):
         return [Microphone.from_DB(d) for d in data_list]
 
 class Sound:
-    def __init__(self, name, path, userID, id=0, visibility=0):
+    def __init__(self, name, path, userID, id=0):
         self.id = id
         self.name = name
         self.pathToFile = path
         self.userID = userID
-        self.visibility = visibility
 
     def from_DB(data):
         if data is None: return None
-        return Sound(data[1], data[2], data[4], data[0], data[3])
+        return Sound(data[1], data[2], data[3], data[0])
 
     def from_DB_ls(data_list):
         return [Sound.from_DB(d) for d in data_list]
 
 class Robot:
-    def __init__(self, name, path, userID, id=0, visibility=0):
+    def __init__(self, name, path, userID, id=0):
         self.id = id
         self.name = name
         self.pathToConfig = path
         self.userID = userID
-        self.visibility = visibility
 
     def from_DB(data):
         if data is None: return None
-        return Robot(data[1], data[2], data[4], data[0], data[3])
+        return Robot(data[1], data[2], data[3], data[0])
 
     def from_DB_ls(data_list):
         return [Robot.from_DB(d) for d in data_list]
@@ -63,7 +60,7 @@ class Robot:
 
 
 class Simulation:
-    def __init__(self, path, date, seed, userID, id=0, df="", state="scheduled", zip="", visibility=0, tID=""):
+    def __init__(self, path, date, seed, userID, id=0, df="", state="scheduled", zip="", tID=""):
         self.id = id
         self.pathToConfig = path
         self.dateCreated = date
@@ -72,12 +69,11 @@ class Simulation:
         self.seed = seed
         self.pathToZip = zip
         self.userID = userID
-        self.visibility = visibility
         self.taskID = tID
 
     def from_DB(data):
         if data is None: return None
-        return Simulation(data[1], data[2], data[5], data[7], id=data[0], df=data[3], state=data[4], zip=data[6], visibility=data[8], tID=data[9])
+        return Simulation(data[1], data[2], data[5], data[7], id=data[0], df=data[3], state=data[4], zip=data[6], tID=data[8])
 
     def from_DB_ls(data_list):
         return [Simulation.from_DB(d) for d in data_list]

@@ -5,8 +5,8 @@ function fetchEditorState(link=false){
       "variables": {},
       "simulation_config": {
        "robot_pos": { "x": 0, "y": -1, "z": 0 },
-       "room_dimensions": {"x": 5,"y": 5,"z": 5},
-       "abs_coeff": {"Ax1": 0.6, "Ax2": 0.6, "Ay1": 0.6, "Ay2": 0.6,"Az1": 0.6, "Az2": 0.6},
+       "room_dimensions": { "x": 5,"y": 5,"z": 5 },
+       "abs_coeff": { "Ax1": 0.6, "Ax2": 0.6, "Ay1": 0.6, "Ay2": 0.6,"Az1": 0.6, "Az2": 0.6 },
        "source_config": {
          "simulation_setups": [{"style": "single", "origin": { "x": 0.0, "y": 0.0, "z": 0.0 }}],
          "background_noise": { "volume": 1.0 }

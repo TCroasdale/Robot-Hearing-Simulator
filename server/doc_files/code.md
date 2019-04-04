@@ -1,7 +1,7 @@
 # The Code Files
 ---
 ## Introduction
-Both robots and simulations are compiled down into JSON objects representing the data you enter. 
+Both robots and simulations are compiled down into JSON objects representing the data you enter.
 These files can be seen in the code editor tab for both pages.
 
 
@@ -108,7 +108,6 @@ The fields which accept random numbers are:
 
 - ```simulation_config.room_dimensions```
 - ```simulation_config.robot_pos```
-- ```simulation_config.rt60```
 - ```simulation_config.source_config.simulation_setups.single.origin```
 - ```simulation_config.room_dimensions```
 
@@ -133,7 +132,7 @@ For example, This will insert the value 5 in the y coordinate of the robot's pos
 ```
 {
   "simulation_config": {
-  "robot_pos": { "x": 0, 
+  "robot_pos": { "x": 0,
     "y": { "value": "X"},
     "z": 0
   },
