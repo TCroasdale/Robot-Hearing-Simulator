@@ -9,7 +9,6 @@ from celery.utils.log import get_task_logger
 
 
 celeryApp = Celery('servertasks', broker='pyamqp://guest@localhost//')
-logger = get_task_logger(__name__)
 
 def endTask(taskID):
     celeryApp.control.revoke(taskID, terminate=True)
@@ -28,7 +27,6 @@ def runSimulation(self, simconfig, roboconfig, sounds, filename, simid):
     db.run_query("UPDATE simulations SET state = ?, taskID = ? WHERE id = ?" , ("running", self.request.id, simid))
 
     try:
-
         dlFile = sim.run_from_json_config(sim_config, robo_config, sounds, filename)
 
         db.run_query("UPDATE simulations SET state = ? WHERE id = ?" , ("finished", simid))

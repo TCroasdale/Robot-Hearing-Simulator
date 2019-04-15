@@ -61,7 +61,6 @@ class Vector3(object):
                 self.iter_value += 1
                 return self.z
 
-
 class Transform(object):
     '''
         Representing the position and orientation of an object
@@ -74,7 +73,6 @@ class Transform(object):
 
     def translate(self, s):
         self.position += s
-
 
     def rotate(self, q):
         self.orientation[0] + q[0]
@@ -93,14 +91,11 @@ class Transform(object):
         if self.parent is None: # Only the root transform can move
             self.position = vec
 
-
     def get_world_pos(self):
         if self.parent == None:
             return self.position
         else:
             return self.parent.get_world_pos() + self.position
-
-
 
     def get_world_rot(self):
         if self.parent == None:
@@ -128,7 +123,6 @@ class RobotMotor(object):
         info = "id: {0}, transform: {1}".format(self.id, self.transform)
         return info
 
-
 class RobotMicrophone(object):
     '''
         Representing a microphone within a robot.
@@ -142,8 +136,6 @@ class RobotMicrophone(object):
     def __str__(self):
         info = "id: {0}, transform: {1}".format(self.id, self.transform)
         return info
-
-
 
 class Robot(object):
     '''
