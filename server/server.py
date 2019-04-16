@@ -212,7 +212,6 @@ class WebServer:
             return jsonify({"success": "true"})
 
 
-
         @self.app.route('/simulator/run_simulation', methods=['POST'])
         def run_simulation():
             if 'userID' not in session: return jsonify({"success": "false", "reason": "no user found"})
@@ -232,7 +231,6 @@ class WebServer:
             # sim_conf['simulation_config']['robot_config']['uid'] = request.form['robot_id']
             seed = str(uuid.uuid4())
             sim_conf['simulation_config']['seed'] = seed
-
 
             if 'sim_to_update' in request.form:
                 sim = self.db.get_simulation(request.form['sim_to_update'])
@@ -264,7 +262,6 @@ class WebServer:
 
                 # Checking the utterance file.
                 utt = sounds['utterance']
-                print(utt)
                 if utt is None or (utt.userID != session['userID'] and not self.db.item_is_public(utt.id, "SOUND")):
                     return jsonify({"success": "false", "reason": "No sound found."})
 
@@ -393,7 +390,6 @@ class WebServer:
 
 
             else:
-
                 # Write the config to a file
                 unique_name = uuid.uuid4()
                 filename = UPLOAD_DIR + 'robot_configs/{0}.json'.format(unique_name)
@@ -486,9 +482,6 @@ class WebServer:
             processedItems = [{'id': x.id, 'name': x.name, 'desc': x.description, 'likes': x.likes, 'type': x.type, 'itemID': x.itemID} for x in relevantItems]
 
             return jsonify({'result': processedItems})
-
-
-
 
         @self.app.route("/publish", methods=['POST'])
         def publish():

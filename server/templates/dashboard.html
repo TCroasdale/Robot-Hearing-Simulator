@@ -7,16 +7,16 @@
     <hr>
     <div id="item-Carousel" class="carousel slide" data-ride="carousel">
         <!-- Indicators -->
-        <div class="input-group">
-          <button data-target="#item-Carousel" data-slide-to="0" class="form-control btn btn-info border border-dark">Simulations</button>
-          <button data-target="#item-Carousel" data-slide-to="1" class="form-control btn-info border border-dark">Sounds</button>
-          <button data-target="#item-Carousel" data-slide-to="2" class="form-control btn btn-info border border-dark">Robots</button>
-          <button data-target="#item-Carousel" data-slide-to="3" class="form-control btn btn-info border border-dark">Microphones</button>
-        </div>
-      
+        <ul class="nav nav-tabs nav-fill">
+          <li class="nav-item active"><a class="nav-link" data-toggle="tab" href="#sims-tab">Simulations</a></li>
+          <li class="nav-item"><a class="nav-link" data-toggle="tab"href="#sounds-tab" >Sounds</a></li>
+          <li class="nav-item"><a class="nav-link" data-toggle="tab"href="#robots-tab" >Robots</a></li>
+          <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#mics-tab">Microphones</a></li>
+        </ul>
+
         <!-- Wrapper for slides -->
-        <div class="carousel-inner">
-          <div class="carousel-item active">
+        <div class="tab-content bg-white py-1 px-1">
+          <div class="tab-pane fade active" id="sims-tab">
                 <h3>Simulations</h3>
                 <ul id="sim-list" class="list-group">
                   {% for sim in simulations: %}
@@ -46,9 +46,13 @@
                     </li>
                   {% endfor %}
                 </ul>
+                {% if simulations|length == 0 %}
+                <p>You have no simulations, add one <a href="/simulator">here</a></p>
+                {% endif %}
+
           </div>
-      
-          <div class="carousel-item">
+
+          <div class="tab-pane fade" id="sounds-tab">
               <h3>Sounds</h3>
               <ul id="sound-list" class="list-group">
                 {% for sound in sounds: %}
@@ -69,8 +73,8 @@
                 {% endfor %}
               </ul>
           </div>
-      
-          <div class="carousel-item">
+
+          <div class="tab-pane fade" id="robots-tab">
               <h3>Robots</h3>
               <ul id="robot-list" class="list-group">
                 {% for robot in robots: %}
@@ -92,7 +96,7 @@
               </ul>
           </div>
 
-          <div class="carousel-item">
+          <div class="tab-pane fade" id="mics-tab">
               <h3>Microphone Responses</h3>
               <ul id="mic-list" class="list-group">
                 {% for mic in microphones: %}
@@ -113,9 +117,9 @@
                 {% endfor %}
               </ul>
         </div>
-      
+
       </div>
-    </div>  
+    </div>
 
     <br>
     <hr>
@@ -139,6 +143,9 @@
           </div>
         </div>
     {% endfor %}
+    {% if addedItems|length == 0 %}
+    <p>You have no items added to your account, add one <a href="/search">here</a></p>
+    {% endif %}
     </div>
     <audio id="sound-preview">
       <source src="" type="audio/wav" id="audio-src">
@@ -147,7 +154,7 @@
 
     <div class="modal fade" id="publish-modal" role="dialog">
       <div class="modal-dialog">
-      
+
         <div class="modal-content">
           <div class="modal-header">
             <h4 class="modal-title">Run Simulation</h4>
@@ -173,14 +180,14 @@
             <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
           </div>
         </div>
-        
+
       </div>
     </div>
 
     <!-- Run Sim modal -->
     <div class="modal fade" id="run-sim-modal" role="dialog">
       <div class="modal-dialog">
-      
+
         <div class="modal-content">
           <div class="modal-header">
             <h4 class="modal-title">Publish Item</h4>
@@ -243,7 +250,7 @@
             <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
           </div>
         </div>
-        
+
       </div>
     </div>
 {% endblock %}
