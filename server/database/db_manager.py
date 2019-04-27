@@ -126,6 +126,8 @@ class DB_Manager:
 
     def __init__(self): pass
 
+    def init_db(self): pass
+
     def is_email_used(self, email): pass
 
     def get_user(self, email=None, id=None): pass

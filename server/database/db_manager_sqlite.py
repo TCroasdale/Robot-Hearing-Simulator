@@ -5,6 +5,14 @@ class DB_Manager_SQLite(DB_Manager):
     def __init__(self, db):
         self.dbLocation = db
 
+    def set_test_db(self):
+        self.dbLocation = 'server/database/test.db'
+        self.delete_user('*')
+        self.delete_simulation('*')
+        self.delete_microphone('*')
+        self.delete_robot('*')
+        self.delete_sound('*')
+
     def is_email_used(self, email):
         with sql.connect(self.dbLocation) as con:
             cur = con.cursor()
@@ -175,6 +183,12 @@ class DB_Manager_SQLite(DB_Manager):
 
         if self.item_is_public(id, "SOUND"):
             self.delete_public_item(id, "SOUND")
+
+    def delete_user(self, id):
+        with sql.connect(self.dbLocation) as con:
+            cur = con.cursor()
+            cur.execute("DELETE FROM users WHERE id=?", [id])
+
 
     def delete_robot(self, id):
         with sql.connect(self.dbLocation) as con:

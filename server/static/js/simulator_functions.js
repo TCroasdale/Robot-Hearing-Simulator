@@ -221,8 +221,9 @@ $(document).ready(function() {
 
     //Add utterance and bgnoise to formdata
     fData = new FormData();
+
     uttupload = $('#utterancefile')
-    if(!uttupload[0].disabled){
+    if(uttupload[0].files[0] > 0){
       fData.append('utterance', uttupload[0].files[0])
     }else{
       console.log("fileID", getFileIDSelection('utterance-select', 'public-utt-id'))
@@ -237,7 +238,13 @@ $(document).ready(function() {
       fData.append('bgnoise_id', getFileIDSelection('bgnoise-select', 'public-bgnoise-id'))
     }
 
-    fData.append('robot_id', getFileIDSelection('robot-select', 'public-robot-id'))
+    if($('#no-robot-link').length > 0){
+      if($('#public-robot-id').val() >= 0){
+        fData.append('robot_id', $('#public-robot-id').val())
+      }
+    } else {
+      fData.append('robot_id', getFileIDSelection('robot-select', 'public-robot-id'))
+    }
 
     //THIS MIGHT CAUSE AN ERROR, WAS ORIGINALLY editor.getValue()
     fData.append('config', JSON.stringify(config))
@@ -330,8 +337,8 @@ $(document).ready(function() {
 })
 
 function getFileIDSelection(selectID, publicID){
-  console.log($('#' + selectID))
-  if($('#' + selectID).val() < 0){
+  console.log("$(#{0})".format(selectID), $('#' + selectID))
+  if($('#' + selectID).val() < 0 || $('#' + selectID) === undefined ){
     return $('#' + publicID).val()
   }else{
     return $('#' + selectID).val()
@@ -367,7 +374,9 @@ function verify(config){
 
   console.log($('#no-robot-link').length > 0)
   if($('#no-robot-link').length > 0){
-    return failVerify("There is no robot available to use.", 'no-robot-link')
+    if($('#public-robot-id').val() < 0){
+      return failVerify("No public robot selected", 'no-robot-link')
+    }
   }
   return true
 }
@@ -461,12 +470,12 @@ function compile_ui(){
   // var rt60 = read_num_input('rt-60', old_cfg['simulation_config']['rt60'])
   // var sample = read_num_input('sample-rate', old_cfg['simulation_config']['sample_rate'])
 
-  let Ax1 = $('#Ax1').val()
-  let Ax2 = $('#Ax2').val()
-  let Ay1 = $('#Ay1').val()
-  let Ay2 = $('#Ay2').val()
-  let Az1 = $('#Az1').val()
-  let Az2 = $('#Az2').val()
+  let Ax1 = Number($('#Ax1').val())
+  let Ax2 = Number($('#Ax2').val())
+  let Ay1 = Number($('#Ay1').val())
+  let Ay2 = Number($('#Ay2').val())
+  let Az1 = Number($('#Az1').val())
+  let Az2 = Number($('#Az2').val())
   let abs_coeff = { "Ax1": Ax1, "Ax2": Ax2, "Ay1": Ay1, "Ay2": Ay2, "Az1": Az1, "Az2": Az2 }
 
   sim_config = {"robot_pos": robopos, "room_dimensions": roomdim, "abs_coeff": abs_coeff, "sample_rate": "16000"}

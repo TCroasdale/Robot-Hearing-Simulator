@@ -37,8 +37,17 @@ class WebServer:
 
         self.set_routes()
 
+    def get_app(self):
+        return self.app.test_client()
+
     def start(self):
-        self.app.run(debug=True)
+        self.app.run(debug=False, host='0.0.0.0')
+
+    def shutdown_server(self):
+        func = request.environ.get('werkzeug.server.shutdown')
+        if func is None:
+            raise RuntimeError('Not running with the Werkzeug Server')
+        func()
 
     #Returns true if filename has an allowed extension
     def allowed_file(filename):
@@ -63,7 +72,7 @@ class WebServer:
                   if len(request.form['password']) < 8:
                       return render_template('signup.html', message="short-pass")
 
-                  if request.form['password'] == request.form['confirm-password']:
+                  if request.form['password'] == request.form['confpass']:
                       pass_hash = hashlib.sha512(str(request.form['password'] + salt).encode('utf-8')).hexdigest()
                       user = User(email, pass_hash, salt)
                       user = self.db.insert_user(user)
@@ -227,8 +236,6 @@ class WebServer:
             # Link variables
             sim_conf['simulation_config'] = util.link_vars(sim_conf['simulation_config'], sim_conf['variables'])
 
-
-            # sim_conf['simulation_config']['robot_config']['uid'] = request.form['robot_id']
             seed = str(uuid.uuid4())
             sim_conf['simulation_config']['seed'] = seed
 
@@ -257,7 +264,6 @@ class WebServer:
                 if 'utterance' in request.files:
                     sounds['utterance'] = processFileUpload(request.files['utterance'], session['userID'])
                 else:
-                    print(request.form)
                     sounds['utterance'] = self.db.get_sound(request.form['utterance_id'])
 
                 # Checking the utterance file.
@@ -283,7 +289,8 @@ class WebServer:
 
                 if robot is None or (robot.userID != session['userID'] and not self.db.item_is_public(robot.id, "ROBOT")):
                     print("Robot: {0}".format(robot))
-                    print("userID {0}, sessionID {1}".format(robot.userID, session['userID']))
+                    if robot is not None:
+                        print("userID {0}, sessionID {1}".format(robot.userID, session['userID']))
                     print("public item {0}".format(self.db.item_is_public(robot.id, "ROBOT")))
                     return jsonify({"success": "false", "reason": "No robot found."})
 
@@ -294,11 +301,7 @@ class WebServer:
                 sim = Simulation(filename, date, seed, session['userID'])
                 sim = self.db.insert_simulation(sim)
 
-                print("Running sim with: ")
-                print(sim_conf)
-                print(robot_conf_dict)
-                print(sounds)
-
+                print("Running sim with: ", sim_cong, robot_conf_dict, sounds)
 
                 runSimulation.delay(sim_conf, robot_conf_dict, sounds, unique_name, sim.id)
 
@@ -325,7 +328,6 @@ class WebServer:
                     return mic
             else:
                 return None
-
 
         # Conf = the robot config_robot
         # files = the dictionary or sound and file paths
